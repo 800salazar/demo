@@ -1,12 +1,17 @@
 {
-  "name": "demo",
+  "name": "salazar-demo",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "check": "pnpm lint && pnpm typecheck && pnpm build"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",
