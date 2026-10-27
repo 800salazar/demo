@@ -47,7 +47,7 @@ export default function LandingPage() {
       <div className={styles.pageWrap}>
         <header className={styles.topbar}>
           <Link href="/" className={styles.wordmark} aria-label={`${profile.name}, inicio`}>
-            adán<span>.</span><span className={styles.wordmarkSubtitle}>SALAZAR</span>
+            adán<span>.</span><span className={styles.wordmarkSubtitle}> SEBASTIAN SALAZAR</span>
           </Link>
         </header>
 
@@ -128,7 +128,6 @@ export default function LandingPage() {
                 <p className={styles.printUrl}>https://salazar.red/</p>
               </section>
 
-              <footer className={styles.footer}><span>salazar.red</span><PrintProfileButton /></footer>
             </SkeletonReveal>
           </main>
         </div>
