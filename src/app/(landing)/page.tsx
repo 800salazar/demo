@@ -128,6 +128,7 @@ export default function LandingPage() {
                 <p className={styles.printUrl}>https://salazar.red/</p>
               </section>
 
+              <footer className={styles.footer}><span>Adan Sebastian Salazar</span></footer>
             </SkeletonReveal>
           </main>
         </div>
