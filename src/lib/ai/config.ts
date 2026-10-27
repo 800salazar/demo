@@ -1,11 +1,10 @@
 import "server-only";
 
-export type AiConfig = { available: true; apiKey: string; model: string } | { available: false };
+export type AiConfig = { available: true; model: string } | { available: false };
 
-/** El asistente solo está disponible si existen la API key y el modelo; nunca se simulan respuestas. */
 export function getAiConfig(): AiConfig {
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
-  const model = process.env.OPENAI_MODEL?.trim();
-
-  return apiKey && model ? { available: true, apiKey, model } : { available: false };
+  const model = process.env.AI_MODEL?.trim();
+  const authenticated = Boolean(process.env.AI_GATEWAY_API_KEY?.trim() || process.env.VERCEL_OIDC_TOKEN?.trim());
+  return authenticated && model && /^[\w.-]+\/[\w./-]+$/.test(model)
+    ? { available: true, model } : { available: false };
 }

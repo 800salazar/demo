@@ -6,6 +6,7 @@ import { DemoDataPanel } from "@/components/showroom/demo-data-panel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { demoModules } from "@/config/site";
+import { demoRoutes } from "@/config/routes";
 
 export default function HomePage() {
   return (
@@ -21,7 +22,7 @@ export default function HomePage() {
           Descubre cómo simplificamos operaciones, reducimos errores y facilitamos el trabajo de tu equipo.
         </p>
         <Button asChild size="lg" className="mt-8">
-          <Link href="/recorrido">
+          <Link href={demoRoutes.tour}>
             <Compass data-icon="inline-start" aria-hidden />
             Recorrido de 3 minutos
           </Link>
@@ -56,7 +57,7 @@ export default function HomePage() {
           </div>
         </div>
         <Button asChild variant="outline" size="lg">
-          <Link href="/integraciones">Ver integraciones</Link>
+          <Link href={demoRoutes.integrations}>Ver integraciones</Link>
         </Button>
       </section>
 

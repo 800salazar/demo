@@ -2,11 +2,12 @@ import { connection } from "next/server";
 import { CircleAlert, CircleCheck } from "lucide-react";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAiConfig } from "@/lib/ai/config";
+import { isRateLimitConfigured } from "@/lib/ai/rate-limit";
 
 /** Se evalúa en cada solicitud para reflejar las variables de entorno reales del servidor. */
 export async function AiStatus() {
   await connection();
-  const { available } = getAiConfig();
+  const available = getAiConfig().available && isRateLimitConfigured();
 
   return (
     <Card>
@@ -17,12 +18,12 @@ export async function AiStatus() {
           ) : (
             <CircleAlert className="size-5 text-amber-600" aria-hidden />
           )}
-          {available ? "Asistente de IA disponible" : "Asistente de IA no disponible"}
+          {available ? "Conexión de IA configurada" : "Modo de cálculos disponible"}
         </CardTitle>
         <CardDescription>
           {available
-            ? "Las respuestas se generan en el servidor a partir de métricas calculadas con los datos de la demostración."
-            : "Falta configurar OPENAI_API_KEY y OPENAI_MODEL en el servidor. El dashboard con cálculos reales seguirá disponible; no se simulan respuestas de inteligencia artificial."}
+            ? "El asistente intentará analizar tus órdenes con IA. Si la conexión falla, mostrará un resumen calculado claramente identificado."
+            : "Puedes consultar cifras de costos, retrasos y órdenes. El análisis con IA se habilitará al completar la configuración del servidor."}
         </CardDescription>
       </CardHeader>
     </Card>

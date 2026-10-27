@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { CostByDepartmentChart } from "@/components/operations/cost-by-department-chart";
 import { ModulePlaceholder } from "@/components/shared/module-placeholder";
 import { PageHeader } from "@/components/shared/page-header";
+import { OperationsDashboard } from "@/components/operations/operations-dashboard";
+import { OperationalAssistant } from "@/components/ai/operational-assistant";
 
 export const metadata: Metadata = { title: "Control de operaciones" };
 
@@ -14,7 +16,9 @@ export default function OperacionesPage() {
         description="Menos errores, procesos más sencillos: un sistema que guía a tu equipo paso a paso y ayuda a evitar errores operativos."
       />
       <div className="space-y-6">
+        <OperationsDashboard />
         <CostByDepartmentChart />
+        <OperationalAssistant />
         <ModulePlaceholder
           phase={3}
           summary="Gestión de órdenes de trabajo de una empresa manufacturera ficticia, con indicadores que se actualizan al instante."

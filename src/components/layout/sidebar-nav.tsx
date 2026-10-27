@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { navItems } from "@/config/site";
+import { isActiveDemoRoute } from "@/config/routes";
 import { cn } from "@/lib/utils";
 
 export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
@@ -12,7 +13,7 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
     <nav aria-label="Principal" className="flex flex-col gap-1">
       {navItems.map((item) => {
         const Icon = item.icon;
-        const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+        const active = isActiveDemoRoute(pathname, item.href);
 
         return (
           <Link

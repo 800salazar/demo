@@ -6,22 +6,23 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { demoRoutes } from "@/config/routes";
 
 export const metadata: Metadata = { title: "Recorrido de 3 minutos" };
 
 const steps = [
   {
-    href: "/administracion",
+    href: demoRoutes.administration,
     time: "≈ 30 s",
     text: "Agrega una nueva prioridad y comprueba cómo se actualiza el sistema.",
   },
   {
-    href: "/operaciones",
+    href: demoRoutes.operations,
     time: "≈ 60 s",
     text: "Crea una orden, cambia su estado y observa cómo se actualizan los indicadores.",
   },
   {
-    href: "/ia",
+    href: demoRoutes.ai,
     time: "≈ 60 s",
     text: "Pregunta a la inteligencia artificial qué departamento tiene mayores costos.",
   },

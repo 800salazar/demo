@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { AiStatus } from "@/components/ai/ai-status";
-import { ModulePlaceholder } from "@/components/shared/module-placeholder";
+import { OperationalAssistant } from "@/components/ai/operational-assistant";
+import { OperationsDashboard } from "@/components/operations/operations-dashboard";
+import { CostByDepartmentChart } from "@/components/operations/cost-by-department-chart";
 import { PageHeader } from "@/components/shared/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -19,18 +21,9 @@ export default function IaPage() {
         <Suspense fallback={<Skeleton className="h-24 w-full rounded-xl" aria-busy="true" aria-label="Verificando asistente" />}>
           <AiStatus />
         </Suspense>
-        <ModulePlaceholder
-          phase={4}
-          summary="Un asistente que consulta y analiza los datos de la demostración: primero calcula las métricas con lógica verificable y solo entonces el modelo las interpreta."
-          items={[
-            "Dashboard financiero y operativo con gráficas de costos",
-            "Preguntas sugeridas y preguntas libres del visitante",
-            "Respuestas que separan datos, cálculos y recomendaciones",
-            "Registros y métricas que sustentan cada conclusión",
-            "Comparación de periodos y detección de oportunidades de ahorro",
-            "Aviso claro cuando no hay información suficiente",
-          ]}
-        />
+        <OperationalAssistant />
+        <OperationsDashboard />
+        <CostByDepartmentChart />
       </div>
     </>
   );

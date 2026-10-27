@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
+import { legacyDemoRedirects } from "./src/config/routes";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  redirects: async () => legacyDemoRedirects,
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {

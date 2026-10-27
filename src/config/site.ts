@@ -7,6 +7,7 @@ import {
   Sparkles,
   type LucideIcon,
 } from "lucide-react";
+import { demoRoutes } from "./routes";
 
 export const siteConfig = {
   name: "Salazar Consultores",
@@ -30,7 +31,7 @@ export interface DemoModule {
 export const demoModules: DemoModule[] = [
   {
     number: 1,
-    href: "/administracion",
+    href: demoRoutes.administration,
     navLabel: "Autoadministración",
     title: "Sistemas autoadministrables",
     description: "Realiza cambios sencillos sin depender de un desarrollador.",
@@ -39,7 +40,7 @@ export const demoModules: DemoModule[] = [
   },
   {
     number: 2,
-    href: "/operaciones",
+    href: demoRoutes.operations,
     navLabel: "Operaciones",
     title: "Control de operaciones",
     description: "Organiza procesos, controla actividades y consulta resultados en tiempo real.",
@@ -48,7 +49,7 @@ export const demoModules: DemoModule[] = [
   },
   {
     number: 3,
-    href: "/ia",
+    href: demoRoutes.ai,
     navLabel: "IA empresarial",
     title: "Inteligencia artificial empresarial",
     description: "Convierte la información de tu empresa en respuestas útiles para tomar decisiones.",
@@ -65,13 +66,13 @@ export interface NavItem {
 }
 
 export const navItems: NavItem[] = [
-  { href: "/", label: "Inicio", icon: House },
-  { href: "/recorrido", label: "Recorrido de 3 minutos", icon: Compass },
+  { href: demoRoutes.home, label: "Inicio", icon: House },
+  { href: demoRoutes.tour, label: "Recorrido de 3 minutos", icon: Compass },
   ...demoModules.map((module) => ({
     href: module.href,
     label: module.navLabel,
     demoNumber: module.number,
     icon: module.icon,
   })),
-  { href: "/integraciones", label: "Integraciones", icon: Plug },
+  { href: demoRoutes.integrations, label: "Integraciones", icon: Plug },
 ];

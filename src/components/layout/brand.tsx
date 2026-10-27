@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
+import { demoRoutes } from "@/config/routes";
 import { cn } from "@/lib/utils";
 
 /** Identidad textual temporal; sustituir el cuadro por el logotipo cuando esté disponible en `public/`. */
 export function Brand({ className, onClick }: { className?: string; onClick?: () => void }) {
   return (
     <Link
-      href="/"
+      href={demoRoutes.home}
       onClick={onClick}
       className={cn(
         "flex items-center gap-3 rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/50",

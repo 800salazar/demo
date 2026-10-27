@@ -1,159 +1,163 @@
 # Salazar Demo — Soluciones empresariales
 
-Plataforma demostrativa interactiva de **Salazar Consultores** para gerentes de TI, directores de operaciones y responsables de compras de empresas manufactureras. Muestra, en menos de 3 minutos, tres ideas: sistemas **autoadministrables**, **control de operaciones** y **inteligencia artificial** que analiza información real.
+Showroom interactivo de Salazar Consultores para empresas manufactureras. Todos los datos son ficticios: cada visitante conserva sus 30 órdenes en su navegador, sin cuentas ni registro.
 
-Todos los datos son ficticios. No requiere cuentas ni registro: cada visitante tiene su propia demostración, guardada en su navegador.
+## Dominio y navegación
 
-## Estado del proyecto
+El dominio configurado por el propietario en Vercel es **`salazar.red`**. Este despliegue organiza sus páginas así:
 
-Este repositorio contiene el **esqueleto** del proyecto: la pila completa, la navegación, el diseño base, la capa de datos ficticios y la infraestructura de despliegue. Las demostraciones se construyen por fases:
+| URL | Contenido |
+| --- | --- |
+| `https://salazar.red/` | Landing independiente, sin relación con el demo ni otros proyectos. Por ahora muestra una página neutral «Próximamente». |
+| `https://salazar.red/demo` | Inicio del showroom de demostraciones |
+| `/demo/administracion` | Administración del demo |
+| `/demo/operaciones` | Dashboard, órdenes y asistente operativo |
+| `/demo/ia` | Análisis con IA |
+| `/demo/recorrido` y `/demo/integraciones` | Recorrido y catálogo de integraciones |
+| `/demo/api/ai` y `/demo/api/health` | Endpoints del demo |
 
-| Fase | Contenido | Estado |
-| ---- | --------- | ------ |
-| 1 | Estructura, navegación, diseño visual y datos ficticios | Esqueleto listo |
-| 2 | Demo 1 · Sistema autoadministrable (prioridades, departamentos, categorías, estados) | Pendiente |
-| 3 | Demo 2 · Control de operaciones y dashboard | Pendiente |
-| 4 | Demo 3 · Inteligencia artificial conectada a los datos | Pendiente (endpoint base listo) |
-| 5 | Integraciones demostrativas (CSV) y recorrido guiado | Pendiente |
-| 6 | Pruebas, correcciones y optimización visual | Pendiente |
+La landing tiene su propio layout en `src/app/(landing)/`. El menú, el pie, la marca y las notificaciones del demo solo se montan en `src/app/demo/layout.tsx`. La raíz no redirige a `/demo` ni carga los datos de demostración. Las antiguas rutas del showroom, como `/ia`, redirigen a su nueva ubicación; las redirecciones son explícitas y no capturan todas las rutas del dominio.
 
-Lo que ya funciona de verdad:
+Las rutas internas se centralizan en `src/config/routes.ts`. No se usa `basePath` global, por lo que la raíz permanece disponible para desarrollar la landing dentro del mismo despliegue.
 
-- Showroom con las tres demos, menú lateral y navegación adaptable a móvil, tablet y escritorio.
-- Datos ficticios realistas (6 departamentos, 3 prioridades, 4 estados, 30 órdenes con fechas relativas al momento de iniciar la demo) que persisten en el navegador.
-- Botón **Restablecer datos de demostración**, con confirmación, que restaura el escenario original.
-- Gráfica de costo real por departamento calculada en vivo con los datos.
-- Endpoint `POST /api/ai` con validación, límites de tamaño y de uso. Si no está configurado, el asistente se muestra como **no disponible**; nunca se simulan respuestas de IA.
-- Botón de WhatsApp con mensaje precargado y número configurable.
+## Decisión de arquitectura: un solo Supabase
 
-Las pantallas de cada módulo indican con claridad cuándo están «En construcción» y qué incluirán.
+**Enfoca y Salazar Demo comparten el proyecto Supabase `acwlzsofiqdaxmwpyczu`.** Enfoca es privado, de uso exclusivo de Adán; Salazar Demo es público y permite a los visitantes probar ejemplos con datos ficticios. No se requiere crear otro proyecto Supabase.
+
+La separación se mantiene en el acceso de cada aplicación y en las consultas explícitas del servidor. El asistente recibe las órdenes actuales del navegador y usa Supabase únicamente para la cuota de IA; no consulta las tablas de Enfoca. La clave secret tiene privilegios amplios sobre el proyecto y permanece en el servidor, fuera del contexto del modelo.
+
+Referencias para continuar el desarrollo: [arquitectura y límites entre aplicaciones](docs/architecture.md), [despliegue y verificaciones](docs/deployment.md) y [reglas para agentes](AGENTS.md).
+
+## Funciones disponibles
+
+- Navegación adaptable, datos de demostración y restablecimiento con confirmación.
+- Gráfica de costo real por departamento e indicadores de órdenes, completadas y costos.
+- Edición de costo real, fecha compromiso y estado de una orden en `/demo/operaciones` y `/demo/ia`. Completar una orden requiere que sus actividades obligatorias estén realizadas.
+- Asistente operativo en ambas pantallas, con preguntas sugeridas y consulta libre. Cada consulta envía el estado actual de las órdenes del visitante.
+- Métricas recalculadas en el servidor, análisis con Vercel AI Gateway y respuestas alternativas claramente identificadas como cálculos.
+- Aviso cuando una respuesta corresponde a datos anteriores a un cambio.
+
+Las demás funciones anunciadas en los módulos de administración, operaciones, integraciones y recorrido conservan sus avisos de construcción. El asistente no realiza cambios ni integra información de Enfoca.
 
 ## Tecnologías
 
-- [Next.js 16](https://nextjs.org) (App Router, Cache Components) · React 19 · TypeScript
-- [Tailwind CSS 4](https://tailwindcss.com) · [shadcn/ui](https://ui.shadcn.com) · [Lucide](https://lucide.dev) · [Recharts](https://recharts.org)
-- [OpenAI SDK](https://github.com/openai/openai-node) (solo en el servidor)
-- [Supabase](https://supabase.com) (preparado, aún no se usa en la demo) · [Zod](https://zod.dev)
-- pnpm · ESLint
+Next.js 16.4 / React 19 / TypeScript / Tailwind CSS 4 / shadcn/ui / Recharts / Vercel AI SDK 7 / Vercel AI Gateway / Supabase / Zod / pnpm.
 
-## Requisitos
+## Desarrollo
 
-- Node.js **22 o superior**
-- [pnpm](https://pnpm.io) 10
-
-## Instalación y ejecución
+Requiere Node.js 22 o superior y pnpm 10.
 
 ```bash
 pnpm install
-cp .env.example .env.local   # opcional: solo necesario para IA, Supabase y WhatsApp
-pnpm dev                     # http://localhost:3000
+cp .env.example .env.local  # Solo si no existe; conserva tus variables actuales
+pnpm dev
 ```
 
-Scripts disponibles:
+En desarrollo local, el showroom se abre en `http://localhost:3000/demo`; `http://localhost:3000/` corresponde a la landing.
 
-| Comando | Descripción |
-| ------- | ----------- |
-| `pnpm dev` | Servidor de desarrollo |
-| `pnpm build` / `pnpm start` | Compilación y servidor de producción |
+| Comando | Función |
+| --- | --- |
+| `pnpm dev` | Servidor local |
 | `pnpm lint` | ESLint |
-| `pnpm typecheck` | Genera los tipos de rutas y ejecuta TypeScript |
-| `pnpm check` | Lint + typecheck + build |
+| `pnpm typecheck` | Tipos de rutas y TypeScript |
+| `pnpm test` | Pruebas de cálculos, endpoint y adaptador de cuotas |
+| `pnpm test:e2e` | Pruebas en Chrome; inicia un servidor local en el puerto 3100 |
+| `pnpm build` / `pnpm start` | Compilar y servir producción |
+| `pnpm check` | Lint, tipos y build |
 
-## Variables de entorno
+Las pruebas E2E usan Chrome instalado y deshabilitan llamadas al modelo para evitar consumo. Comprueban el flujo real navegador → endpoint → cálculos → respuesta, persistencia tras recargar y dos contextos de navegador independientes. Las pruebas unitarias de Gateway y Supabase usan dobles de prueba; no certifican una conexión externa real.
 
-Se definen en `.env.local` (desarrollo) o en *Project Settings → Environment Variables* de Vercel. Ninguna es obligatoria para que la demo funcione.
+## Activar la IA
 
-| Variable | Ámbito | Descripción |
-| -------- | ------ | ----------- |
-| `OPENAI_API_KEY` | Servidor | API key de OpenAI. Nunca llega al navegador. |
-| `OPENAI_MODEL` | Servidor | Modelo a utilizar. Sin esta variable y la anterior, el asistente de IA aparece como no disponible. |
-| `NEXT_PUBLIC_SUPABASE_URL` | Público | URL del proyecto de Supabase. |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Público | Llave *publishable* de Supabase (pública por diseño). |
-| `NEXT_PUBLIC_WHATSAPP_NUMBER` | Público | Número de contacto en formato internacional, solo dígitos (por ejemplo `521XXXXXXXXXX`). Sin número, WhatsApp abre el mensaje y permite elegir el contacto. |
+Configura las variables del sitio publicado en Vercel → proyecto Salazar Demo → Settings → Environment Variables, para Production y para Preview si probarás ahí. `.env.local` corresponde a la ejecución local; no configura el despliegue. Los secretos son exclusivamente del servidor, sin prefijo `NEXT_PUBLIC_`.
 
-Las variables `NEXT_PUBLIC_*` se incorporan al compilar: tras cambiarlas en Vercel hay que volver a desplegar.
+| Variable | Ámbito | Uso |
+| --- | --- | --- |
+| `AI_MODEL` | Servidor | ID `proveedor/modelo` disponible en [el catálogo de Gateway](https://ai-gateway.vercel.sh/v1/models). Para pruebas gratuitas con datos ficticios: `nvidia/nemotron-3.5-lightning-free`. |
+| `AI_GATEWAY_API_KEY` | Servidor | Clave de Vercel AI Gateway. Alternativa a OIDC. |
+| `VERCEL_OIDC_TOKEN` | Servidor | Autenticación OIDC de Vercel; alternativa a la clave de Gateway. |
+| `SUPABASE_URL` | Servidor | URL del proyecto compartido con Enfoca: `https://acwlzsofiqdaxmwpyczu.supabase.co`. |
+| `SUPABASE_PUBLISHABLE_KEY` | Servidor | Clave pública del proyecto compartido; usada en el servidor para comprobar el esquema sin privilegios. No es necesaria para la llamada de IA y su cuota. |
+| `SUPABASE_SECRET_KEY` | Servidor | Clave privada del proyecto compartido. El código de IA la usa exclusivamente para la RPC de cuotas. No se expone al navegador ni al modelo. |
+| `NEXT_PUBLIC_WHATSAPP_NUMBER` | Público | Contacto comercial, solo dígitos. |
 
-## Estructura
+La clave de Gateway tiene prioridad si se configuran ambos métodos de autenticación. En Vercel puedes usar OIDC; para desarrollo local con un proyecto vinculado, `vercel env pull` obtiene un token temporal. Consulta [la configuración oficial de OIDC](https://vercel.com/docs/ai-gateway/authentication-and-byok/oidc). No se necesita contratar ni configurar OpenAI por separado.
 
-```
-src/
-├── app/                      # Rutas (App Router)
-│   ├── page.tsx              # Showroom
-│   ├── administracion/       # Demo 1
-│   ├── operaciones/          # Demo 2
-│   ├── ia/                   # Demo 3
-│   ├── integraciones/
-│   ├── recorrido/            # Recorrido de 3 minutos
-│   └── api/
-│       ├── ai/route.ts       # POST: asistente de IA (servidor)
-│       └── health/route.ts   # GET: estado del despliegue y de Supabase
-├── components/
-│   ├── ui/                   # shadcn/ui
-│   ├── layout/               # Menú lateral, encabezado móvil, marca
-│   ├── showroom/             # Tarjetas de demo, panel de datos, restablecer, contacto
-│   ├── shared/               # Encabezado de página, etiquetas de color, placeholders
-│   ├── admin/ operations/ ai/  # Piezas de cada demo
-├── config/site.ts            # Marca, navegación y las tres demos
-└── lib/
-    ├── demo/                 # Tipos, datos ficticios, persistencia y store reactivo
-    ├── ai/                   # Configuración, prompt, validación y límite de uso (solo servidor)
-    └── supabase/client.ts    # Cliente de Supabase (preparado)
-supabase/
-├── config.toml
-└── migrations/               # Esquema de la base de datos
-```
+El código no fija un modelo por defecto: `AI_MODEL` debe configurarse explícitamente. Verifica disponibilidad y costo antes de elegirlo. Define también un presupuesto en AI Gateway; una cuota de solicitudes no equivale a un presupuesto monetario.
 
-## Datos de la demostración
+Los nombres anteriores `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` siguen aceptándose como respaldo; los nuevos tienen prioridad. Ningún componente del navegador necesita un cliente Supabase en esta versión. La clave publishable no sustituye a `SUPABASE_SECRET_KEY`, necesaria para ejecutar la RPC privada de cuotas.
 
-- `lib/demo/seed.ts` genera el escenario original. Las fechas son relativas al momento en que se genera, así que los ejemplos siguen siendo útiles con el tiempo.
-- `lib/demo/store.ts` mantiene los datos en memoria, los comparte entre las tres demos y los guarda mediante un **adaptador de persistencia** (`lib/demo/persistence.ts`). Hoy el adaptador usa `localStorage`; para usar Supabase basta con implementar el mismo contrato (`load` / `save`) y asignarlo en `store.ts`.
-- Los registros usan identificadores estables, de modo que renombrar una prioridad, un departamento o un estado no rompe las relaciones con las órdenes existentes.
-- Los indicadores se calculan con el tipo de estado (`pending`, `in_progress`, `completed`), no con su nombre.
-- Si los datos guardados están dañados o son de otra versión (`DATA_VERSION`), se regeneran automáticamente.
-- Todas las escrituras deben pasar por `updateDemoData`; el restablecimiento es `resetDemoData`.
+### Cuota persistente
 
-## Inteligencia artificial
+Las cuotas viven en el **mismo proyecto Supabase que Enfoca**. Antes de aplicar SQL, comprueba qué objetos del demo ya existen y revisa las migraciones pendientes conforme a [la guía de despliegue](docs/deployment.md).
 
-`POST /api/ai` recibe `{ question, context }`, donde `context` son únicamente métricas **ya calculadas** por la aplicación. El servidor:
-
-- usa el SDK oficial de OpenAI, con la API key y el modelo definidos por variables de entorno;
-- limita el tamaño del cuerpo (16 KB), de la pregunta (300 caracteres) y de los datos (12 000 caracteres);
-- limita el uso por cliente (12 solicitudes cada 10 minutos);
-- responde `503` cuando no está configurado, en lugar de simular una respuesta;
-- instruye al modelo a usar solo los datos recibidos y a separar datos, análisis y recomendaciones.
-
-El límite de uso vive en memoria de cada instancia, por lo que es un freno básico, no una garantía. Configura además un **límite mensual de gasto** en tu cuenta de OpenAI.
-
-## Supabase
-
-La demo actual **no depende de Supabase**: persiste en el navegador. La migración `supabase/migrations/*_init_demo_sessions.sql` deja listo el esquema para guardar un snapshot por visitante (autenticación anónima), con RLS por propietario y sin acceso para el rol `anon`.
+Para vincular la CLI al proyecto acordado:
 
 ```bash
-supabase login
-supabase link --project-ref <ref-del-proyecto>
-supabase db push
+supabase link --project-ref acwlzsofiqdaxmwpyczu
 ```
 
-Después agrega `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` en Vercel. `GET /api/health` indica si Supabase está configurado y migrado, sin exponer secretos.
+`20261026225631_ai_usage_limits.sql` define únicamente la tabla `demo_ai_usage`, su índice, sus permisos y la función `consume_demo_ai_quota`. El esquema que compartió el propietario el 2026-10-27 ya contiene `demo_ai_usage`; no vuelvas a ejecutar su `CREATE TABLE` sin comprobar el estado. Falta confirmar remotamente la función y sus permisos. No ejecutes todas las migraciones con `supabase db push` sin revisar antes las pendientes y el historial del proyecto compartido.
 
-## Despliegue en Vercel
+- Máximo de 12 llamadas al modelo por IP en ventanas fijas de 10 minutos.
+- Máximo compartido de 200 llamadas por día UTC por base de datos.
+- La transacción bloquea primero el contador del proyecto y después el del visitante, para coordinar instancias concurrentes.
+- Solo `service_role` puede ejecutar la función o acceder a los contadores. RLS está activado; `anon` y `authenticated` no tienen permisos.
+- No se guardan preguntas, respuestas, órdenes ni IP en texto. El identificador de cuota es un HMAC calculado en el servidor.
+- En Vercel se usa `x-vercel-forwarded-for`; fuera de Vercel las solicitudes comparten una cuota conservadora. Visitantes en la misma red comparten el límite por IP, aunque sus datos operativos siguen separados.
+- Si falta configuración, migración o disponibilidad del almacén, no se llama al modelo: se muestran cálculos. Los fallos del proveedor también consumen su intento reservado, sin reintentos automáticos.
 
-1. Importa el repositorio en [vercel.com/new](https://vercel.com/new) (Framework: Next.js; se detecta pnpm automáticamente).
-2. Agrega las variables de entorno que necesites (ver tabla anterior).
-3. Despliega. Cada `git push` a `main` publica una nueva versión de producción.
+La prueba SQL en `supabase/tests/ai_usage_limits.sql` verifica permisos, la llamada 13 y el tope global. Ejecútala únicamente en una base de prueba desechable; se revierte al terminar. La prueba secuencial no sustituye una prueba de concurrencia en el entorno de lanzamiento.
 
-Con la CLI: `vercel link`, `vercel env add <NOMBRE> production` y `vercel --prod`.
+## Contrato y aislamiento del asistente
 
-## Notas para quien continúe el desarrollo
+`POST /demo/api/ai` recibe `{ question, snapshot }`. El snapshot incluye únicamente departamentos, prioridades, estados y una proyección de las órdenes actuales. No acepta contexto arbitrario, credenciales ni instrucciones para consultar otras fuentes.
 
-- Este proyecto usa Next.js 16 con **Cache Components** y **Partial Prefetching** activados. No llames a `Date.now()`, `new Date()`, `Math.random()` ni `crypto.randomUUID()` durante el render; hazlo en efectos o manejadores de eventos. Lee `AGENTS.md` y la documentación incluida en `node_modules/next/dist/docs/` antes de modificar APIs de Next.
-- En `error.tsx` la propiedad para reintentar se llama `retry`.
-- Los componentes de shadcn/ui se agregan con `pnpm dlx shadcn@latest add <componente>`.
-- La interfaz está en español (México); el código y los identificadores, en inglés.
+El servidor:
 
-## Limitaciones conocidas
+1. Rechaza solicitudes de otros orígenes y formatos distintos de JSON.
+2. Limita el cuerpo a 96 KiB reales en UTF-8, incluso sin `Content-Length`, y la pregunta a 300 caracteres.
+3. Valida forma, longitudes, costos, fechas, identificadores únicos y referencias entre las órdenes y catálogos; admite hasta 100 órdenes.
+4. Recalcula totales, costos por departamento, sobrecostos por orden y retrasos con fecha de Chihuahua. No confunde una orden completada con un retraso abierto.
+5. Reserva la cuota persistente y envía únicamente estos datos a Gateway, sin herramientas de consulta o escritura.
+6. Devuelve `{ answer, source, asOf }`. `source: "ai"` identifica generación; `source: "calculations"` identifica un cálculo alternativo y añade `reason`.
 
-- Las demostraciones de las fases 2 a 5 aún no están construidas.
-- Los datos viven en el navegador: cambiar de navegador o borrar los datos del sitio devuelve el escenario original.
-- La respuesta real del asistente de IA no se ha probado con una API key; el endpoint se verificó en sus validaciones y límites.
-- No hay pruebas automatizadas todavía.
+El modelo recibe títulos y observaciones como contenido no confiable. No tiene herramientas de base de datos, navegación ni escritura. No se comparten conversaciones ni snapshots entre solicitudes, y todas las respuestas HTTP usan `private, no-store`. Los textos del modelo se muestran como texto, sin ejecutar HTML.
+
+Si no hay IA, los cálculos alternativos cubren resumen, costos, retrasos y consulta de un folio. La interfaz indica esta limitación; no simula inteligencia artificial. Las recomendaciones generadas deben verificarse antes de tomar decisiones.
+
+## Datos y estructura
+
+`src/lib/demo/store.ts` es la única vía de actualización y persiste en `localStorage`. `resetDemoData` restaura el escenario con fechas relativas al momento actual. Las referencias usan IDs estables y los indicadores usan `status.kind`, independientemente del nombre visible.
+
+| Ruta | Contenido |
+| --- | --- |
+| `src/app/demo/api/ai/route.ts` | Validación, cuota, Gateway y alternativa calculada |
+| `src/app/(landing)/` | Página y layout de la landing independiente en `/` |
+| `src/app/demo/` | Páginas, APIs y layout del showroom en `/demo` |
+| `src/config/routes.ts` | Rutas del demo, selección del menú y redirecciones de compatibilidad |
+| `src/lib/ai/` | Configuración, esquemas, cálculos, prompt y adaptador de cuota |
+| `src/components/ai/` | Asistente visual y estado de configuración |
+| `src/components/operations/` | Indicadores, editor de prueba y gráfica |
+| `supabase/migrations/` | Snapshots futuros y cuotas del asistente |
+| `tests/unit/` | Pruebas automatizadas de las fronteras del servidor |
+| `tests/e2e/` | Cambios, persistencia y aislamiento de navegadores |
+| `docs/architecture.md` | Proyecto Supabase compartido, accesos y límites de las aplicaciones |
+| `docs/deployment.md` | Variables, comprobación de cuotas y pruebas de lanzamiento |
+
+La tabla `demo_sessions` sigue preparada para una futura persistencia por usuario anónimo. Las órdenes del demo actual permanecen en el navegador. La cuota sí necesita persistencia en el servidor.
+
+## Validación de lanzamiento pendiente
+
+- Confirmar Gateway/OIDC, `AI_MODEL` y las variables del proyecto Supabase compartido en el entorno de Vercel que se desplegará.
+- Verificar la tabla de cuotas ya reportada, la RPC y sus permisos; aplicar solamente los objetos del demo que falten, sin cambios a Enfoca.
+- Ejecutar `pnpm check`, `pnpm test` y `pnpm test:e2e` en un entorno con permisos para iniciar procesos y puertos locales.
+- Probar respuestas reales del modelo para las 30 órdenes, una orden modificada y dos visitantes.
+- Revisar los recursos públicos del navegador para confirmar que no contienen secretos.
+- Desplegar en Vercel después de revisar el resultado y repetir las pruebas con la URL de Preview/producción.
+
+Las variables `NEXT_PUBLIC_*` se incorporan al compilar: cambiar sus valores requiere un nuevo despliegue. La presencia de variables no certifica conectividad; la pantalla indica que la conexión está configurada, y la solicitud real determina si puede usarse.
+
+## Notas de Next.js
+
+Este proyecto usa Next.js 16 con Cache Components y Partial Prefetching. Lee `AGENTS.md` y los documentos incluidos en `node_modules/next/dist/docs/` antes de modificar APIs. No generes fechas, aleatorios ni UUID durante el render: utiliza efectos o manejadores. La interfaz está en español de México; los identificadores están en inglés.

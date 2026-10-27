@@ -1,33 +1,46 @@
 import "server-only";
+import { createHmac } from "node:crypto";
+import { isIP } from "node:net";
+import { createClient } from "@supabase/supabase-js";
+import { z } from "zod";
+import { getSupabaseUrl } from "@/lib/supabase/config";
 
-const WINDOW_MS = 10 * 60 * 1000;
-const MAX_REQUESTS = 12;
-const MAX_TRACKED_CLIENTS = 5_000;
+export type RateLimitResult =
+  | { allowed: true }
+  | { allowed: false; retryAfterSeconds: number }
+  | { unavailable: true };
 
-const hits = new Map<string, number[]>();
+export function isRateLimitConfigured(): boolean {
+  return Boolean(getSupabaseUrl() && process.env.SUPABASE_SECRET_KEY?.trim());
+}
 
-export type RateLimitResult = { allowed: true } | { allowed: false; retryAfterSeconds: number };
+/** Only Vercel's overwritten IP header is trusted; other hosts share a conservative bucket. */
+export function getClientBucket(headers: Headers, secret: string): string {
+  const forwarded = process.env.VERCEL === "1" ? headers.get("x-vercel-forwarded-for")?.trim() : null;
+  const identity = forwarded && isIP(forwarded) ? forwarded : "shared-non-vercel";
+  return createHmac("sha256", secret).update(`salazar-demo-ai:${identity}`).digest("hex");
+}
 
-/**
- * Límite básico por cliente en memoria. En serverless cada instancia lleva su propio conteo,
- * así que es un freno razonable, no una garantía: fija además un tope de gasto en OpenAI.
- */
-export function checkRateLimit(clientId: string, now: number = Date.now()): RateLimitResult {
-  const recent = (hits.get(clientId) ?? []).filter((timestamp) => now - timestamp < WINDOW_MS);
+const resultSchema = z.object({ allowed: z.boolean(), retry_after_seconds: z.number().int().min(0).max(86400) });
 
-  if (recent.length >= MAX_REQUESTS) {
-    hits.set(clientId, recent);
-    return { allowed: false, retryAfterSeconds: Math.ceil((recent[0] + WINDOW_MS - now) / 1000) };
+/** Atomic, persistent quotas: 12 requests/IP/10 min, 200 requests/project/UTC day. Fail closed. */
+export async function checkRateLimit(headers: Headers): Promise<RateLimitResult> {
+  const url = getSupabaseUrl();
+  const secret = process.env.SUPABASE_SECRET_KEY?.trim();
+  if (!url || !secret) return { unavailable: true };
+  try {
+    const client = createClient(url, secret, {
+      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    });
+    const { data, error } = await client.rpc("consume_demo_ai_quota", {
+      p_client_hash: getClientBucket(headers, secret),
+    }).abortSignal(AbortSignal.timeout(5_000));
+    const parsed = resultSchema.safeParse(data);
+    if (error || !parsed.success) return { unavailable: true };
+    return parsed.data.allowed ? { allowed: true } : {
+      allowed: false, retryAfterSeconds: Math.max(1, parsed.data.retry_after_seconds),
+    };
+  } catch {
+    return { unavailable: true };
   }
-
-  recent.push(now);
-  hits.set(clientId, recent);
-
-  if (hits.size > MAX_TRACKED_CLIENTS) {
-    for (const [id, timestamps] of hits) {
-      if (timestamps.every((timestamp) => now - timestamp >= WINDOW_MS)) hits.delete(id);
-    }
-  }
-
-  return { allowed: true };
 }
