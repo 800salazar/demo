@@ -16,9 +16,9 @@ export const profileMedia = {
 
 /** Public content for salazar.red/. Keep the landing concise and outcome-led. */
 export const profile = {
-  name: "Adán Salazar",
+  name: "Adán SebastianSalazar",
   initials: "AS",
-  position: "Gerente general",
+  position: "",
   company: "Salazar Consultores",
   location: "Chihuahua, México",
   description: "Adán Salazar. Software a la medida, automatización e inteligencia artificial para empresas.",
