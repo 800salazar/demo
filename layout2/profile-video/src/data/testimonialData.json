@@ -1,0 +1,47 @@
+[
+    {
+        "id": 1,
+        "image": "/images/home-images/client-img1.jpg",
+        "title": "Amazing Services!",
+        "quoteIcon": "/images/svg/qote.svg",
+        "text": "Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet consectetur, adipisci velit, sed quia non numquam eius tempora in labore et dolore magnam aliquam quaerat voluptatem. minima a quis nostrum exercitationemullam.",
+        "name": "Robert Alikson",
+        "position": "CEO at Envato"
+    },
+    {
+        "id": 2,
+        "image": "/images/home-images/client-img2.jpg",
+        "title": "Amazing Services!",
+        "quoteIcon": "/images/svg/qote.svg",
+        "text": "Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet consectetur, adipisci velit, sed quia non numquam eius tempora in labore et dolore magnam aliquam quaerat voluptatem. minima a quis nostrum exercitationemullam.",
+        "name": "Olivia Segio",
+        "position": "CEO at Envato"
+    },
+    {
+        "id": 3,
+        "image": "/images/home-images/client-img3.jpg",
+        "title": "Great Services!",
+        "quoteIcon": "/images/svg/qote.svg",
+        "text": "Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet consectetur, adipisci velit, sed quia non numquam eius tempora in labore et dolore magnam aliquam quaerat voluptatem. minima a quis nostrum exercitationemullam.",
+        "name": "Andrew Lewis",
+        "position": "CEO at Envato"
+    },
+    {
+        "id": 4,
+        "image": "/images/home-images/client-img4.jpg",
+        "title": "Good Services!",
+        "quoteIcon": "/images/svg/qote.svg",
+        "text": "Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet consectetur, adipisci velit, sed quia non numquam eius tempora in labore et dolore magnam aliquam quaerat voluptatem. minima a quis nostrum exercitationemullam.",
+        "name": "Dan Sawyer",
+        "position": "Manager"
+    },
+    {
+        "id": 5,
+        "image": "/images/home-images/client-img5.jpg",
+        "title": "Best Services!",
+        "quoteIcon": "/images/svg/qote.svg",
+        "text": "Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet consectetur, adipisci velit, sed quia non numquam eius tempora in labore et dolore magnam aliquam quaerat voluptatem. minima a quis nostrum exercitationemullam.",
+        "name": "Lewi Andrew",
+        "position": "Developer"
+    }
+]

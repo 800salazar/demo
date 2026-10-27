@@ -1,0 +1,47 @@
+[
+    {
+        "id": 1,
+        "name": "Basic Plan",
+        "price": 25,
+        "priceUnit": "/mon",
+        "icon": "/images/svg/basic-plain.svg",
+        "features": [
+            "Web Development",
+            "Mobile Development",
+            "Advertising",
+            "Graphic Design",
+            "Project Management"
+        ],
+        "taxesNote": "10% taxes will include after make price"
+    },
+    {
+        "id": 2,
+        "name": "Standard Plan",
+        "price": 75,
+        "priceUnit": "/mon",
+        "icon": "/images/svg/strandard-plan.svg",
+        "features": [
+            "Web Development",
+            "Mobile Development",
+            "Advertising",
+            "Graphic Design",
+            "Project Management"
+        ],
+        "taxesNote": "10% taxes will include after make price"
+    },
+    {
+        "id": 3,
+        "name": "Gold Plan",
+        "price": 125,
+        "priceUnit": "/mon",
+        "icon": "/images/svg/gold-plan.svg",
+        "features": [
+            "Web Development",
+            "Mobile Development",
+            "Advertising",
+            "Graphic Design",
+            "Project Management"
+        ],
+        "taxesNote": "10% taxes will include after make price"
+    }
+]

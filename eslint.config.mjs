@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Original Vite templates are design references, not application source.
+    "layout2/**",
   ]),
 ]);
 

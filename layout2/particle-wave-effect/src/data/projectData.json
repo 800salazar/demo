@@ -1,0 +1,62 @@
+[
+    {
+        "id": 1,
+        "title": "Space In Lost - Jupiter J2",
+        "category": "Content",
+        "image": "/images/home-images/project-img1.jpg",
+        "overlayIcon": "/images/svg/content-svg.svg"
+    },
+    {
+        "id": 2,
+        "title": "Connect With Future Place",
+        "category": "YT Video",
+        "image": "/images/home-images/project-img3.jpg",
+        "overlayIcon": "/images/svg/youtube-svg.svg",
+        "videoUrl": "https://www.youtube.com/embed/PavYAOpVpJI"
+    },
+    {
+        "id": 3,
+        "title": "Pyramids With Illusion",
+        "category": "Content",
+        "image": "/images/home-images/project-img5.jpg",
+        "overlayIcon": "/images/svg/content-svg.svg"
+    },
+    {
+        "id": 4,
+        "title": "Explore Human Minds",
+        "category": "YT Video",
+        "image": "/images/home-images/project-img7.jpg",
+        "overlayIcon": "/images/svg/youtube-svg.svg",
+        "videoUrl": "https://www.youtube.com/embed/f7hbWvHKns0"
+    },
+    {
+        "id": 5,
+        "title": "Astronaut Catch Earth",
+        "category": "Gallery",
+        "image": "/images/home-images/project-img2.jpg",
+        "overlayIcon": "/images/svg/gallery-svg.svg"
+    },
+    {
+        "id": 6,
+        "title": "Mind Process Chips",
+        "category": "Vimeo Video",
+        "image": "/images/home-images/project-img4.jpg",
+        "overlayIcon": "/images/svg/vimeo-svg.svg",
+        "videoUrl": "https://player.vimeo.com/video/259411563"
+    },
+    {
+        "id": 7,
+        "title": "Space Shuttle Launch",
+        "category": "Gallery",
+        "image": "/images/home-images/project-img6.jpg",
+        "overlayIcon": "/images/svg/gallery-svg.svg"
+    },
+    {
+        "id": 8,
+        "title": "Dubai 3D Amazing View",
+        "category": "Vimeo Video",
+        "image": "/images/home-images/project-img8.jpg",
+        "overlayIcon": "/images/svg/vimeo-svg.svg",
+        "videoUrl": "https://player.vimeo.com/video/259411563"
+    }
+]

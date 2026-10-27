@@ -1,0 +1,26 @@
+.skeleton { --t-skeleton-color: #dce6f5; --t-skeleton-pulse-duration: 1200ms; }
+.panel { border: 1px solid #d3e0f4; border-radius: 20px; padding: 38px; background: #f6f9ff; }
+.eyebrow { width: 185px; max-width: 75%; height: 11px; margin-bottom: 25px; }
+.heading { width: 255px; max-width: 85%; height: 35px; margin-bottom: 13px; }
+.description { width: 370px; max-width: 100%; height: 13px; margin-bottom: 26px; }
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.cards > div { padding: 18px; background: #edf2f9; border: 1px solid #d7e1f0; border-radius: 13px; }
+.icon { width: 23px; height: 20px; margin-bottom: 10px; }
+.cardTitle { width: 100%; height: 18px; margin-bottom: 13px; }
+.cardLine { width: 85%; height: 12px; }
+.footerLine { width: 240px; max-width: 70%; height: 12px; margin-top: 32px; }
+.nextPanel { margin-top: 24px; padding: 40px; border: 1px solid #253348; border-radius: 20px; background: #101b2b; --t-skeleton-color: #263d5d; }
+.nextPanel > span { width: 65%; height: 33px; margin-bottom: 14px; }
+.nextPanel > span:last-child { width: 45%; margin: 0; }
+.loadingPage { min-height: 100dvh; background: linear-gradient(145deg, #0057b8e6, #071a39), #071a39; padding: 112px 24px 40px; }
+.loadingInner { width: min(900px, 100%); margin: 0 auto; }
+.status { color: #adbfda; font-size: 12px; margin: 0 0 18px; text-align: center; }
+@media (max-width: 960px) and (min-width: 761px), (max-width: 480px) {
+  .cards { grid-template-columns: 1fr; }
+  .panel { padding: 26px 21px; border-radius: 16px; }
+  .cards > div { padding: 18px; }
+}
+@media (max-width: 760px) {
+  .heading { height: 28px; }
+  .nextPanel { display: none; }
+}

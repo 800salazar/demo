@@ -8,7 +8,7 @@ El dominio configurado por el propietario en Vercel es **`salazar.red`**. Este d
 
 | URL | Contenido |
 | --- | --- |
-| `https://salazar.red/` | Landing independiente, sin relación con el demo ni otros proyectos. Por ahora muestra una página neutral «Próximamente». |
+| `https://salazar.red/` | Landing breve de Adán Salazar: Conferencia, Perfil, Qué hago y Contacto, con identidad azul y layout independiente. |
 | `https://salazar.red/demo` | Inicio del showroom de demostraciones |
 | `/demo/administracion` | Administración del demo |
 | `/demo/operaciones` | Dashboard, órdenes y asistente operativo |
@@ -18,7 +18,9 @@ El dominio configurado por el propietario en Vercel es **`salazar.red`**. Este d
 
 La landing tiene su propio layout en `src/app/(landing)/`. El menú, el pie, la marca y las notificaciones del demo solo se montan en `src/app/demo/layout.tsx`. La raíz no redirige a `/demo` ni carga los datos de demostración. Las antiguas rutas del showroom, como `/ia`, redirigen a su nueva ubicación; las redirecciones son explícitas y no capturan todas las rutas del dominio.
 
-Las rutas internas se centralizan en `src/config/routes.ts`. No se usa `basePath` global, por lo que la raíz permanece disponible para desarrollar la landing dentro del mismo despliegue.
+Las rutas internas del demo se centralizan en `src/config/routes.ts`. No se usa `basePath` global. El perfil profesional se publica en la raíz del mismo despliegue; sus textos, contacto y fotografía opcional se configuran en `src/config/profile.ts`. Ver [edición del perfil](docs/profile.md).
+
+La sección `/#conferencia` permite elegir entre revisar avances y aterrizar una idea, completar tres datos cuando corresponde y copiar un prompt para pegarlo en la IA favorita del alumno. Los prompts se editan en `src/lib/conference/prompts.ts`. La herramienta no recibe archivos ni guarda respuestas de los estudiantes.
 
 ## Decisión de arquitectura: un solo Supabase
 

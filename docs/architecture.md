@@ -21,12 +21,16 @@ El despliegue de este repositorio usa el dominio `salazar.red` asignado por el p
 
 | Ubicación | Función |
 | --- | --- |
-| `salazar.red/` · `src/app/(landing)/` | Landing independiente, sin relación con Demo, Enfoca ni otros proyectos. Conserva un layout propio y por ahora una página neutral, hasta definir su contenido. |
+| `salazar.red/` · `src/app/(landing)/` | Perfil profesional de Adán Salazar y herramienta de conferencia para estudiantes en `#conferencia`, con identidad azul y layout propio. No monta datos ni navegación de Demo o Enfoca. |
 | `salazar.red/demo` · `src/app/demo/` | Showroom público, sus módulos, su navegación y sus APIs |
 | `src/app/layout.tsx` | Estructura HTML, fuentes y estilos generales; no monta el menú ni los datos del demo |
 | `src/app/demo/layout.tsx` | Menú, marca, pie de demostración y notificaciones, exclusivos de `/demo` |
 
 Los enlaces del showroom permanecen bajo `/demo`, incluido el regreso al inicio. La landing no monta el store del demo ni lo promueve mediante enlaces o contenido. El estado sigue usando la clave existente `salazar-demo:data` de `localStorage`; cambiar la ruta conserva los datos anteriores en ese mismo navegador y origen.
+
+La landing usa contenido público estático en `src/config/profile.ts`, CSS Modules y componentes de servidor. El menú, la impresión y la alternativa visual al fallar una imagen usan componentes de cliente. Sus fotos y logotipos se sirven desde archivos explícitos del bucket `landing` del proyecto compartido. No consulta tablas de Supabase ni requiere credenciales o migraciones adicionales. El contacto abre el cliente de correo; no almacena ni envía formularios desde el servidor. La lectura pública de los archivos de Storage sigue pendiente de confirmar. Ver [edición del perfil](profile.md).
+
+El recurso `#conferencia` es un componente de cliente para elegir un prompt, completar tres datos y copiar texto al portapapeles. Los datos solo viven en el estado de React; no se guardan en disco, `localStorage` ni Supabase. No llama al endpoint de IA del demo. El alumno adjunta sus archivos y envía el prompt directamente en la IA externa que elija.
 
 No configurar un `basePath` global ni una redirección desde `/` al showroom. `src/config/routes.ts` centraliza las URLs; `next.config.ts` redirige únicamente las antiguas páginas y endpoints del demo. La existencia del código local no confirma que esta nueva estructura ya esté publicada: requiere desplegar la versión actualizada.
 

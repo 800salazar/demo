@@ -11,7 +11,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## Dominio y rutas acordadas
 
 - El dominio de este despliegue en Vercel es `salazar.red`.
-- La raíz `https://salazar.red/` está reservada para una landing independiente, sin relación ni navegación obligatoria hacia Demo, Enfoca u otros proyectos. Mientras no se defina su contenido, mantener una página neutral.
+- La raíz `https://salazar.red/` contiene el perfil profesional de Adán Salazar: landing tipo CV en tonos azules, inspirada en `layout2`. Mantenerla independiente de Demo y Enfoca, sin navegación obligatoria hacia ellos. Su contenido editable está en `src/config/profile.ts`; consultar `docs/profile.md`.
+- El recurso para estudiantes de la conferencia aparece al principio de `/`, con ancla `#conferencia`: dos caminos y prompts para copiar. Su contenido está en `src/lib/conference/prompts.ts`. No subir archivos ni guardar datos de estudiantes en el servidor o en Supabase; los documentos se adjuntan directamente en la IA elegida por cada alumno.
 - Salazar Demo se publica en `https://salazar.red/demo`. Todas sus pantallas y APIs están bajo `/demo`, con rutas centralizadas en `src/config/routes.ts`.
 - El menú, la marca del demo, el pie y el Toaster pertenecen a `src/app/demo/layout.tsx`, no al layout raíz. El enlace de inicio y el logotipo del demo llevan a `/demo`, nunca a `/`.
 - La landing está en `src/app/(landing)/`; su grupo de rutas no añade segmentos a la URL. No aplicar `basePath: '/demo'` a toda la aplicación ni redirigir `/` al showroom.

@@ -1,0 +1,14 @@
+declare module "*.mp4";
+declare module "*.mov";
+declare module "*.webm";
+declare module "*.png";
+declare module "*.jpg";
+declare module "*.jpeg";
+declare module "*.svg";
+declare module "ityped";
+declare module '*.css';
+declare module 'swiper/css'
+declare module 'swiper/css/pagination'
+declare module 'swiper/css/autoplay'
+declare module 'swiper/css/effect-fade'
+declare module 'swiper/css/navigation' 

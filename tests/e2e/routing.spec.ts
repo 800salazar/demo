@@ -2,9 +2,14 @@ import { expect, test } from "@playwright/test";
 
 test("domain root is independent and does not initialize demo data", async ({ page }) => {
   await page.goto("/");
-  await expect(page).toHaveTitle("Salazar.red");
-  await expect(page.getByRole("heading", { name: "Próximamente." })).toBeVisible();
-  await expect(page.getByRole("navigation")).toHaveCount(0);
+  await expect(page).toHaveTitle("Adán Salazar · Estrategia digital y tecnología");
+  await expect(page.locator("#contenido > .t-skeleton-reveal")).toHaveAttribute("aria-busy", "false");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Expertos en Soluciones Digitales");
+  const navigation = page.getByRole("navigation", { name: "Perfil personal" });
+  await expect(navigation.getByRole("link", { name: "Conferencia", exact: true })).toHaveAttribute("aria-current", "location");
+  await navigation.getByRole("link", { name: "Contacto", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Conectemos ideas 💡", exact: true })).toBeInViewport();
+  await expect(page.getByRole("link", { name: "Conectar con Adán Salazar en LinkedIn", exact: true })).toHaveAttribute("href", "https://www.linkedin.com/in/adansalazarr");
   await expect(page.locator('a[href^="/demo"]')).toHaveCount(0);
   await expect(page.getByText("Demostración de Salazar Consultores", { exact: false })).toHaveCount(0);
   expect(await page.evaluate(() => localStorage.getItem("salazar-demo:data"))).toBeNull();

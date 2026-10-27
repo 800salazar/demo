@@ -1,0 +1,113 @@
+.toolkit {
+  --ink: #172b49;
+  --soft-ink: #4c607d;
+  --workshop-blue: #215dcc;
+  padding: 38px;
+  margin-bottom: 24px;
+  border: 1px solid #d3e0f4;
+  border-radius: 20px;
+  background: #f6f9ff;
+  color: var(--ink);
+  line-height: 1.6;
+  scroll-margin-top: 24px;
+}
+
+.toolkit a:focus-visible, .toolkit button:focus-visible,
+.toolkit input:focus-visible, .toolkit textarea:focus-visible,
+.toolkit summary:focus-visible {
+  outline: 3px solid #2358bb;
+  outline-offset: 4px;
+}
+
+.eyebrow { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; font-size: 9px; font-weight: 600; letter-spacing: 1.1px; color: #3f608e; }
+.toolkit h2 { font-size: clamp(32px, 3.3vw, 45px); line-height: 1.12; letter-spacing: -1.8px; font-weight: 650; }
+.toolkit h2 > span { color: var(--workshop-blue); }
+.intro { margin-top: 14px; color: var(--soft-ink); font-size: 13px; }
+.pathChoices { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 24px; }
+.pathCard { display: grid; grid-template-columns: 23px minmax(0, 1fr) 17px; align-items: center; gap: 12px; text-align: left; padding: 21px 18px; border: 1px solid; border-radius: 13px; cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+.choiceCopy { display: flex; flex-direction: column; gap: 5px; }
+.choiceCopy > strong { font-size: 16px; font-weight: 600; line-height: 1.3; letter-spacing: -.3px; }
+.choiceCopy > span { font-size: 11px; line-height: 1.5; }
+.auditCard { color: #175a43; background: #eaf6ee; border-color: #bbdac7; }
+.auditCard:hover, .auditCard[aria-pressed="true"] { border-color: #247a50; box-shadow: inset 0 0 0 1px #247a50; }
+.ideaCard { color: #234f9a; background: #eaf1ff; border-color: #c0d2f1; }
+.ideaCard:hover, .ideaCard[aria-pressed="true"] { border-color: #3065c0; box-shadow: inset 0 0 0 1px #3065c0; }
+.pathContent { margin-top: 28px; padding-top: 23px; border-top: 1px solid #d8e2f2; scroll-margin-top: 24px; }
+.pathContent:focus { outline: none; }
+.changePath { display: inline-block; margin-bottom: 17px; color: #4d6384; font-size: 11px; }
+.changePath:hover { color: #215dcc; text-decoration: underline; text-underline-offset: 3px; }
+.pathContent h3 { font-size: 23px; line-height: 1.3; letter-spacing: -.7px; font-weight: 600; }
+.instructions { margin: 19px 0; padding-left: 20px; list-style: decimal; color: #3f5575; font-size: 13px; }
+.instructions > li { padding-left: 5px; margin-top: 7px; }
+.instructions strong { font-weight: 600; color: var(--ink); }
+.documents { background: white; border: 1px solid #d8e3f4; border-radius: 9px; margin: 22px 0; padding: 0 17px; }
+.documents > summary, .promptPreview > summary { display: flex; justify-content: space-between; align-items: center; gap: 12px; cursor: pointer; list-style: none; font-size: 12px; font-weight: 500; padding: 14px 0; }
+.documents > summary::-webkit-details-marker, .promptPreview > summary::-webkit-details-marker { display: none; }
+.documents[open] > summary > svg, .promptPreview[open] > summary > svg { transform: rotate(180deg); }
+.documents > ul { list-style: disc; margin: 0 0 12px; padding-left: 17px; color: var(--soft-ink); font-size: 12px; }
+.documents li + li { margin-top: 9px; }
+.documents strong { color: #273e5e; font-weight: 600; }
+.documents > p { font-size: 11px; color: var(--soft-ink); padding-bottom: 16px; }
+.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 19px 16px; margin-top: 25px; }
+.fields > label:first-child { grid-column: 1 / -1; }
+.fields label { display: flex; flex-direction: column; gap: 7px; color: #273f61; font-size: 12px; font-weight: 550; }
+.fields input, .fields textarea { display: block; width: 100%; min-width: 0; border: 1px solid #b7c9e2; border-radius: 8px; background: white; color: var(--ink); font: inherit; font-weight: 400; font-size: 13px; padding: 12px; box-shadow: 0 1px 2px #193b6a05; }
+.fields input { min-height: 46px; }
+.fields textarea { resize: vertical; min-height: 79px; }
+.fields input::placeholder, .fields textarea::placeholder { color: #677c99; opacity: 1; }
+.copyBar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 18px; margin-top: 22px; }
+.copyButton { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 12px 23px; border: 1px solid #1f56b6; border-radius: 9px; background: var(--workshop-blue); color: white; font-size: 14px; font-weight: 550; cursor: pointer; }
+.copyButton:hover { background: #194da9; }
+.copyButton:disabled { cursor: wait; opacity: .7; }
+.copyFeedback { font-size: 12px; color: #165b3b; margin-top: 12px; }
+.copyFeedback:empty { margin: 0; }
+.manualText { margin-top: 13px; padding: 14px; width: 100%; background: white; border: 1px solid #a3b9d9; border-radius: 8px; color: var(--ink); font-size: 12px; line-height: 1.65; resize: vertical; }
+.promptPreview { margin-top: 13px; }
+.promptPreview > summary { color: #4d6384; font-size: 11px; font-weight: 400; justify-content: flex-start; }
+.promptPreview > pre { margin-top: 5px; padding: 18px; border-radius: 9px; border: 1px solid #d6e2f3; background: #edf3fc; color: #334d71; font-family: var(--font-geist-sans), sans-serif; font-size: 12px; line-height: 1.85; white-space: pre-wrap; overflow-wrap: anywhere; }
+.assistants { border-top: 1px solid #d8e2f2; padding-top: 19px; margin-top: 27px; }
+.assistants > div { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.assistants a { display: inline-flex; align-items: center; gap: 5px; min-height: 29px; color: #2858a6; font-size: 12px; font-weight: 550; }
+.assistants a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.assistants > p { color: var(--soft-ink); font-size: 10px; margin-top: 8px; }
+
+@media (max-width: 1180px) {
+  .toolkit { padding: 30px; }
+  .pathCard { padding: 19px 16px; gap: 10px; }
+}
+
+@media (max-width: 960px) and (min-width: 761px) {
+  .toolkit { padding: 27px 25px; }
+  .pathChoices { grid-template-columns: 1fr; }
+  .fields { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 760px) {
+  .toolkit { padding: 29px 26px; border-radius: 16px; margin-bottom: 19px; }
+  .toolkit h2 { font-size: 36px; letter-spacing: -1.5px; }
+  .intro { font-size: 13px; }
+}
+
+@media (max-width: 480px) {
+  .toolkit { padding: 26px 21px; }
+  .toolkit h2 { font-size: 30px; letter-spacing: -1.2px; }
+  .eyebrow { font-size: 8px; letter-spacing: .8px; }
+  .intro { font-size: 12px; margin-top: 14px; }
+  .pathChoices { grid-template-columns: 1fr; gap: 11px; }
+  .pathCard { padding: 17px 15px; gap: 10px; }
+  .pathContent h3 { font-size: 22px; }
+  .fields { grid-template-columns: 1fr; gap: 17px; }
+  .fields input, .fields textarea { font-size: 16px; }
+  .copyBar { align-items: flex-start; flex-direction: column; gap: 9px; }
+  .copyButton { width: 100%; }
+  .assistants > div { gap: 6px 13px; }
+  .assistants a { font-size: 11px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pathCard { transition: none; }
+}
+
+@media print {
+  .toolkit { display: none; }
+}

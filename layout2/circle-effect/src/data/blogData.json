@@ -1,0 +1,75 @@
+[
+    {
+        "id": 1,
+        "date": "March 31, 2025",
+        "tag": "Web Dev",
+        "views": "1.4k",
+        "title": "7 Great Web Development Languages to Learn this Year",
+        "thumbnail": "/images/home-images/blog-img1.jpg",
+        "content1": "In pharetra lectus porttitor eros massa sit mattis quis. Ultricies sed cras arcu integer nisi aliquam. Nibh consequat dignissim iaculis auctor tortor aliquam. Condimentum orci consectetur risus vel vitae sit ipsum eu amet. Elit risus scelerisque sit semper. Eu faucibus at diam pellentesque tortor bibendum nec ullamcorper. Morbi sem quis porttitor suspendisse hendrerit quis rhoncus porttitor in. Sed eros amet bibendum odio lacus eu. Elit volutpat vitae massa id.",
+        "quote": "Amidst the chaos of life, let your home be a crystal gentle dance of flames and the energy of creating a haven of pure serenity and magic.",
+        "quoteAuthor": "Michel Clarck",
+        "content2": "Pretium orci quam volutpat tortor dignissim fames tellus. Pulvinar pellentesque ut massa adipiscing neque risus tempor. Egestas molestie nibh amet sodales aliquam. Feugiat at interdum nibh enim ornare. Accumsan sodales adipiscing fringilla eget nulla. Eget nunc consequat non praesent pharetra nibh arcu vulputate arcu. Auctor venenatis elementum sed tincidunt duis pretium ultrices. Nibh pharetra ut sed ipsum.",
+        "list": [
+            "In pharetra lectus porttitor eros massa sit mattis quis.",
+            "Ultricies sed cras arcu integer nisi aliquam.",
+            "Nibh consequat dignissim iaculis auctor tortor aliquam.",
+            "Condimentum orci consectetur risus vel vitae sit ipsum eu amet.",
+            "Eu faucibus at diam pellentesque tortor bibendum nec ullamcorper."
+        ]
+    },
+    {
+        "id": 2,
+        "date": "March 25, 2025",
+        "tag": "SEO",
+        "views": "1.2k",
+        "title": "How to Optimize your Website for Better Performance",
+        "thumbnail": "/images/home-images/blog-img2.jpg",
+        "content1": "In pharetra lectus porttitor eros massa sit mattis quis. Ultricies sed cras arcu integer nisi aliquam. Nibh consequat dignissim iaculis auctor tortor aliquam. Condimentum orci consectetur risus vel vitae sit ipsum eu amet. Elit risus scelerisque sit semper. Eu faucibus at diam pellentesque tortor bibendum nec ullamcorper. Morbi sem quis porttitor suspendisse hendrerit quis rhoncus porttitor in. Sed eros amet bibendum odio lacus eu. Elit volutpat vitae massa id.",
+        "quote": "Your website is your digital identity — master it.",
+        "quoteAuthor": "Sarah Wayne",
+        "content2": "Pretium orci quam volutpat tortor dignissim fames tellus. Pulvinar pellentesque ut massa adipiscing neque risus tempor. Egestas molestie nibh amet sodales aliquam. Feugiat at interdum nibh enim ornare. Accumsan sodales adipiscing fringilla eget nulla. Eget nunc consequat non praesent pharetra nibh arcu vulputate arcu. Auctor venenatis elementum sed tincidunt duis pretium ultrices. Nibh pharetra ut sed ipsum.",
+        "list": [
+            "Optimize your images.",
+            "Minify JS and CSS.",
+            "Use lazy loading.",
+            "Improve server response time."
+        ]
+    },
+    {
+        "id": 3,
+        "date": "March 18, 2025",
+        "tag": "UI/UX",
+        "views": "980",
+        "title": "Top UI/UX Design Trends You Should Know in 2025",
+        "thumbnail": "/images/home-images/blog-img3.jpg",
+        "content1": "Design trends evolve every year, and 2025 is no different. This year we see a rise in immersive experiences, minimalist interfaces, and advanced personalization that shapes user interaction.",
+        "quote": "Great design is intelligence made visible.",
+        "quoteAuthor": "Alina Wheeler",
+        "content2": "With AI-driven interfaces and clean layouts, modern UI/UX focuses on delivering seamless user journeys. Designers now emphasize motion micro-interactions, soft gradients, and accessibility-first approaches.",
+        "list": [
+            "Use micro-animations to guide user flow.",
+            "Focus on accessibility and inclusive design.",
+            "Adopt soft gradients and minimal layouts.",
+            "Personalize user experiences with AI."
+        ]
+    },
+    {
+        "id": 4,
+        "date": "March 10, 2025",
+        "tag": "Marketing",
+        "views": "2.1k",
+        "title": "Digital Marketing Strategies That Actually Work in 2025",
+        "thumbnail": "/images/home-images/blog-img4.jpg",
+        "content1": "Digital marketing continues to evolve with new tools, platforms, and algorithms. In 2025, brands must adapt to new channels and behavior-focused strategies to stay competitive.",
+        "quote": "Marketing is no longer about the stuff you make, but the stories you tell.",
+        "quoteAuthor": "Seth Godin",
+        "content2": "From short-form video platforms to personalized ads and community-driven branding, marketers must understand where their audience spends time and deliver value-packed content across channels.",
+        "list": [
+            "Leverage short-form content for higher reach.",
+            "Focus on personalization through automation.",
+            "Invest in community-driven engagement.",
+            "Optimize content for voice search."
+        ]
+    }
+]

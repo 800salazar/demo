@@ -6,7 +6,7 @@ Esta guía conserva la arquitectura acordada: **Salazar Demo y Enfoca comparten 
 
 El propietario indicó que `salazar.red` ya está asignado al proyecto en Vercel. La versión de este repositorio debe servir la landing independiente en `/` y el showroom en `/demo`, con la IA en `/demo/ia` y sus endpoints en `/demo/api/*`.
 
-No cambiar el dominio a otro proyecto ni configurar un `basePath` global. El cambio se implementa con carpetas y layouts del App Router dentro del despliegue existente. La landing provisional solo muestra «Próximamente»; su contenido definitivo se desarrollará aparte y no debe mezclarse con Demo, Enfoca u otros proyectos.
+No cambiar el dominio a otro proyecto ni configurar un `basePath` global. El cambio se implementa con carpetas y layouts del App Router dentro del despliegue existente. La raíz contiene el perfil profesional de Adán Salazar, con contenido público estático y diseño azul inspirado en `layout2`. No requiere nuevas variables ni migraciones de Supabase. Ver [edición del perfil](profile.md).
 
 Se conservan redirecciones HTTP 307 desde `/administracion`, `/operaciones`, `/ia`, `/recorrido`, `/integraciones`, `/api/ai` y `/api/health` a sus equivalentes bajo `/demo`. Este estado debe comprobarse en la versión desplegada; no se han modificado ajustes remotos de Vercel desde esta sesión.
 
@@ -79,11 +79,16 @@ La conexión disponible en esta conversación devolvió falta de permisos para i
 
 Estado registrado el **2026-10-27**, después de trasladar el showroom a `/demo`: se aprobaron **40 pruebas automatizadas, TypeScript y ESLint**. Las pruebas incluyen las redirecciones ejecutadas con las utilidades de Next.js, la selección del menú, los cálculos y el endpoint de IA con dobles de los servicios externos. La compilación local siguió bloqueada por la restricción de abrir el puerto interno de Turbopack. Las pruebas de navegador requieren un servidor local, también bloqueado por el entorno; un intento anterior de compilación con webpack no pudo resolver Google Fonts. No equivale a una certificación del build de Vercel ni a una prueba real del proveedor de IA.
 
+Después de implementar el perfil personal, las mismas 40 pruebas, TypeScript y ESLint vuelven a pasar. La compilación alternativa con webpack y fuentes locales de prueba terminó correctamente, incluida la página raíz y la portada Open Graph. El build habitual de Turbopack, las pruebas de navegador y la lectura pública de los archivos de `landing` continúan pendientes por las restricciones descritas en [verificación del perfil](profile.md#verificación-del-2026-10-27). No se publicó un deployment desde esta sesión.
+
 ## Prueba funcional del despliegue
 
 | Prueba | Resultado esperado |
 | --- | --- |
-| Abrir `https://salazar.red/` | Landing neutral, sin menú ni contenido del demo y sin redirección al showroom |
+| Abrir `https://salazar.red/` | Perfil de Adán Salazar, navegación entre secciones y contacto por correo; sin contenido del demo ni redirección al showroom |
+| Abrir la raíz en celular | Tarjeta de perfil adaptable y menú inferior desplegable; sin desplazamiento horizontal |
+| Comprobar los recursos de `landing` sin iniciar sesión | Foto `yo.jpeg`, icono y logotipos públicos accesibles; no se necesitan claves para servirlos |
+| Pulsar «Imprimir perfil» | Diálogo de impresión con una versión clara del perfil, apta para guardar como PDF |
 | Abrir `https://salazar.red/demo` y navegar entre módulos | Todos los enlaces del showroom permanecen bajo `/demo`; «Inicio» vuelve al showroom |
 | Entrar por un enlace anterior como `/ia` | Redirige a `/demo/ia` |
 | Abrir una URL inexistente bajo `/demo` | Muestra el error del demo y permite volver a `/demo` |

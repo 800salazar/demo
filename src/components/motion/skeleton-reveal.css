@@ -1,0 +1,88 @@
+/*
+ * Local implementation of the pulse -> content cross-fade described at:
+ * https://transitions.dev/detail.html?t=skeleton-loader-and-reveal
+ * The upstream CLI/recipe could not be retrieved. These are local motion tokens,
+ * not a claim to reproduce the library's exact CSS or default token values.
+ */
+.t-skeleton-reveal {
+  --t-skeleton-duration: 320ms;
+  --t-skeleton-easing: cubic-bezier(.22, 1, .36, 1);
+  --t-skeleton-distance: 8px;
+  --t-skeleton-blur: 6px;
+  --t-skeleton-scale: .985;
+  --t-skeleton-pulse-duration: 1200ms;
+  --t-skeleton-color: #dce6f5;
+  position: relative;
+  min-width: 0;
+}
+
+.t-skeleton-placeholder {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity var(--t-skeleton-duration) var(--t-skeleton-easing),
+    visibility 0s;
+}
+
+.t-skeleton-content {
+  position: relative;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(var(--t-skeleton-distance)) scale(var(--t-skeleton-scale));
+  filter: blur(var(--t-skeleton-blur));
+  transition:
+    opacity var(--t-skeleton-duration) var(--t-skeleton-easing),
+    transform var(--t-skeleton-duration) var(--t-skeleton-easing),
+    filter var(--t-skeleton-duration) var(--t-skeleton-easing),
+    visibility 0s;
+}
+
+.t-skeleton-reveal[data-ready="true"] > .t-skeleton-content {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  filter: none;
+}
+
+.t-skeleton-reveal[data-ready="true"] > .t-skeleton-placeholder {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--t-skeleton-duration) var(--t-skeleton-easing),
+    visibility 0s var(--t-skeleton-duration);
+}
+
+.t-skeleton-block {
+  display: block;
+  border-radius: 8px;
+  background: var(--t-skeleton-color, #dce6f5);
+  animation: t-skeleton-pulse var(--t-skeleton-pulse-duration, 1200ms) ease-in-out infinite;
+}
+
+.t-skeleton-reveal[data-ready="true"] > .t-skeleton-placeholder .t-skeleton-block {
+  animation: none;
+}
+
+@keyframes t-skeleton-pulse {
+  0%, 100% { opacity: .45; }
+  50% { opacity: .9; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-skeleton-reveal {
+    --t-skeleton-duration: 0ms;
+    --t-skeleton-distance: 0px;
+    --t-skeleton-blur: 0px;
+    --t-skeleton-scale: 1;
+  }
+  .t-skeleton-block { animation: none; opacity: .7; }
+}
+
+@media print {
+  .t-skeleton-placeholder { display: none; }
+  .t-skeleton-content { opacity: 1; visibility: visible; transform: none; filter: none; transition: none; }
+}

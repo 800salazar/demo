@@ -1,0 +1,32 @@
+[
+    {
+        "id": 1,
+        "icon": "/images/svg/web.svg",
+        "title": "Web Design & Development",
+        "description": "Pellentesque consequat ornare arcu magna mattis. Morbi non dictum egestas pretium leo enim. Volutpat nulla purus at libero. Vel pharetra donec urna scelerisque vel."
+    },
+    {
+        "id": 2,
+        "icon": "/images/svg/UI-design.svg",
+        "title": "UI Design & Experience",
+        "description": "Facilisis auctor adipiscing magna mollis cras aliquet morbi. Quisque enim tempor eget integer nam at egestas eu. Maecenas nec varius pharetra pulvinar elit faucibus scelerisque ut."
+    },
+    {
+        "id": 3,
+        "icon": "/images/svg/digital.svg",
+        "title": "Web & Social Digital Solution",
+        "description": "Eleifend odio accumsan lectus nec neque purus et pellentesque. Amet quam habitasse pulvinar rutrum leo. Erat et venenatis quam odio turpis viverra tristique."
+    },
+    {
+        "id": 4,
+        "icon": "/images/svg/branding.svg",
+        "title": "Branding & Strategy",
+        "description": "In vitae accumsan tincidunt venenatis. Tempus enim elementum id tristique. Mi sapien ullamcorper arcu sagittis ante pharetra etiam aliquet sollicitudin nulla."
+    },
+    {
+        "id": 5,
+        "icon": "/images/svg/video.svg",
+        "title": "Video & Photography",
+        "description": "Mauris orci consequat at dolor in. Fringilla in at magna netus eleifend sit faucibus ultricies est. Euismod non dui potenti interdum neque praesent posuere."
+    }
+]

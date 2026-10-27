@@ -1,0 +1,48 @@
+{
+    "education": [
+        {
+            "id": 1,
+            "title": "Master in Design",
+            "institute": "Cambridge University",
+            "year": "2010 - 2014",
+            "description": "Eu nulla at mauris cursus consectetur posuere iaculis ipsum neque. Morbi felis pellentesque ligula sed dictumst."
+        },
+        {
+            "id": 2,
+            "title": "Bachelor in Science",
+            "institute": "Cambridge University",
+            "year": "2014 - 2016",
+            "description": "Porttitor euismod at semper ut massa. Lorem varius magna volutpat nunc. Et faucibus scelerisque donec eleifenda."
+        },
+        {
+            "id": 3,
+            "title": "Diploma in Computer",
+            "institute": "Cambridge University",
+            "year": "2016 - 2018",
+            "description": "Adipiscing sed magna tempus arcu morbi. Ipsum pellentesque lorem suscipit in. Hendrerit rhoncus quis tempor urna."
+        }
+    ],
+    "experience": [
+        {
+            "id": 1,
+            "title": "LEAD DESIGN & DEVELOPMENT",
+            "institute": "Envato",
+            "year": "2020 - Current",
+            "description": "Ipsum erat duis leo lectus tellus neque dictumst. Dignissim tortor quis nisl mi lectus facilisis ac eget."
+        },
+        {
+            "id": 2,
+            "title": "SENIOR DESIGN & DEVELOPEMNT",
+            "institute": "Apple",
+            "year": "2019 - 2020",
+            "description": "Congue dolor gravida eu tristique netus posuere dolor. Penatibus imperdiet egestas ut sit scelerisque sapien a."
+        },
+        {
+            "id": 3,
+            "title": "JUNIOR DESIGN & DEVELOPMENT",
+            "institute": "Twitter",
+            "year": "2018 - 2019",
+            "description": "Aliquet at interdum pellentesque non fringilla eget orci suspendisse. A iaculis augue vitae ultricies fusce sit."
+        }
+    ]
+}
