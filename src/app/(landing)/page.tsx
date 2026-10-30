@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Code2, Compass, Mail, MapPin, Sparkles } from "lucide-react";
-import { PrintProfileButton, ProfileNavigation } from "@/components/profile/profile-navigation";
+import { ArrowUpRight, ChevronDown, Code2, Compass, GraduationCap, Mail, MapPin, Sparkles } from "lucide-react";
+import { ProfileNavigation } from "@/components/profile/profile-navigation";
 import { ConferenceToolkit } from "@/components/conference/conference-toolkit";
 import { PublicProfileImage } from "@/components/profile/public-profile-image";
 import { ClientLogosVideo } from "@/components/profile/client-logos-video";
@@ -28,7 +28,10 @@ export const metadata: Metadata = {
 };
 
 const specialtyIcons = [Code2, Sparkles, Compass];
-const rotatingServices = ["Redes Sociales", "Correo Corporativo", "Página Web", "Inteligencia Artificial"];
+const rotatingServices = [
+  "Redes Sociales", "Correo Corporativo", "Página Web", "Inteligencia Artificial",
+  "Google Partner", "Microsoft Partner", "Consultores en Tecnología",
+];
 
 function Monogram() {
   return (
@@ -38,6 +41,31 @@ function Monogram() {
       <div className={styles.orbitInner} />
       <div className={styles.monogramLetters}>{profile.initials}<span>.</span></div>
       <span className={styles.orbitDot} />
+    </div>
+  );
+}
+
+function ProfileDetails() {
+  return (
+    <div className={styles.profileDetails}>
+      <div className={styles.skillsHeading}><h2>Sobre mí</h2><Compass size={18} aria-hidden="true" /></div>
+      <p className={styles.sidebarSummary}>{profile.summary}</p>
+      <div className={styles.sidebarEducation}>
+        <GraduationCap size={18} aria-hidden="true" />
+        <p><strong>{profile.education.institution}</strong><br />{profile.education.degree} · {profile.education.period}</p>
+      </div>
+      <h3 className={styles.sidebarLabel}>Habilidades</h3>
+      <ul>{profile.skills.map((skill) => <li key={skill}>{skill}</li>)}</ul>
+      <h3 className={styles.sidebarLabel}>Idiomas</h3>
+      <p className={styles.sidebarLanguages}>{profile.languages.join(" · ")}</p>
+      <div className={styles.sidebarContacts} role="group" aria-label="Contacto personal">
+        <a href={profile.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn de Adán Salazar" title="LinkedIn">
+          <SocialIcon network="linkedin" size={19} />
+        </a>
+        <a href={`mailto:${profile.email}`} aria-label={`Enviar correo a ${profile.email}`} title="Correo electrónico">
+          <Mail size={19} aria-hidden="true" />
+        </a>
+      </div>
     </div>
   );
 }
@@ -69,22 +97,13 @@ export default function LandingPage() {
                 <p className={styles.profileRole}>{profile.position}</p>
                 <p className={styles.profileLocation}><MapPin size={13} aria-hidden="true" />{profile.location}</p>
               </div>
+              <details className={styles.mobileProfileDetails}>
+                <summary><span className={styles.showMore}>Ver más</span><span className={styles.showLess}>Ver menos</span><ChevronDown size={16} aria-hidden="true" /></summary>
+                <ProfileDetails />
+              </details>
             </div>
-            <section className={styles.sidebarSkills} aria-labelledby="profile-skills-title">
-              <div className={styles.skillsHeading}><h2 id="profile-skills-title">Sobre mí</h2><Compass size={18} aria-hidden="true" /></div>
-              <p className={styles.sidebarSummary}>{profile.summary}</p>
-              <h3 className={styles.sidebarLabel}>Habilidades</h3>
-              <ul>{profile.skills.map((skill) => <li key={skill}>{skill}</li>)}</ul>
-              <h3 className={styles.sidebarLabel}>Idiomas</h3>
-              <p className={styles.sidebarLanguages}>{profile.languages.join(" · ")}</p>
-              <div className={styles.sidebarContacts} role="group" aria-label="Contacto personal">
-                <a href={profile.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn de Adán Salazar" title="LinkedIn">
-                  <SocialIcon network="linkedin" size={19} />
-                </a>
-                <a href={`mailto:${profile.email}`} aria-label={`Enviar correo a ${profile.email}`} title="Correo electrónico">
-                  <Mail size={19} aria-hidden="true" />
-                </a>
-              </div>
+            <section className={styles.sidebarSkills} aria-label="Sobre mí">
+              <ProfileDetails />
             </section>
           </aside>
           <ProfileNavigation />
@@ -120,7 +139,7 @@ export default function LandingPage() {
               </section>
 
               <section id="especialidades" className={styles.panel} aria-labelledby="specialties-title">
-                <h2 id="specialties-title">Lo que puedo resolver.</h2>
+                <h2 id="specialties-title">¿Qué necesitas resolver?</h2>
                 <div className={styles.specialtyGrid}>
                   {profile.specialties.map((specialty, index) => {
                     const Icon = specialtyIcons[index];

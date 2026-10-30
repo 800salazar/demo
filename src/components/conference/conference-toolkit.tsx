@@ -1,19 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { ArrowDown, ArrowUpRight, Check, ChevronDown, Copy, FileSpreadsheet, GraduationCap, Lightbulb } from "lucide-react";
+import { ArrowDown, Check, ChevronDown, Copy, FileSpreadsheet, GraduationCap, Lightbulb } from "lucide-react";
 import { businessAuditPrompt, buildBusinessIdeaPrompt, type BusinessIdea } from "@/lib/conference/prompts";
 import styles from "./conference.module.css";
 
 type Path = "audit" | "idea";
 type CopyState = "idle" | "copying" | "copied" | "manual";
-
-const assistants = [
-  { name: "ChatGPT", href: "https://chatgpt.com/" },
-  { name: "Claude", href: "https://claude.ai/" },
-  { name: "Gemini", href: "https://gemini.google.com/" },
-  { name: "Copilot", href: "https://copilot.microsoft.com/" },
-];
 
 export function ConferenceToolkit() {
   const [path, setPath] = useState<Path | null>(null);
@@ -88,7 +81,7 @@ export function ConferenceToolkit() {
     <section id="conferencia" className={styles.toolkit} aria-labelledby="conference-title">
       <p className={styles.eyebrow}><GraduationCap size={17} aria-hidden="true" /> RECURSO DE LA CONFERENCIA</p>
       <h2 id="conference-title">Emprende <span>con IA.</span></h2>
-      <p className={styles.intro}>Elige un camino. Copia y pega en tu IA.</p>
+      <p className={styles.intro}>¿Tienes una idea de negocio? 💡 Te comparto un prompt para que la IA te ayude a validarla con poco presupuesto y sin morir en el intento.</p>
 
       <div className={styles.pathChoices} role="group" aria-label="Elige tu punto de partida">
         <button type="button" className={`${styles.pathCard} ${styles.auditCard}`}
@@ -112,7 +105,7 @@ export function ConferenceToolkit() {
             <h3>Revisa tu proyecto.</h3>
             <ol className={styles.instructions}>
               <li>Copia el prompt.</li>
-              <li>Abre tu IA y <strong>adjunta tus archivos</strong>.</li>
+              <li>Abre una IA que permita <strong>adjuntar tus archivos</strong>.</li>
               <li>Pégalo y envíalo.</li>
             </ol>
             <details className={styles.documents}>
@@ -155,10 +148,6 @@ export function ConferenceToolkit() {
         {path ? <details className={styles.promptPreview}><summary>Ver el prompt completo <ChevronDown size={16} aria-hidden="true" /></summary><pre>{prompt}</pre></details> : null}
       </div>
 
-      <div className={styles.assistants} aria-label="Abrir tu IA favorita">
-        <div>{assistants.map((assistant) => <a key={assistant.name} href={assistant.href} target="_blank" rel="noopener noreferrer">{assistant.name}<ArrowUpRight size={13} aria-hidden="true" /></a>)}</div>
-        {path === "audit" ? <p>Elige una IA que permita adjuntar archivos.</p> : null}
-      </div>
     </section>
   );
 }

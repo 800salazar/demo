@@ -27,12 +27,13 @@ export const profile = {
   website: "https://salazarconsultores.com/",
   photo: profileAssets.photo as string | null,
   summary: "Tecnología y estrategia para empresas.",
+  education: { institution: "Tec de Monterrey", degree: "ITC", period: "2018–2024" },
   skills: ["Visión de negocio", "Gestión de proyectos", "Transformación digital"],
   languages: ["Español (nativo)", "Inglés"],
   specialties: [
-    { title: "Software a la medida", description: "Centraliza tu operación en un sistema que se adapta a tu empresa." },
-    { title: "Automatización e IA", description: "Reduce tareas repetitivas y aprovecha mejor tus datos." },
-    { title: "Estrategia digital", description: "Define qué resolver primero y cómo llevarlo a la práctica." },
+    { title: "Organiza tu negocio", description: "Controla tus ventas, clientes e inventario desde un sistema hecho para ti." },
+    { title: "Ahorra tiempo", description: "Automatiza tareas y responde más rápido a tus clientes con ayuda de la IA." },
+    { title: "Atrae más clientes", description: "Da a conocer tu negocio con una página web, redes sociales y publicidad digital." },
   ],
 } as const;
 

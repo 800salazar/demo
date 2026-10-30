@@ -37,15 +37,19 @@
 .profileName { font-weight: 600; font-size: 25px; letter-spacing: -.8px; line-height: 1.35; }
 .profileRole { margin-top: 5px; font-size: 12px; color: var(--muted); }
 .profileLocation { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); margin-top: 16px; }
+.mobileProfileDetails { display: none; }
 .sidebarSkills { margin-top: 18px; padding: 21px 22px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; }
 .skillsHeading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
 .skillsHeading > h2 { font-size: 16px; font-weight: 550; letter-spacing: -.3px; }
 .skillsHeading > svg { color: var(--blue); }
 .sidebarSummary { color: var(--muted); font-size: 12px; line-height: 1.6; }
+.sidebarEducation { display: flex; align-items: flex-start; gap: 10px; margin-top: 18px; color: #bdcde3; font-size: 12px; line-height: 1.6; }
+.sidebarEducation svg { color: var(--blue); flex-shrink: 0; margin-top: 2px; }
+.sidebarEducation strong { color: #dce8f9; font-weight: 600; }
 .sidebarLabel { margin-top: 18px; margin-bottom: 7px; color: #dce8f9; font-size: 11px; font-weight: 600; }
-.sidebarSkills > ul { margin: 0; padding: 0; list-style: none; }
-.sidebarSkills li { display: flex; align-items: center; gap: 9px; padding: 3px 0; font-size: 12px; color: #bdcde3; }
-.sidebarSkills li::before { content: ""; width: 4px; height: 4px; background: var(--blue); border-radius: 50%; flex-shrink: 0; }
+.profileDetails > ul { margin: 0; padding: 0; list-style: none; }
+.profileDetails li { display: flex; align-items: center; gap: 9px; padding: 3px 0; font-size: 12px; color: #bdcde3; }
+.profileDetails li::before { content: ""; width: 4px; height: 4px; background: var(--blue); border-radius: 50%; flex-shrink: 0; }
 .sidebarLanguages { color: #bdcde3; font-size: 12px; }
 .sidebarContacts { display: flex; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
 .sidebarContacts a { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid #344965; border-radius: 9px; color: #c1d6f5; }
@@ -139,6 +143,15 @@
   .sidebar { position: static; max-height: none; overflow: visible; }
   .sidebarSkills { display: none; }
   .profileCard { display: grid; grid-template-columns: 100px 1fr; border-radius: 14px; margin-bottom: 18px; }
+  .mobileProfileDetails { display: block; grid-column: 1 / -1; border-top: 1px solid var(--line); }
+  .mobileProfileDetails summary { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; cursor: pointer; list-style: none; color: #a9c8fb; font-size: 12px; font-weight: 600; }
+  .mobileProfileDetails summary::-webkit-details-marker { display: none; }
+  .mobileProfileDetails summary:focus-visible { outline: 2px solid #a9ceff; outline-offset: -3px; }
+  .mobileProfileDetails summary svg { transition: transform .2s; }
+  .mobileProfileDetails[open] summary svg { transform: rotate(180deg); }
+  .showLess, .mobileProfileDetails[open] .showMore { display: none; }
+  .mobileProfileDetails[open] .showLess { display: inline; }
+  .mobileProfileDetails .profileDetails { padding: 8px 20px 20px; }
   .profileCover { height: 126px; }
   .profileInfo { padding: 17px 18px; display: flex; flex-direction: column; justify-content: center; }
   .profileName { font-size: 24px; }
@@ -187,7 +200,7 @@
   .pageWrap { width: 100%; padding: 0; }
   .topbar { height: auto; padding-bottom: 14px; }
   .wordmark { color: #12213a; }
-  .profileCover, .navigationShell, .footer, .clients, .sidebarSkills, .heroCompany, .companyActions { display: none; }
+  .profileCover, .navigationShell, .footer, .clients, .sidebarSkills, .mobileProfileDetails, .heroCompany, .companyActions { display: none; }
   .layout { display: block; }
   .sidebar { position: static; max-height: none; overflow: visible; margin-bottom: 14px; }
   .profileCard { display: block; border: 0; border-radius: 0; }

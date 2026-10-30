@@ -65,11 +65,6 @@
 .promptPreview { margin-top: 13px; }
 .promptPreview > summary { color: #4d6384; font-size: 11px; font-weight: 400; justify-content: flex-start; }
 .promptPreview > pre { margin-top: 5px; padding: 18px; border-radius: 9px; border: 1px solid #d6e2f3; background: #edf3fc; color: #334d71; font-family: var(--font-geist-sans), sans-serif; font-size: 12px; line-height: 1.85; white-space: pre-wrap; overflow-wrap: anywhere; }
-.assistants { border-top: 1px solid #d8e2f2; padding-top: 19px; margin-top: 27px; }
-.assistants > div { display: flex; flex-wrap: wrap; gap: 8px 18px; }
-.assistants a { display: inline-flex; align-items: center; gap: 5px; min-height: 29px; color: #2858a6; font-size: 12px; font-weight: 550; }
-.assistants a:hover { text-decoration: underline; text-underline-offset: 3px; }
-.assistants > p { color: var(--soft-ink); font-size: 10px; margin-top: 8px; }
 
 @media (max-width: 1180px) {
   .toolkit { padding: 30px; }
@@ -100,8 +95,6 @@
   .fields input, .fields textarea { font-size: 16px; }
   .copyBar { align-items: flex-start; flex-direction: column; gap: 9px; }
   .copyButton { width: 100%; }
-  .assistants > div { gap: 6px 13px; }
-  .assistants a { font-size: 11px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

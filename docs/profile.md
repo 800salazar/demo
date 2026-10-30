@@ -4,7 +4,7 @@ La raíz `https://salazar.red/` es una landing personal breve, con perfil latera
 
 La versión minimalista concentra la presentación en «Expertos en **Soluciones Digitales**», el logotipo blanco de Salazar Consultores, un botón al sitio corporativo y tres iconos de sus redes. Continúan tres especialidades con una frase cada una. El cierre «Conectemos ideas 💡» enlaza al LinkedIn personal de Adán. Se retiraron los bloques de filosofía, proceso, trayectoria por responsabilidades, listas de herramientas y mensajes repetidos. La foto y el logotipo aparecen una sola vez.
 
-Debajo del perfil, la tarjeta **Sobre mí** reúne una presentación breve, tres habilidades, idiomas y accesos personales a LinkedIn y correo. Sus textos se editan en `src/config/profile.ts`; muestra español (nativo) e inglés. Solo aparece en escritorio; la columna admite desplazamiento en pantallas de poca altura.
+Debajo del perfil, la tarjeta **Sobre mí** reúne una presentación breve, formación, habilidades, idiomas y accesos personales a LinkedIn y correo. Sus textos se editan en `src/config/profile.ts`; muestra español (nativo) e inglés. En escritorio aparece como tarjeta lateral; en móvil se despliega con «Ver más» dentro de la tarjeta del perfil.
 
 El fondo usa un degradado diagonal de `#0057b8e6` a `#071a39`, con base azul marino para el canal alfa. La carga inicial usa el mismo fondo.
 
@@ -17,7 +17,7 @@ La herramienta para estudiantes aparece al principio de `/`, antes de la present
 - **Camino 1 · Ya tengo avances:** copiar el prompt de auditoría, abrir la IA elegida, adjuntar allí los archivos y pegar el texto. Una ayuda desplegable explica los cuatro tipos de documentos sugeridos.
 - **Camino 2 · Solo tengo una idea:** completar producto, ciudad/zona y presupuesto. «Copiar prompt» incorpora esos datos. Se permiten presupuestos escritos como `$0 MXN` o un rango; la IA debe adaptar el plan a lo indicado.
 
-Se muestra un solo camino a la vez y el prompt completo queda en un desplegable. El botón solo confirma la copia cuando la API del portapapeles responde correctamente. Si no está disponible o se deniega, aparece un campo de texto seleccionable para copiar manualmente. Los enlaces a ChatGPT, Claude, Gemini y Copilot abren esas herramientas sin enviarles información automáticamente.
+Se muestra un solo camino a la vez y el prompt completo queda en un desplegable. El botón solo confirma la copia cuando la API del portapapeles responde correctamente. Si no está disponible o se deniega, aparece un campo de texto seleccionable para copiar manualmente.
 
 Los tres datos se conservan únicamente en el estado de la página mientras está abierta. No hay carga local de archivos, llamadas al modelo, escritura en `localStorage`, registros de estudiantes ni acceso adicional a Supabase. Los archivos del camino 1 se adjuntan en la IA que el estudiante elija.
 
