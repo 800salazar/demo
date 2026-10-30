@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Code2, Compass, MapPin, Sparkles } from "lucide-react";
+import { ArrowUpRight, Code2, Compass, Mail, MapPin, Sparkles } from "lucide-react";
 import { PrintProfileButton, ProfileNavigation } from "@/components/profile/profile-navigation";
 import { ConferenceToolkit } from "@/components/conference/conference-toolkit";
 import { PublicProfileImage } from "@/components/profile/public-profile-image";
 import { ClientLogosVideo } from "@/components/profile/client-logos-video";
 import { SocialIcon } from "@/components/profile/social-icon";
+import { ContainerTextFlip } from "@/components/ui/container-text-flip";
 import { SkeletonReveal } from "@/components/motion/skeleton-reveal";
 import { LandingContentSkeleton } from "@/components/profile/landing-content-skeleton";
 import { companySocialLinks, profile, profileAssets, profileMedia } from "@/config/profile";
@@ -27,6 +28,7 @@ export const metadata: Metadata = {
 };
 
 const specialtyIcons = [Code2, Sparkles, Compass];
+const rotatingServices = ["Redes Sociales", "Correo Corporativo", "Página Web", "Inteligencia Artificial"];
 
 function Monogram() {
   return (
@@ -69,8 +71,20 @@ export default function LandingPage() {
               </div>
             </div>
             <section className={styles.sidebarSkills} aria-labelledby="profile-skills-title">
-              <div className={styles.skillsHeading}><h2 id="profile-skills-title">Habilidades</h2><Compass size={18} aria-hidden="true" /></div>
+              <div className={styles.skillsHeading}><h2 id="profile-skills-title">Sobre mí</h2><Compass size={18} aria-hidden="true" /></div>
+              <p className={styles.sidebarSummary}>{profile.summary}</p>
+              <h3 className={styles.sidebarLabel}>Habilidades</h3>
               <ul>{profile.skills.map((skill) => <li key={skill}>{skill}</li>)}</ul>
+              <h3 className={styles.sidebarLabel}>Idiomas</h3>
+              <p className={styles.sidebarLanguages}>{profile.languages.join(" · ")}</p>
+              <div className={styles.sidebarContacts} role="group" aria-label="Contacto personal">
+                <a href={profile.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn de Adán Salazar" title="LinkedIn">
+                  <SocialIcon network="linkedin" size={19} />
+                </a>
+                <a href={`mailto:${profile.email}`} aria-label={`Enviar correo a ${profile.email}`} title="Correo electrónico">
+                  <Mail size={19} aria-hidden="true" />
+                </a>
+              </div>
             </section>
           </aside>
           <ProfileNavigation />
@@ -81,6 +95,9 @@ export default function LandingPage() {
 
               <section id="inicio" className={`${styles.panel} ${styles.hero}`} aria-labelledby="hero-title">
                 <h1 id="hero-title">Expertos en <br /><strong>Soluciones Digitales</strong></h1>
+                <div className="dark mt-5">
+                  <ContainerTextFlip words={rotatingServices} className="max-w-full whitespace-nowrap text-lg md:text-2xl" />
+                </div>
                 <div className={styles.heroCompany}>
                   <PublicProfileImage src={profileAssets.logoWhite} alt={profile.company}
                     className={styles.companyLogo} sizes="200px">

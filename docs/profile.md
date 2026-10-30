@@ -4,7 +4,7 @@ La raíz `https://salazar.red/` es una landing personal breve, con perfil latera
 
 La versión minimalista concentra la presentación en «Expertos en **Soluciones Digitales**», el logotipo blanco de Salazar Consultores, un botón al sitio corporativo y tres iconos de sus redes. Continúan tres especialidades con una frase cada una. El cierre «Conectemos ideas 💡» enlaza al LinkedIn personal de Adán. Se retiraron los bloques de filosofía, proceso, trayectoria por responsabilidades, listas de herramientas y mensajes repetidos. La foto y el logotipo aparecen una sola vez.
 
-Debajo del perfil, la tarjeta **Habilidades** recupera la composición lateral de `layout2`. Muestra visión de negocio, gestión de proyectos, liderazgo de equipos, análisis de procesos, transformación digital y automatización e IA. La lista se edita en `profile.skills`, sin porcentajes ni niveles inventados. Solo aparece en escritorio; la columna admite desplazamiento en pantallas de poca altura.
+Debajo del perfil, la tarjeta **Sobre mí** reúne una presentación breve, tres habilidades, idiomas y accesos personales a LinkedIn y correo. Sus textos se editan en `src/config/profile.ts`; muestra español (nativo) e inglés. Solo aparece en escritorio; la columna admite desplazamiento en pantallas de poca altura.
 
 El fondo usa un degradado diagonal de `#0057b8e6` a `#071a39`, con base azul marino para el canal alfa. La carga inicial usa el mismo fondo.
 

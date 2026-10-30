@@ -16,19 +16,19 @@ export const profileMedia = {
 
 /** Public content for salazar.red/. Keep the landing concise and outcome-led. */
 export const profile = {
-  name: "Adán SebastianSalazar",
+  name: "Adán Sebastián Salazar",
   initials: "AS",
   position: "",
   company: "Salazar Consultores",
   location: "Chihuahua, México",
   description: "Adán Salazar. Software a la medida, automatización e inteligencia artificial para empresas.",
   linkedin: "https://www.linkedin.com/in/adansalazarr",
+  email: "adans@adan.mx",
   website: "https://salazarconsultores.com/",
   photo: profileAssets.photo as string | null,
-  skills: [
-    "Visión de negocio", "Gestión de proyectos", "Liderazgo de equipos",
-    "Análisis de procesos", "Transformación digital", "Automatización e IA",
-  ],
+  summary: "Tecnología y estrategia para empresas.",
+  skills: ["Visión de negocio", "Gestión de proyectos", "Transformación digital"],
+  languages: ["Español (nativo)", "Inglés"],
   specialties: [
     { title: "Software a la medida", description: "Centraliza tu operación en un sistema que se adapta a tu empresa." },
     { title: "Automatización e IA", description: "Reduce tareas repetitivas y aprovecha mejor tus datos." },
