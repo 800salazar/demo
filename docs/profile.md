@@ -6,6 +6,8 @@ La versión minimalista concentra la presentación en «Expertos en **Soluciones
 
 Debajo del perfil, la tarjeta **Sobre mí** reúne una presentación breve, formación, habilidades, idiomas y accesos personales a LinkedIn y correo. Sus textos se editan en `src/config/profile.ts`; muestra español (nativo) e inglés. En escritorio aparece como tarjeta lateral; en móvil se despliega con «Ver más» dentro de la tarjeta del perfil.
 
+La tarjeta del perfil también muestra las frases de `profile.favoriteQuotes`. El revelado pixelado se adapta al espacio de la tarjeta y las frases cambian automáticamente, con controles para recorrerlas y pausar. Si el usuario prefiere movimiento reducido, se muestran sin animación y se recorren con los controles. La implementación se inspira en el efecto proporcionado de Hyperiux Vault; usa animación temporal en lugar del desplazamiento de pantalla completa del ejemplo.
+
 El fondo usa un degradado diagonal de `#0057b8e6` a `#071a39`, con base azul marino para el canal alfa. La carga inicial usa el mismo fondo.
 
 El bloque «Clientes», dentro de «Qué hago», reproduce `animo-stairway-720p.webm` directamente desde Storage. Se carga al acercarse al viewport, con reproducción silenciosa, bucle y controles nativos para pausarlo. Con movimiento reducido solo se precargan metadatos y el usuario inicia la reproducción. El video se omite en impresión.

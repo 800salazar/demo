@@ -6,6 +6,7 @@ import { ConferenceToolkit } from "@/components/conference/conference-toolkit";
 import { PublicProfileImage } from "@/components/profile/public-profile-image";
 import { ClientLogosVideo } from "@/components/profile/client-logos-video";
 import { SocialIcon } from "@/components/profile/social-icon";
+import { ProfileQuotes } from "@/components/profile/profile-quotes";
 import { ContainerTextFlip } from "@/components/ui/container-text-flip";
 import { SkeletonReveal } from "@/components/motion/skeleton-reveal";
 import { LandingContentSkeleton } from "@/components/profile/landing-content-skeleton";
@@ -97,6 +98,7 @@ export default function LandingPage() {
                 <p className={styles.profileRole}>{profile.position}</p>
                 <p className={styles.profileLocation}><MapPin size={13} aria-hidden="true" />{profile.location}</p>
               </div>
+              <ProfileQuotes quotes={profile.favoriteQuotes} />
               <details className={styles.mobileProfileDetails}>
                 <summary><span className={styles.showMore}>Ver más</span><span className={styles.showLess}>Ver menos</span><ChevronDown size={16} aria-hidden="true" /></summary>
                 <ProfileDetails />

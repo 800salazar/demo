@@ -37,6 +37,15 @@
 .profileName { font-weight: 600; font-size: 25px; letter-spacing: -.8px; line-height: 1.35; }
 .profileRole { margin-top: 5px; font-size: 12px; color: var(--muted); }
 .profileLocation { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); margin-top: 16px; }
+.profileQuotes { border-top: 1px solid var(--line); padding: 16px 22px 12px; }
+.quoteHeading { display: flex; align-items: center; gap: 7px; color: #91b9f6; font-size: 10px; font-weight: 600; }
+.quoteTextWrap { position: relative; margin-top: 10px; }
+.quoteText { color: #e3edfb; font-size: 12px; font-weight: 500; line-height: 1.6; overflow-wrap: anywhere; }
+.quoteCanvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.quoteControls { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; color: var(--muted); font-size: 10px; }
+.quoteControls > div { display: flex; gap: 2px; }
+.quoteControls button { display: grid; place-items: center; width: 32px; height: 32px; color: #b5ceef; border: 0; border-radius: 7px; background: transparent; }
+.quoteControls button:hover { background: #213652; color: white; }
 .mobileProfileDetails { display: none; }
 .sidebarSkills { margin-top: 18px; padding: 21px 22px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; }
 .skillsHeading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
@@ -143,6 +152,7 @@
   .sidebar { position: static; max-height: none; overflow: visible; }
   .sidebarSkills { display: none; }
   .profileCard { display: grid; grid-template-columns: 100px 1fr; border-radius: 14px; margin-bottom: 18px; }
+  .profileQuotes { grid-column: 1 / -1; padding: 14px 18px 10px; }
   .mobileProfileDetails { display: block; grid-column: 1 / -1; border-top: 1px solid var(--line); }
   .mobileProfileDetails summary { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; cursor: pointer; list-style: none; color: #a9c8fb; font-size: 12px; font-weight: 600; }
   .mobileProfileDetails summary::-webkit-details-marker { display: none; }
@@ -200,7 +210,7 @@
   .pageWrap { width: 100%; padding: 0; }
   .topbar { height: auto; padding-bottom: 14px; }
   .wordmark { color: #12213a; }
-  .profileCover, .navigationShell, .footer, .clients, .sidebarSkills, .mobileProfileDetails, .heroCompany, .companyActions { display: none; }
+  .profileCover, .navigationShell, .footer, .clients, .sidebarSkills, .mobileProfileDetails, .profileQuotes, .heroCompany, .companyActions { display: none; }
   .layout { display: block; }
   .sidebar { position: static; max-height: none; overflow: visible; margin-bottom: 14px; }
   .profileCard { display: block; border: 0; border-radius: 0; }
