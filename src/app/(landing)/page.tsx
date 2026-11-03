@@ -51,10 +51,12 @@ function ProfileDetails() {
     <div className={styles.profileDetails}>
       <div className={styles.skillsHeading}><h2>Sobre mí</h2><Compass size={18} aria-hidden="true" /></div>
       <p className={styles.sidebarSummary}>{profile.summary}</p>
-      <div className={styles.sidebarEducation}>
-        <GraduationCap size={18} aria-hidden="true" />
-        <p><strong>{profile.education.institution}</strong><br />{profile.education.degree} · {profile.education.period}</p>
-      </div>
+      {profile.education.map((education) => (
+        <div key={education.institution} className={styles.sidebarEducation}>
+          <GraduationCap size={18} aria-hidden="true" />
+          <p><strong>{education.institution}</strong><br />{education.degree} · {education.period}</p>
+        </div>
+      ))}
       <h3 className={styles.sidebarLabel}>Habilidades</h3>
       <ul>{profile.skills.map((skill) => <li key={skill}>{skill}</li>)}</ul>
       <h3 className={styles.sidebarLabel}>Idiomas</h3>

@@ -27,8 +27,11 @@ export const profile = {
   website: "https://salazarconsultores.com/",
   photo: profileAssets.photo as string | null,
   summary: "Tecnología y estrategia para empresas.",
-  education: { institution: "Tec de Monterrey", degree: "ITC", period: "2018–2024" },
-  skills: ["Visión de negocio", "Gestión de proyectos", "Transformación digital"],
+  education: [
+    { institution: "Tec de Monterrey", degree: "ITC", period: "2018–2024" },
+    { institution: "CBTIS 122", degree: "Mecatrónica", period: "2015–2018" },
+  ],
+  skills: ["Visión de negocio", "Gestión de proyectos", "Transformación digital", "Programación full stack", "Hablar en público"],
   languages: ["Español (nativo)", "Inglés"],
   favoriteQuotes: [
     "No tengo que resolverlo todo hoy. Solo tengo que no olvidarme de mí.",
