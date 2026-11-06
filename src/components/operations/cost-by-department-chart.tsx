@@ -7,7 +7,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatMXN } from "@/lib/format";
 import { summarizeByDepartment } from "@/lib/demo/selectors";
@@ -23,12 +23,11 @@ export function CostByDepartmentChart() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Costo real por departamento</CardTitle>
-        <CardDescription>Calculado en vivo con las órdenes de la demostración.</CardDescription>
+        <CardTitle>Costo por departamento (MXN)</CardTitle>
       </CardHeader>
       <CardContent>
         {data ? (
-          <ChartContainer config={chartConfig} className="h-72 w-full">
+          <ChartContainer data-guide="cost-chart" config={chartConfig} className="h-72 w-full">
             <BarChart data={summarizeByDepartment(data)} layout="vertical" margin={{ left: 0, right: 16 }}>
               <CartesianGrid horizontal={false} />
               <YAxis dataKey="department" type="category" tickLine={false} axisLine={false} width={104} />

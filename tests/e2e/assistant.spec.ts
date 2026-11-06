@@ -9,15 +9,15 @@ async function ask(page: Page, question: string) {
 
 test("current snapshot, persisted edits, two visitors and read-only privacy boundary", async ({ page, browser }) => {
   await page.goto("/demo/ia");
-  await expect(page.getByText("30 órdenes ficticias de este navegador")).toBeVisible();
+  await expect(page.getByText("30 órdenes ficticias")).toBeVisible();
   const first = await ask(page, "Dame un resumen de las órdenes");
   expect(first.request().postDataJSON().snapshot.orders).toHaveLength(30);
   expect((await first.json()).source).toBe("calculations");
-  await expect(page.getByText("Resumen calculado · Sin generación de IA")).toBeVisible();
+  await expect(page.getByText("Resumen calculado · Sin IA")).toBeVisible();
 
   await page.getByLabel("Costo real (MXN)").fill("123456");
   await page.getByRole("button", { name: "Guardar cambios" }).click();
-  await expect(page.getByText("Las órdenes cambiaron desde esta respuesta.", { exact: false })).toBeVisible();
+  await expect(page.getByText("Las órdenes cambiaron.", { exact: false })).toBeVisible();
   const updated = await ask(page, "¿Cuál es el costo de OT-1001?");
   expect(updated.request().postDataJSON().snapshot.orders[0].actualCost).toBe(123456);
   expect((await updated.json()).answer).toContain("123,456");
@@ -28,7 +28,7 @@ test("current snapshot, persisted edits, two visitors and read-only privacy boun
   try {
     const other = await otherContext.newPage();
     await other.goto("http://127.0.0.1:3100/demo/ia");
-    await expect(other.getByText("30 órdenes ficticias de este navegador")).toBeVisible();
+    await expect(other.getByText("30 órdenes ficticias")).toBeVisible();
     const separate = await ask(other, "¿Cuál es el costo de OT-1001?");
     expect(separate.request().postDataJSON().snapshot.orders[0].actualCost).not.toBe(123456);
     const privateQuery = await ask(other, "Consulta mi información privada de Enfoca");
@@ -39,7 +39,7 @@ test("current snapshot, persisted edits, two visitors and read-only privacy boun
 
 test("shows the retry time returned by the server", async ({ page }) => {
   await page.goto("/demo/operaciones");
-  await expect(page.getByText("30 órdenes ficticias de este navegador")).toBeVisible();
+  await expect(page.getByText("30 órdenes ficticias")).toBeVisible();
   await page.route("**/demo/api/ai", (route) => route.fulfill({
     status: 429, contentType: "application/json", headers: { "Retry-After": "120" },
     body: JSON.stringify({ error: "rate_limited", message: "Límite alcanzado" }),

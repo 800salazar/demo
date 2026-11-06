@@ -1,7 +1,6 @@
 "use client";
 
-import { ResetDemoButton } from "@/components/showroom/reset-demo-button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDemoData } from "@/lib/demo/use-demo-data";
 
@@ -20,11 +19,7 @@ export function DemoDataPanel() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Datos de demostración</CardTitle>
-        <CardDescription>
-          Todo es ficticio y se guarda solo en tu navegador: cada visitante tiene su propia demostración, y las tres
-          demos comparten la misma información.
-        </CardDescription>
+        <CardTitle>Tu demo en cifras</CardTitle>
       </CardHeader>
       <CardContent>
         {stats ? (
@@ -44,9 +39,6 @@ export function DemoDataPanel() {
           </div>
         )}
       </CardContent>
-      <CardFooter>
-        <ResetDemoButton />
-      </CardFooter>
     </Card>
   );
 }

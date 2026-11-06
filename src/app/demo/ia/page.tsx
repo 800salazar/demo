@@ -13,12 +13,10 @@ export default function IaPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Demo 3"
-        title="Inteligencia artificial empresarial"
-        description="Inteligencia artificial que realmente utiliza tu información: ayuda a encontrar problemas, analizar costos y detectar oportunidades de mejora."
+        title="IA empresarial"
       />
       <div className="space-y-6">
-        <Suspense fallback={<Skeleton className="h-24 w-full rounded-xl" aria-busy="true" aria-label="Verificando asistente" />}>
+        <Suspense fallback={<Skeleton className="h-6 w-56 rounded-lg" aria-busy="true" aria-label="Verificando asistente" />}>
           <AiStatus />
         </Suspense>
         <OperationalAssistant />

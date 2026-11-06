@@ -8,15 +8,19 @@ import { updateDemoData } from "@/lib/demo/store";
 import type { DemoData, WorkOrder } from "@/lib/demo/types";
 import { useDemoData } from "@/lib/demo/use-demo-data";
 import { formatMXN } from "@/lib/format";
+import { notifyGuideAction } from "@/lib/guide/steps";
 
 const fieldClass = "w-full rounded-lg border bg-background px-3 py-2 text-sm";
 
 function OrderEditor({ order, data }: { order: WorkOrder; data: DemoData }) {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [hasEdits, setHasEdits] = useState(false);
+  const requiredRemaining = data.checklist.filter((item) => item.orderId === order.id && item.required && !item.done).length;
 
   function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!hasEdits) return;
     setMessage("");
     setError("");
     const fields = new FormData(event.currentTarget);
@@ -44,26 +48,36 @@ function OrderEditor({ order, data }: { order: WorkOrder; data: DemoData }) {
         detail: `Actualización manual: costo ${formatMXN(actualCost)}, compromiso ${dueDate}, estado ${status.name}.`,
       }],
     }));
-    setMessage(`${order.folio} actualizada. La siguiente consulta usará estos cambios.`);
+    setHasEdits(false);
+    setMessage(`${order.folio} actualizada.`);
+    notifyGuideAction("order-saved");
   }
 
   return (
-    <form onSubmit={save} className="space-y-4">
-      <p className="text-sm text-muted-foreground">{order.title} · {order.assignee}</p>
+    <form onSubmit={save} onChange={() => { setHasEdits(true); setMessage(""); setError(""); }} className="space-y-4">
+      <p className="text-sm text-muted-foreground"><strong className="font-semibold text-foreground">Editando {order.folio}</strong> · {order.title} · {order.assignee}</p>
       <div className="grid gap-4 sm:grid-cols-3">
-        <label className="space-y-2 text-sm font-medium">Costo real (MXN)
-          <input name="actualCost" type="number" min="0" max="1000000000" step="0.01" defaultValue={order.actualCost} required className={fieldClass} />
+        <label data-guide="order-cost" className="space-y-2 text-sm font-medium">Costo real (MXN)
+          <input name="actualCost" type="number" inputMode="decimal" min="0" max="1000000000" step="0.01" defaultValue={order.actualCost} required className={fieldClass} />
         </label>
         <label className="space-y-2 text-sm font-medium">Fecha compromiso
           <input name="dueDate" type="date" defaultValue={order.dueDate} required className={fieldClass} />
         </label>
         <label className="space-y-2 text-sm font-medium">Estado
-          <select name="statusId" defaultValue={order.statusId} className={fieldClass}>
-            {data.statuses.filter((s) => s.active || s.id === order.statusId).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+          <select name="statusId" defaultValue={order.statusId} aria-describedby={requiredRemaining ? "order-status-help" : undefined} className={fieldClass}>
+            {data.statuses.filter((s) => s.active || s.id === order.statusId).map((s) => (
+              <option key={s.id} value={s.id} disabled={s.kind === "completed" && requiredRemaining > 0}>
+                {s.name}{s.kind === "completed" && requiredRemaining > 0 ? " · actividades pendientes" : ""}
+              </option>
+            ))}
           </select>
         </label>
       </div>
-      <Button type="submit">Guardar cambios</Button>
+      {requiredRemaining > 0 && <p id="order-status-help" className="text-xs text-muted-foreground">Cierre bloqueado: {requiredRemaining} actividades obligatorias pendientes.</p>}
+      <div className="flex flex-wrap items-center gap-3">
+        <Button data-guide="order-save" type="submit" disabled={!hasEdits}>Guardar cambios</Button>
+        {hasEdits && <p role="status" className="text-xs text-muted-foreground">Cambios sin guardar en {order.folio}.</p>}
+      </div>
       {message && <p role="status" className="text-sm text-green-700">{message}</p>}
       {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
     </form>
@@ -85,9 +99,9 @@ export function OperationsDashboard() {
         ))}
       </div>
       <Card>
-        <CardHeader><CardTitle>Prueba un cambio en producción</CardTitle><CardDescription>Actualiza una orden ficticia y consulta al asistente. Los cambios se guardan solo en tu navegador.</CardDescription></CardHeader>
+        <CardHeader><CardTitle>Editar orden</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          <label className="block space-y-2 text-sm font-medium">Orden de trabajo
+          <label data-guide="order-select" className="block space-y-2 text-sm font-medium">Orden de trabajo
             <select value={order?.id ?? ""} onChange={(e) => setSelectedId(e.target.value)} className={fieldClass}>
               {data.orders.map((o) => <option key={o.id} value={o.id}>{o.folio} · {o.title}</option>)}
             </select>

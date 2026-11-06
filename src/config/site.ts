@@ -1,8 +1,6 @@
 import {
   ClipboardList,
-  Compass,
   House,
-  Plug,
   SlidersHorizontal,
   Sparkles,
   type LucideIcon,
@@ -15,7 +13,13 @@ export const siteConfig = {
   title: "Salazar Demo — Soluciones empresariales",
   description:
     "Demostración interactiva de software empresarial a la medida: sistemas autoadministrables, control de operaciones e inteligencia artificial aplicada a tus datos.",
-  whatsappMessage: "Hola, vi la demostración de Salazar Consultores y me gustaría platicar sobre mi proyecto.",
+  email: "info@800salazar.com",
+  phone: "8007252927",
+  phoneLabel: "800-725-2927",
+  website: "https://salazarconsultores.com/",
+  websiteLabel: "SalazarConsultores.com",
+  whatsappNumber: "526141282123",
+  whatsappMessage: "Quiero conocer más de software de Salazar Consultores",
 } as const;
 
 export interface DemoModule {
@@ -34,8 +38,8 @@ export const demoModules: DemoModule[] = [
     href: demoRoutes.administration,
     navLabel: "Autoadministración",
     title: "Sistemas autoadministrables",
-    description: "Realiza cambios sencillos sin depender de un desarrollador.",
-    cta: "Probar administración",
+    description: "Consulta las prioridades de tus órdenes.",
+    cta: "Ver configuración",
     icon: SlidersHorizontal,
   },
   {
@@ -43,17 +47,17 @@ export const demoModules: DemoModule[] = [
     href: demoRoutes.operations,
     navLabel: "Operaciones",
     title: "Control de operaciones",
-    description: "Organiza procesos, controla actividades y consulta resultados en tiempo real.",
-    cta: "Explorar sistema",
+    description: "Ajusta órdenes y consulta costos.",
+    cta: "Ver órdenes",
     icon: ClipboardList,
   },
   {
     number: 3,
     href: demoRoutes.ai,
     navLabel: "IA empresarial",
-    title: "Inteligencia artificial empresarial",
-    description: "Convierte la información de tu empresa en respuestas útiles para tomar decisiones.",
-    cta: "Probar análisis con IA",
+    title: "IA empresarial",
+    description: "Detecta retrasos y sobrecostos con tus datos.",
+    cta: "Consultar asistente",
     icon: Sparkles,
   },
 ];
@@ -67,12 +71,10 @@ export interface NavItem {
 
 export const navItems: NavItem[] = [
   { href: demoRoutes.home, label: "Inicio", icon: House },
-  { href: demoRoutes.tour, label: "Recorrido de 3 minutos", icon: Compass },
   ...demoModules.map((module) => ({
     href: module.href,
     label: module.navLabel,
     demoNumber: module.number,
     icon: module.icon,
   })),
-  { href: demoRoutes.integrations, label: "Integraciones", icon: Plug },
 ];

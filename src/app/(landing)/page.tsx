@@ -11,6 +11,7 @@ import { ContainerTextFlip } from "@/components/ui/container-text-flip";
 import { SkeletonReveal } from "@/components/motion/skeleton-reveal";
 import { LandingContentSkeleton } from "@/components/profile/landing-content-skeleton";
 import { companySocialLinks, profile, profileAssets, profileMedia } from "@/config/profile";
+import { brandIcons } from "@/config/brand";
 import styles from "@/components/profile/profile.module.css";
 
 const title = `${profile.name} · Estrategia digital y tecnología`;
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
   description: profile.description,
   alternates: { canonical: "/" },
   authors: [{ name: profile.name }],
-  icons: { icon: { url: profileAssets.icon, type: "image/png" } },
+  icons: brandIcons,
   openGraph: {
     title, description: profile.description, url: "/", siteName: profile.name,
     locale: "es_MX", type: "website",

@@ -9,11 +9,12 @@ import { demoRoutes } from "@/config/routes";
 import { MAX_QUESTION_LENGTH } from "@/lib/ai/limits";
 import { getSnapshot } from "@/lib/demo/store";
 import { useDemoData } from "@/lib/demo/use-demo-data";
+import { notifyGuideAction } from "@/lib/guide/steps";
 
 const suggestions = [
-  "¿Qué órdenes están retrasadas y cuáles debo revisar primero?",
-  "¿Qué departamento tiene mayor costo y qué órdenes superan su presupuesto?",
-  "Dame un resumen de las 30 órdenes y tres recomendaciones.",
+  { label: "Retrasos", question: "¿Qué órdenes están retrasadas y cuáles debo revisar primero?" },
+  { label: "Sobrecostos", question: "¿Qué departamento tiene mayor costo y qué órdenes superan su presupuesto?" },
+  { label: "Resumen", question: "Dame un resumen de las órdenes y tres recomendaciones." },
 ];
 
 type Answer = {
@@ -22,10 +23,10 @@ type Answer = {
 };
 
 const fallbackMessages: Record<string, string> = {
-  ai_not_configured: "La IA todavía no está habilitada. Este resultado usa cálculos del sistema.",
-  quota_unavailable: "La IA está temporalmente pausada. Este resultado usa cálculos del sistema.",
-  ai_empty: "La IA no devolvió contenido. Este resultado usa cálculos del sistema.",
-  ai_error: "La IA no pudo responder. Este resultado usa cálculos del sistema.",
+  ai_not_configured: "IA sin configurar.",
+  quota_unavailable: "IA temporalmente pausada.",
+  ai_empty: "La IA no devolvió contenido.",
+  ai_error: "La IA no pudo responder.",
 };
 
 export function OperationalAssistant() {
@@ -66,6 +67,7 @@ export function OperationalAssistant() {
         throw new Error("El asistente devolvió una respuesta inválida.");
       }
       setAnswer({ ...result, question: text, snapshot: JSON.stringify(snapshot) });
+      notifyGuideAction("answer-ready");
     } catch (cause) {
       if (!abortController.signal.aborted) {
         setError(cause instanceof Error ? cause.message : "No se pudo conectar. Intenta de nuevo.");
@@ -86,24 +88,24 @@ export function OperationalAssistant() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2"><Sparkles className="size-5 text-primary" aria-hidden />Asistente de producción</CardTitle>
         <CardDescription>
-          Pregunta sobre las órdenes de tu demostración. Cada consulta analiza tus cambios actuales; el asistente solo puede leer información.
+          Analiza tus órdenes actuales. Solo lectura.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
-        <div className="flex flex-wrap gap-2" aria-label="Preguntas sugeridas">
-          {suggestions.map((text) => (
-            <Button key={text} variant="outline" className="h-auto max-w-full whitespace-normal text-left" disabled={!data || busy} onClick={() => void ask(text)}>
-              {text}
+        <div data-guide="ai-suggestions" className="flex flex-wrap gap-2" aria-label="Preguntas sugeridas">
+          {suggestions.map(({ label, question: suggestedQuestion }) => (
+            <Button key={label} variant="outline" className="h-auto max-w-full whitespace-normal text-left" disabled={!data || busy} onClick={() => void ask(suggestedQuestion)}>
+              {label}
             </Button>
           ))}
         </div>
         <form onSubmit={submit} className="space-y-3">
           <label htmlFor="operational-question" className="block text-sm font-medium">Tu pregunta</label>
           <textarea id="operational-question" value={question} onChange={(e) => setQuestion(e.target.value)}
-            placeholder="Por ejemplo: ¿qué cambió en la orden OT-1001?" required minLength={3} maxLength={MAX_QUESTION_LENGTH}
+            placeholder="¿Qué cambió en OT-1001?" required minLength={3} maxLength={MAX_QUESTION_LENGTH}
             rows={3} disabled={busy} className="w-full rounded-lg border bg-background p-3 text-sm focus-visible:outline-2 focus-visible:outline-ring" />
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-xs text-muted-foreground">{data ? `${data.orders.length} órdenes ficticias de este navegador` : "Cargando tus órdenes…"} · {question.length}/{MAX_QUESTION_LENGTH}</p>
+            <p className="text-xs text-muted-foreground">{data ? `${data.orders.length} órdenes ficticias` : "Cargando órdenes…"} · {question.length}/{MAX_QUESTION_LENGTH}</p>
             <Button type="submit" disabled={!data || busy || question.trim().length < 3}>
               {busy ? <LoaderCircle className="size-4 animate-spin" aria-hidden /> : <Send className="size-4" aria-hidden />}
               {busy ? "Analizando…" : "Consultar"}
@@ -113,14 +115,14 @@ export function OperationalAssistant() {
         {error && <p role="alert" className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
         <div aria-live="polite" aria-busy={busy}>
           {answer && (
-            <div className="space-y-3 rounded-xl border bg-muted/30 p-4">
+            <div data-guide="ai-answer" className="space-y-3 rounded-xl border bg-muted/30 p-4">
               <p className="text-sm font-semibold">{answer.question}</p>
               <p className="text-xs font-medium text-muted-foreground">
-                {answer.source === "ai" ? "Respuesta generada con IA · Verifica antes de decidir" : "Resumen calculado · Sin generación de IA"}
+                {answer.source === "ai" ? "IA · Verifica antes de decidir" : "Resumen calculado · Sin IA"}
                 {" · "}{new Date(answer.asOf).toLocaleString("es-MX", { timeZone: "America/Chihuahua" })}
               </p>
               {answer.source === "calculations" && <p className="text-sm text-muted-foreground">{fallbackMessages[answer.reason ?? ""]}</p>}
-              {changed && <p role="status" className="rounded-lg bg-amber-100 p-3 text-sm text-amber-950">Las órdenes cambiaron desde esta respuesta. Vuelve a consultar para actualizar el análisis.</p>}
+              {changed && <p role="status" className="rounded-lg bg-amber-100 p-3 text-sm text-amber-950">Las órdenes cambiaron. Consulta de nuevo para actualizar.</p>}
               <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{answer.answer}</p>
             </div>
           )}

@@ -18,6 +18,11 @@ test("domain root is independent and does not initialize demo data", async ({ pa
 test("demo navigation stays below /demo and marks only the current page", async ({ page }) => {
   await page.goto("/demo");
   const navigation = page.getByRole("navigation", { name: "Principal" });
+  await expect(navigation.getByRole("link", { name: "Integraciones", exact: true })).toHaveCount(0);
+  await expect(navigation.getByRole("link", { name: "Recorrido de 3 minutos", exact: true })).toHaveCount(0);
+  for (const number of [1, 2, 3]) {
+    await expect(navigation.getByRole("group", { name: `Demo ${number}`, exact: true })).toBeVisible();
+  }
   await expect(navigation.getByRole("link", { name: "Inicio", exact: true })).toHaveAttribute("aria-current", "page");
   for (const link of await navigation.getByRole("link").all()) {
     expect(await link.getAttribute("href")).toMatch(/^\/demo(?:\/|$)/);

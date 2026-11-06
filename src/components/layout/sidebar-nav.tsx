@@ -1,40 +1,38 @@
 "use client";
 
 import Link from "next/link";
+import { useId } from "react";
 import { usePathname } from "next/navigation";
 import { navItems } from "@/config/site";
 import { isActiveDemoRoute } from "@/config/routes";
-import { cn } from "@/lib/utils";
+import { Check } from "lucide-react";
+import styles from "./demo-theme.module.css";
 
 export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
+  const navId = useId();
 
   return (
-    <nav aria-label="Principal" className="flex flex-col gap-1">
+    <nav aria-label="Principal" className={styles.navigation}>
       {navItems.map((item) => {
         const Icon = item.icon;
         const active = isActiveDemoRoute(pathname, item.href);
 
         return (
-          <Link
-            key={item.href}
-            href={item.href}
-            onClick={onNavigate}
-            aria-current={active ? "page" : undefined}
-            className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground outline-none transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-3 focus-visible:ring-ring/50",
-              active && "bg-sidebar-accent text-sidebar-accent-foreground",
-            )}
-          >
-            <Icon className={cn("size-4 shrink-0", active && "text-sidebar-primary")} aria-hidden />
-            <span className="flex-1 truncate">{item.label}</span>
-            {item.demoNumber && (
-              <span className="grid size-5 shrink-0 place-items-center rounded-full bg-muted text-[0.65rem] font-semibold text-muted-foreground">
-                <span className="sr-only">Demo </span>
-                {item.demoNumber}
-              </span>
-            )}
-          </Link>
+          <div key={item.href} className={item.demoNumber ? styles.navigationGroup : undefined}
+            role={item.demoNumber ? "group" : undefined} aria-labelledby={item.demoNumber ? `${navId}-demo-${item.demoNumber}` : undefined}>
+            {item.demoNumber && <p id={`${navId}-demo-${item.demoNumber}`} className={styles.navigationHeading}>Demo {item.demoNumber}</p>}
+            <Link
+              href={item.href}
+              onClick={onNavigate}
+              aria-current={active ? "page" : undefined}
+              className={styles.navigationLink}
+            >
+              <Icon className="size-4 shrink-0" aria-hidden />
+              <span className="min-w-0 flex-1 leading-snug">{item.label}</span>
+              {active && <Check className="size-4 shrink-0" aria-hidden />}
+            </Link>
+          </div>
         );
       })}
     </nav>

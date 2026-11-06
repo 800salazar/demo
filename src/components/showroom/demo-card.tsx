@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { DemoModule } from "@/config/site";
 import { cn } from "@/lib/utils";
+import styles from "@/components/layout/demo-theme.module.css";
 
 export function DemoCard({ module, className }: { module: DemoModule; className?: string }) {
   const Icon = module.icon;
@@ -12,14 +13,14 @@ export function DemoCard({ module, className }: { module: DemoModule; className?
     <Card
       className={cn(
         "transition duration-200 hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0",
+        styles.moduleCard,
         className,
       )}
     >
       <CardHeader>
-        <div className="mb-3 grid size-11 place-items-center rounded-xl bg-accent text-accent-foreground">
+        <div className={styles.moduleIcon}>
           <Icon className="size-5" aria-hidden />
         </div>
-        <p className="text-xs font-medium tracking-wide text-primary uppercase">Demo {module.number}</p>
         <CardTitle className="text-lg">{module.title}</CardTitle>
         <CardDescription>{module.description}</CardDescription>
       </CardHeader>

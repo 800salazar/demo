@@ -18,6 +18,18 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - La landing está en `src/app/(landing)/`; su grupo de rutas no añade segmentos a la URL. No aplicar `basePath: '/demo'` a toda la aplicación ni redirigir `/` al showroom.
 - Conservar las redirecciones explícitas de las antiguas rutas del demo; no añadir una redirección global que capture rutas de la landing.
 
+## Identidad y contacto comercial del demo
+
+- El showroom usa la identidad de Salazar Consultores: degradado claro `#8cc3fcff` → `#2c80e1ff`, degradado principal `#0057b8e6` → `#01172fe6`, textos blancos en superficies de marca, bordes redondeados y estilo moderno, futurista y minimalista. Los estilos están limitados al demo; consultar `docs/brand.md`.
+- Usar los recursos públicos del bucket `landing` desde `src/config/brand.ts`: logo azul sobre claro, blanco sobre oscuro, negro en el pie, `icon.png` como icono y `animo-stairway-720p.webm` en formato 1:1 al principio del showroom.
+- El pie muestra «Estamos para servirte», `info@800salazar.com`, `800-725-2927`, «WhatsApp» y `SalazarConsultores.com`. El enlace comercial de la portada también usa «WhatsApp», con el mismo formato sencillo del pie. WhatsApp apunta a `+52 614 128 2123` con «Quiero conocer más de software de Salazar Consultores». El contacto se edita en `src/config/site.ts`; no depende de una variable de entorno.
+- Mantener el footer compacto y horizontal, con ajuste de filas en móvil; no volver a añadir la leyenda «Demostración de Salazar Consultores · Todos los datos son ficticios» al pie. El menú lateral y el panel móvil usan un degradado oscuro de fondo y otro claro para la sección activa, con logo blanco y señal de selección además del color.
+- Aplicar prevención de errores (poka-yoke): controles táctiles de 44 px, campos legibles, folio visible al editar, bloqueo de guardado sin edición y de cierres con actividades obligatorias pendientes, y confirmación antes de restablecer datos. Ver `docs/brand.md`.
+- Mantener textos mínimos: títulos claros, acciones cortas y sin párrafos que repitan el diseño. Mostrar funciones futuras bajo demanda; conservar etiquetas accesibles, errores, motivos de bloqueo y la distinción entre IA y cálculos.
+- La portada de `/demo` mantiene video, demos y contacto; no mostrar «Sin registro», el bloque de integraciones ni «Tu demo en cifras». La navegación muestra Inicio y grupos con divisor «Demo 1», «Demo 2», «Demo 3» y su módulo debajo; no enlazar Integraciones ni el antiguo recorrido desde el menú.
+- La ayuda interactiva vive exclusivamente en `/demo`: «Guía de uso» en la portada sustituye «Explorar demos» e inicia el recorrido completo. Tiene un pulso suave que respeta movimiento reducido. El resto de pantallas conserva la guía contextual con ese mismo nombre. `/demo/recorrido` sigue disponible por URL. Editar pasos en `src/lib/guide/steps.ts`; mantener los objetivos `data-guide`. La guía no modifica órdenes ni envía consultas por sí sola, permite omitir/salir y guarda la opinión final solo en el navegador.
+- El favicon usa `icon.png` de Salazar con URL versionada en `brandIcons` (`src/config/brand.ts`), compartida por los metadatos de raíz, perfil y demo. `/favicon.ico` redirige a ese recurso público; no restaurar iconos del starter.
+
 ## Arquitectura acordada: Supabase compartido
 
 - Enfoca y Salazar Demo comparten **un único proyecto Supabase**: `acwlzsofiqdaxmwpyczu` (`https://acwlzsofiqdaxmwpyczu.supabase.co`). Es una decisión explícita del propietario. No exigir ni proponer separar proyectos como requisito para continuar.

@@ -38,8 +38,15 @@ Referencias para continuar el desarrollo: [arquitectura y límites entre aplicac
 - Asistente operativo en ambas pantallas, con preguntas sugeridas y consulta libre. Cada consulta envía el estado actual de las órdenes del visitante.
 - Métricas recalculadas en el servidor, análisis con Vercel AI Gateway y respuestas alternativas claramente identificadas como cálculos.
 - Aviso cuando una respuesta corresponde a datos anteriores a un cambio.
+- «Guía de uso» en la portada, con pulso suave, inicia el recorrido interactivo. Las demás pantallas tienen una guía contextual con controles resaltados. El visitante realiza las acciones; puede retroceder, omitir pasos y salir. La URL `/demo/recorrido` sigue disponible, sin un enlace adicional en el menú.
 
-Las demás funciones anunciadas en los módulos de administración, operaciones, integraciones y recorrido conservan sus avisos de construcción. El asistente no realiza cambios ni integra información de Enfoca.
+Las funciones pendientes de administración y operaciones se muestran bajo «Próximamente»; las integraciones identifican que aún no están activas. El asistente no realiza cambios ni integra información de Enfoca.
+
+La guía se configura en `src/lib/guide/steps.ts`; usa objetivos `data-guide` y señales locales después de guardar o recibir una respuesta. No llama al modelo ni altera órdenes automáticamente. La opinión final se conserva solo en el navegador, sin telemetría de visitantes. Ver [guía e identidad visual](docs/brand.md).
+
+## Identidad visual y contacto
+
+La identidad visual del demo usa los degradados azules y los materiales de Salazar Consultores, con el video cuadrado de clientes en la primera sección. Ver [identidad, materiales y contacto comercial](docs/brand.md). El pie muestra correo, teléfono, WhatsApp y sitio corporativo; sus datos se editan en `src/config/site.ts` y no requieren una variable de entorno para WhatsApp.
 
 ## Tecnologías
 
@@ -81,7 +88,6 @@ Configura las variables del sitio publicado en Vercel → proyecto Salazar Demo 
 | `SUPABASE_URL` | Servidor | URL del proyecto compartido con Enfoca: `https://acwlzsofiqdaxmwpyczu.supabase.co`. |
 | `SUPABASE_PUBLISHABLE_KEY` | Servidor | Clave pública del proyecto compartido; usada en el servidor para comprobar el esquema sin privilegios. No es necesaria para la llamada de IA y su cuota. |
 | `SUPABASE_SECRET_KEY` | Servidor | Clave privada del proyecto compartido. El código de IA la usa exclusivamente para la RPC de cuotas. No se expone al navegador ni al modelo. |
-| `NEXT_PUBLIC_WHATSAPP_NUMBER` | Público | Contacto comercial, solo dígitos. |
 
 La clave de Gateway tiene prioridad si se configuran ambos métodos de autenticación. En Vercel puedes usar OIDC; para desarrollo local con un proyecto vinculado, `vercel env pull` obtiene un token temporal. Consulta [la configuración oficial de OIDC](https://vercel.com/docs/ai-gateway/authentication-and-byok/oidc). No se necesita contratar ni configurar OpenAI por separado.
 

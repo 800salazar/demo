@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { brandIcons } from "@/config/brand";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,6 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://salazar.red"),
   title: "Salazar.red",
+  icons: brandIcons,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

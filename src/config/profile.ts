@@ -1,17 +1,13 @@
-/** Assets selected by the owner in the shared project's landing bucket. */
-const landingAssetBase = "https://acwlzsofiqdaxmwpyczu.supabase.co/storage/v1/object/public/landing";
+import { brandAssetBase, brandAssets, brandMedia } from "./brand";
 
 export const profileAssets = {
-  photo: `${landingAssetBase}/yo.jpeg`,
-  icon: `${landingAssetBase}/icon.png`,
-  logoBlue: `${landingAssetBase}/logonew2025-azul.png`,
-  logoWhite: `${landingAssetBase}/logonew2025-blanco.png`,
-  logoBlack: `${landingAssetBase}/logonew2025-negro.png`,
+  photo: `${brandAssetBase}/yo.jpeg`,
+  ...brandAssets,
 } as const;
 
 /** Video is served directly by the browser, outside Next.js image optimization. */
 export const profileMedia = {
-  clientLogosVideo: `${landingAssetBase}/animo-stairway-720p.webm`,
+  clientLogosVideo: brandMedia.clientLogosVideo,
 } as const;
 
 /** Public content for salazar.red/. Keep the landing concise and outcome-led. */

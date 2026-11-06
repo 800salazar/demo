@@ -22,9 +22,12 @@ Las variables de la versión publicada se configuran en **Vercel → proyecto Sa
 | `SUPABASE_URL` | `https://acwlzsofiqdaxmwpyczu.supabase.co` | Obligatoria para la cuota persistente |
 | `SUPABASE_SECRET_KEY` | Clave privada del proyecto compartido | Obligatoria para la RPC de cuotas en el código actual; solo servidor |
 | `SUPABASE_PUBLISHABLE_KEY` | Clave pública del mismo proyecto | Usada por la comprobación de salud; no sustituye a la clave privada para cuotas |
-| `NEXT_PUBLIC_WHATSAPP_NUMBER` | Contacto comercial en formato internacional, solo dígitos | Opcional |
 
 No colocar valores reales de claves en documentación, commits o capturas. Cambiar las variables en Vercel requiere un nuevo despliegue para que esa versión utilice la configuración actualizada. Los nombres anteriores `NEXT_PUBLIC_SUPABASE_*` se admiten como respaldo para URL y publishable key; no hace falta duplicarlos.
+
+## Contacto y materiales públicos
+
+El contacto del showroom (correo, teléfono, sitio y WhatsApp) se define en `src/config/site.ts`. El número confirmado es `+52 614 128 2123`; `NEXT_PUBLIC_WHATSAPP_NUMBER` ya no se utiliza. El video y los logos se leen directamente del bucket público `landing` mediante URLs explícitas de `src/config/brand.ts`, sin variables nuevas.
 
 ## Verificar los objetos existentes
 
@@ -91,15 +94,18 @@ Después de implementar el perfil personal, las mismas 40 pruebas, TypeScript y 
 | Pulsar «Imprimir perfil» | Diálogo de impresión con una versión clara del perfil, apta para guardar como PDF |
 | Abrir `https://salazar.red/demo` y navegar entre módulos | Todos los enlaces del showroom permanecen bajo `/demo`; «Inicio» vuelve al showroom |
 | Entrar por un enlace anterior como `/ia` | Redirige a `/demo/ia` |
+| Abrir una pestaña nueva del perfil y del demo | Icono de Salazar; el enlace de icono usa el PNG público versionado y `/favicon.ico` redirige al mismo |
+| Pulsar «Guía de uso» en un módulo y luego Escape, en escritorio y móvil | Resalta un control real, se puede operar y la ayuda se cierra devolviendo el foco |
+| Pulsar «Guía de uso» en la portada | El botón tiene un pulso suave; inicia el recorrido completo sin abrir primero otra pantalla de instrucciones. Permite guardar un cambio, consultar al asistente, retroceder y omitir; no escribe ni consulta automáticamente |
 | Abrir una URL inexistente bajo `/demo` | Muestra el error del demo y permite volver a `/demo` |
 | Consultar `/demo/ia` por órdenes retrasadas | Respuesta basada en las órdenes ficticias del visitante |
-| Comprobar el origen de la respuesta | La interfaz muestra «Respuesta generada con IA»; en `/demo/api/ai`, `source` vale `ai` |
+| Comprobar el origen de la respuesta | La interfaz muestra «IA · Verifica antes de decidir»; en `/demo/api/ai`, `source` vale `ai` |
 | Modificar el costo de una orden y volver a consultar | La siguiente respuesta refleja el nuevo costo |
 | Abrir otro navegador o una ventana incógnita | Mantiene su propio escenario, sin copiar los cambios del primer visitante |
 | Pedir información de Enfoca | El asistente explica su alcance; no consulta ni devuelve información privada |
 | Alcanzar la cuota en un entorno de pruebas | HTTP 429 con `Retry-After`, sin llamadas adicionales al modelo |
 | Revisar la solicitud y los recursos del navegador | No aparecen claves privadas, sesiones ni datos de Enfoca |
 
-La etiqueta «Resumen calculado · Sin generación de IA» significa que esa consulta utilizó la alternativa del sistema. El campo `reason` permite distinguir `ai_not_configured`, `quota_unavailable`, `ai_empty` y `ai_error`; una respuesta HTTP 200 por sí sola no confirma que el modelo haya respondido.
+La etiqueta «Resumen calculado · Sin IA» significa que esa consulta utilizó la alternativa del sistema. El campo `reason` permite distinguir `ai_not_configured`, `quota_unavailable`, `ai_empty` y `ai_error`; una respuesta HTTP 200 por sí sola no confirma que el modelo haya respondido.
 
 El endpoint `/demo/api/health` comprueba el esquema previsto para snapshots con la clave publishable. Su campo `supabase.schemaReady` no certifica que `consume_demo_ai_quota` exista, y que `demo_sessions` todavía no esté creada no impide analizar las órdenes locales si las cuotas y Gateway están operativos.

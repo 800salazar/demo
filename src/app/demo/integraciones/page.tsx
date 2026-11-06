@@ -1,29 +1,38 @@
 import type { Metadata } from "next";
-import { ModulePlaceholder } from "@/components/shared/module-placeholder";
+import { FileSpreadsheet, Plug, Radio, type LucideIcon } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const metadata: Metadata = { title: "Integraciones" };
+
+const integrations: { name: string; icon: LucideIcon }[] = [
+  { name: "Excel y CSV", icon: FileSpreadsheet },
+  { name: "ERP y administración", icon: Plug },
+  { name: "Microsoft 365 y Google Workspace", icon: Plug },
+  { name: "APIs externas", icon: Plug },
+  { name: "Equipos y sensores", icon: Radio },
+  { name: "Inventarios", icon: Plug },
+];
 
 export default function IntegracionesPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Integraciones"
-        title="Conectamos tus sistemas y procesos"
-        description="Ejemplos de las integraciones que desarrollamos, diferenciando con claridad las demostrativas de las conexiones reales."
+        title="Integraciones"
+        description="Opciones de conexión · Aún no activas en el demo."
       />
-      <ModulePlaceholder
-        phase={5}
-        summary="Intercambio de información con otros sistemas, sin necesidad de una integración compleja."
-        items={[
-          "Importar órdenes desde un archivo CSV con validación y vista previa",
-          "Exportar las órdenes a CSV",
-          "ERP y sistemas administrativos",
-          "Microsoft 365 y Google Workspace",
-          "Aplicaciones externas mediante API",
-          "Equipos, sensores industriales e inventarios (simulación identificada como tal)",
-        ]}
-      />
+      <ul data-guide="integrations" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {integrations.map(({ name, icon: Icon }) => (
+          <li key={name}>
+            <Card className="h-full">
+              <CardHeader className="flex items-center gap-3">
+                <Icon className="size-5 shrink-0 text-primary" aria-hidden />
+                <CardTitle>{name}</CardTitle>
+              </CardHeader>
+            </Card>
+          </li>
+        ))}
+      </ul>
     </>
   );
 }

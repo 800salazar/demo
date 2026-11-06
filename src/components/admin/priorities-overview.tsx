@@ -13,12 +13,12 @@ export function PrioritiesOverview() {
       <CardHeader>
         <CardTitle>Prioridades actuales</CardTitle>
         <CardDescription>
-          Así se muestran en las órdenes de trabajo. Aquí podrás crearlas, renombrarlas y cambiarles el color.
+          Vista previa · Edición próximamente.
         </CardDescription>
       </CardHeader>
       <CardContent>
         {data ? (
-          <ul className="flex flex-wrap gap-2">
+          <ul data-guide="priorities" className="flex flex-wrap gap-2">
             {[...data.priorities]
               .sort((a, b) => a.order - b.order)
               .map((priority) => (
