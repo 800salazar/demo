@@ -47,3 +47,56 @@ test("shows the retry time returned by the server", async ({ page }) => {
   await ask(page, "Resume las órdenes");
   await expect(page.getByRole("alert")).toContainText("Intenta en 2 min.");
 });
+
+test("copies the complete answer and retries the same question with updated orders", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", { configurable: true, value: {
+      writeText: async (value: string) => { (window as unknown as { copiedAnswer: string }).copiedAnswer = value; },
+    } });
+  });
+  await page.route("**/demo/api/ai", (route) => route.fulfill({
+    status: 200, contentType: "application/json",
+    body: JSON.stringify({ source: "ai", answer: "Respuesta completa de prueba.", asOf: "2026-11-08T03:00:00Z" }),
+  }));
+  await page.goto("/demo/ia");
+  await expect(page.getByText("30 órdenes ficticias")).toBeVisible();
+  await ask(page, "¿Cuál es el costo de OT-1001?");
+  await page.getByRole("button", { name: "Copiar respuesta" }).click();
+  expect(await page.evaluate(() => (window as unknown as { copiedAnswer: string }).copiedAnswer)).toBe("Respuesta completa de prueba.");
+  await page.getByLabel("Costo real (MXN)").fill("123456");
+  await page.getByRole("button", { name: "Guardar cambios" }).click();
+  const response = page.waitForResponse((r) => r.url().endsWith("/demo/api/ai") && r.request().method() === "POST");
+  await page.getByRole("button", { name: "Reintentar respuesta" }).click();
+  const retried = (await response).request().postDataJSON();
+  expect(retried.question).toBe("¿Cuál es el costo de OT-1001?");
+  expect(retried.snapshot.orders[0].actualCost).toBe(123456);
+});
+
+test("shows the last two turns in a scrollable chat with suggestions beside the composer", async ({ page }) => {
+  let count = 0;
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.route("**/demo/api/ai", async (route) => {
+    count++;
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+      source: "ai", answer: `Respuesta ${count}: **$1,500.00**. ${"Detalle ficticio. ".repeat(35)}`,
+      asOf: "2026-11-08T03:00:00Z",
+    }) });
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/demo/ia");
+  const chat = page.getByRole("region", { name: "Conversación" });
+  const form = page.locator("form").filter({ has: page.getByLabel("Tu pregunta") });
+  await expect(form.getByRole("button", { name: "Retrasos" })).toBeVisible();
+  for (const question of ["Primera pregunta", "Segunda pregunta", "Tercera pregunta"]) {
+    await ask(page, question);
+    await expect(chat.getByText(question, { exact: false })).toBeVisible();
+  }
+  await expect(chat.getByText("Primera pregunta", { exact: false })).toHaveCount(0);
+  await expect(chat.getByText("Segunda pregunta", { exact: false })).toBeAttached();
+  await expect(chat.getByText("Tercera pregunta", { exact: false })).toBeVisible();
+  await expect(chat.locator('strong').filter({ hasText: "$1,500.00" })).toHaveCount(2);
+  const metrics = await chat.evaluate((element) => ({ height: element.clientHeight, scrollHeight: element.scrollHeight, remaining: element.scrollHeight - element.scrollTop - element.clientHeight }));
+  expect(metrics.scrollHeight).toBeGreaterThan(metrics.height);
+  expect(metrics.remaining).toBeLessThan(50);
+  await expect(page.getByLabel("Tu pregunta")).toBeInViewport();
+});

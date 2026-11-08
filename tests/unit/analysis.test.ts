@@ -63,6 +63,19 @@ describe("operational data boundary", () => {
     expect(buildOperationalAnalysis(data, now).totals.overrun).toBe(50);
   });
 
+  it("orders overdue items by commitment date without omitting any", () => {
+    const data = snapshot();
+    data.orders = data.orders.slice(0, 2);
+    const pending = data.statuses.find((status) => status.kind === "pending")!;
+    data.orders[0].statusId = pending.id;
+    data.orders[1].statusId = pending.id;
+    data.orders[0].dueDate = "2026-10-24";
+    data.orders[1].dueDate = "2026-10-20";
+    const answer = getCalculatedFallback("¿Qué órdenes están retrasadas?", buildOperationalAnalysis(data, now));
+    expect(answer).toContain("2 órdenes retrasadas");
+    expect(answer.indexOf(data.orders[1].folio)).toBeLessThan(answer.indexOf(data.orders[0].folio));
+  });
+
   it("explains the boundary for private requests, empty data and missing folios", () => {
     const data = snapshot();
     data.orders = [];

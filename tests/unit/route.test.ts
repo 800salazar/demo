@@ -57,6 +57,16 @@ describe("POST /demo/api/ai", () => {
     expect(prompts[1].datos.orders[0].actualCost).toBe(b.snapshot.orders[0].actualCost);
   });
 
+  it("preserves output for the free Nemotron model without changing other model settings", async () => {
+    vi.stubEnv("AI_MODEL", "nvidia/nemotron-3.5-lightning-free");
+    expect((await (await POST(request(body()))).json()).source).toBe("ai");
+    expect(mocks.generateText.mock.calls[0][0].reasoning).toBe("none");
+    mocks.generateText.mockClear();
+    vi.stubEnv("AI_MODEL", "test/model");
+    await POST(request(body()));
+    expect(mocks.generateText.mock.calls[0][0]).not.toHaveProperty("reasoning");
+  });
+
   it.each(["key", "model"])("labels calculations when %s is missing, without calling the provider", async (missing) => {
     vi.stubEnv(missing === "key" ? "AI_GATEWAY_API_KEY" : "AI_MODEL", "");
     const result = await (await POST(request(body()))).json();

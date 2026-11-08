@@ -70,13 +70,15 @@ export function getCalculatedFallback(question: string, data: OperationalAnalysi
       : `No se encontró ${folio} en las órdenes de esta demostración.`;
   }
   if (/retras|vencid|atras/i.test(question)) {
-    const late = data.orders.filter((o) => o.overdue);
-    return `Hay ${late.length} órdenes retrasadas al ${data.today}: ${late.map((o) => `${o.folio} (${o.department}, compromiso ${o.dueDate})`).join("; ") || "ninguna"}. Se consideran retrasadas las órdenes sin completar con fecha compromiso anterior a hoy.`;
+    const late = data.orders.filter((o) => o.overdue).sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+    return late.length
+      ? `**${late.length} órdenes retrasadas**. Revisa primero las de fecha más antigua:\n${late.map((o) => `• ${o.folio} · ${o.department} · ${o.dueDate}`).join("\n")}`
+      : "No hay órdenes retrasadas.";
   }
   if (/costo|gast|presupuest|ahorr|sobrecosto/i.test(question)) {
     const top = data.departments[0];
     const overruns = data.orders.filter((o) => o.overrun > 0);
-    return `Costo real: ${formatMXN(data.totals.actualCost)}; estimado: ${formatMXN(data.totals.estimatedCost)}. Sobrecostos por orden: ${formatMXN(data.totals.overrun)}. ${top ? `Mayor costo: ${top.department}, ${formatMXN(top.actualCost)}.` : ""} Órdenes sobre presupuesto: ${overruns.map((o) => `${o.folio} (+${formatMXN(o.overrun)})`).join(", ") || "ninguna"}. Estas cifras no permiten asegurar un ahorro futuro.`;
+    return `${top ? `Mayor costo: **${top.department}, ${formatMXN(top.actualCost)}**.\n` : ""}Sobrecostos por orden: **${formatMXN(data.totals.overrun)}**.\n${overruns.length ? `Órdenes sobre presupuesto: ${overruns.map((o) => `${o.folio} (+${formatMXN(o.overrun)})`).join(", ")}.` : "No hay órdenes sobre presupuesto."}${/ahorr/i.test(question) ? "\nEstas cifras no confirman ahorros futuros." : ""}`;
   }
-  return `Resumen calculado de esta demostración: ${data.totals.orders} órdenes; ${data.totals.pending} pendientes, ${data.totals.inProgress} en proceso y ${data.totals.completed} completadas. Hay ${data.totals.overdue} retrasadas. Costo real: ${formatMXN(data.totals.actualCost)}. Sin IA disponible, puedo mostrar cifras de costos, retrasos o un folio (por ejemplo OT-1001); no interpretar otras preguntas.`;
+  return `${data.totals.orders} órdenes: ${data.totals.pending} pendientes, ${data.totals.inProgress} en proceso y ${data.totals.completed} completadas.\nRetrasadas: ${data.totals.overdue}. Costo real: ${formatMXN(data.totals.actualCost)}.\nPuedo calcular costos, retrasos o consultar un folio como OT-1001.`;
 }

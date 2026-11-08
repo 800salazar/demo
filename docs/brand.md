@@ -65,6 +65,8 @@ Mostrar solo lo necesario para elegir, actuar o prevenir un error. Evitar encabe
 
 El «Asistente IA de producción» usa un icono con destellos ocasionales para facilitar su descubrimiento. La animación respeta la preferencia de movimiento reducido y no altera el funcionamiento del asistente.
 
+La conversación muestra como máximo los dos intercambios más recientes mediante burbujas dentro de una ventana gris de altura limitada. Las sugerencias acompañan al campo de pregunta; la ventana sigue la respuesta al crecer y el campo se mantiene visible cuando el visitante no se desplaza manualmente. Los intercambios se guardan únicamente en memoria del componente y desaparecen al recargar. El intercambio anterior pasa a un tono más tenue y el nuevo aparece con movimiento suave. Se interpreta únicamente la negrita marcada con `**`; el texto se presenta como texto seguro, sin ejecutar HTML. Copiar usa la respuesta completa sin marcadores y reintentar vuelve a consultar con el estado actual de las órdenes. Cada solicitud se analiza de forma independiente: la conversación visual no se envía como historial al modelo ni se guarda en Supabase.
+
 Conservar los nombres de los campos, las etiquetas accesibles, el folio, los errores y motivos de bloqueo, la confirmación de restablecer y el origen de las respuestas. Se retiró del menú el aviso de datos ficticios y guardado local; el asistente sigue identificando las órdenes como ficticias. El pie mantiene los contactos acordados.
 
 ## Ayuda interactiva

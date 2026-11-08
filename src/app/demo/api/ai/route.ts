@@ -86,6 +86,8 @@ export async function POST(request: Request) {
     const response = await generateText({
       model: gateway(config.model), system: SYSTEM_PROMPT,
       prompt: JSON.stringify({ pregunta: question, datos: analysis }),
+      // This model can exhaust the output budget on reasoning before returning text.
+      ...(config.model === "nvidia/nemotron-3.5-lightning-free" ? { reasoning: "none" as const } : {}),
       maxOutputTokens: 1500, maxRetries: 0, timeout: 25_000, abortSignal: request.signal,
       providerOptions: { gateway: {
         user: getClientBucket(request.headers, process.env.SUPABASE_SECRET_KEY!),
@@ -93,7 +95,7 @@ export async function POST(request: Request) {
       } },
     });
     if (!response.text.trim()) {
-      console.warn("[api/ai] Gateway unavailable", { category: "empty_response" });
+      console.warn("[api/ai] Gateway unavailable", { category: "empty_response", finishReason: response.finishReason });
       return fallback("ai_empty");
     }
     return NextResponse.json({ answer: response.text, source: "ai", asOf: analysis.asOf }, { headers: privateHeaders });
