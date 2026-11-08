@@ -96,6 +96,18 @@ describe("POST /demo/api/ai", () => {
     expect(JSON.stringify(result)).not.toContain("private-test");
   });
 
+  it("classifies authentication failures without logging secrets or provider messages", async () => {
+    const log = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    try {
+      const error = Object.assign(new Error("private-test-provider-message"), { name: "GatewayAuthenticationError" });
+      mocks.generateText.mockRejectedValue(error);
+      const result = await (await POST(request(body()))).json();
+      expect(result).toMatchObject({ source: "calculations", reason: "ai_error" });
+      expect(log).toHaveBeenCalledWith("[api/ai] Gateway unavailable", { category: "authentication" });
+      expect(JSON.stringify(log.mock.calls)).not.toContain("private-test");
+    } finally { log.mockRestore(); }
+  });
+
   it("rejects foreign origins and unstructured private context before any provider call", async () => {
     expect((await POST(request(body(), { Origin: "https://evil.test" }))).status).toBe(403);
     expect((await POST(request({ ...body(), context: { enfoca: "private" } }))).status).toBe(400);

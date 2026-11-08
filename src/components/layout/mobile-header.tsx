@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Brand } from "@/components/layout/brand";
-import { SidebarFooter } from "@/components/layout/sidebar-footer";
 import { SidebarNav } from "@/components/layout/sidebar-nav";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -33,7 +32,6 @@ export function MobileHeader() {
           <div className="min-h-0 flex-1 overflow-y-auto">
             <SidebarNav onNavigate={() => setOpen(false)} />
           </div>
-          <SidebarFooter />
         </SheetContent>
       </Sheet>
     </header>

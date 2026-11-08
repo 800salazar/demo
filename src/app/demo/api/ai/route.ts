@@ -14,6 +14,17 @@ function errorResponse(error: string, message: string, status: number, headers?:
   return NextResponse.json({ error, message }, { status, headers: { ...privateHeaders, ...headers } });
 }
 
+/** Fixed categories only: provider messages and causes can contain sensitive data. */
+function gatewayDiagnostic(error: unknown) {
+  const name = error instanceof Error ? error.name : "";
+  const authentication = error instanceof Error && (name === "GatewayAuthenticationError"
+    || (name === "GatewayError" && error.message.startsWith("Unauthenticated.")));
+  const status = APICallError.isInstance(error) && typeof error.statusCode === "number"
+    && error.statusCode >= 100 && error.statusCode <= 599 ? error.statusCode : undefined;
+  const category = authentication ? "authentication" : name === "AbortError" || name === "TimeoutError" ? "timeout_or_abort" : "gateway_error";
+  return { category, ...(status === undefined ? {} : { status }) };
+}
+
 /** Bound actual bytes while streaming, even with absent/false Content-Length. */
 async function readBody(request: Request): Promise<string | null> {
   if (Number(request.headers.get("content-length")) > MAX_BODY_BYTES) return null;
@@ -81,11 +92,14 @@ export async function POST(request: Request) {
         tags: ["salazar-demo", "operational-assistant"],
       } },
     });
-    if (!response.text.trim()) return fallback("ai_empty");
+    if (!response.text.trim()) {
+      console.warn("[api/ai] Gateway unavailable", { category: "empty_response" });
+      return fallback("ai_empty");
+    }
     return NextResponse.json({ answer: response.text, source: "ai", asOf: analysis.asOf }, { headers: privateHeaders });
   } catch (error) {
     // Never log questions, snapshots, credentials or provider error bodies.
-    console.warn("[api/ai] Gateway unavailable", { status: APICallError.isInstance(error) ? error.statusCode : undefined });
+    console.warn("[api/ai] Gateway unavailable", gatewayDiagnostic(error));
     return fallback("ai_error");
   }
 }

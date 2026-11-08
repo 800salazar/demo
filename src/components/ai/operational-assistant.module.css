@@ -1,0 +1,24 @@
+.aiIcon {
+  display: inline-grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: .75rem;
+  color: #0057b8;
+  background: #e5f0ff;
+  animation: aiGlimmer 6s ease-in-out infinite;
+}
+.aiAnswer {
+  color: #302052;
+  background: #f7f3ff;
+  border-color: #e1d4f5;
+}
+@keyframes aiGlimmer {
+  0%, 75%, 100% { transform: scale(1); background: #e5f0ff; box-shadow: 0 0 0 0 #2c80e100; }
+  80%, 90% { transform: scale(1.1); background: #b8dbff; box-shadow: 0 0 0 6px #2c80e126, 0 0 16px #2c80e155; }
+  85%, 95% { transform: scale(1); background: #e5f0ff; box-shadow: 0 0 0 0 #2c80e100; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .aiIcon { animation: none; }
+}

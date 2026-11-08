@@ -111,7 +111,7 @@
   border-right: 1px solid var(--border);
 }
 .content { display: flex; min-height: 100dvh; min-width: 0; flex-direction: column; }
-.main { width: 100%; max-width: 84rem; flex: 1; margin-inline: auto; padding: 1.25rem 1rem 2rem; }
+.main { width: 100%; max-width: 84rem; flex: 1; margin-inline: auto; padding: 5rem 1rem 2rem; }
 .footer {
   display: flex;
   flex-wrap: wrap;
@@ -214,14 +214,14 @@
 .contactWhatsApp:focus-visible { outline: 2px solid #b8dbff; outline-offset: 4px; }
 
 @media (min-width: 640px) {
-  .main { padding: 1.75rem 1.5rem 2.5rem; }
+  .main { padding: 5rem 1.5rem 2.5rem; }
   .hero { padding: 2.5rem; }
   .contact { padding: 2.75rem; }
 }
 @media (min-width: 1024px) {
   .shell { display: grid; grid-template-columns: 16rem minmax(0, 1fr); }
   .sidebar { display: flex; }
-  .main { padding: 2rem 2.25rem 3rem; }
+  .main { padding: 5rem 2.25rem 3rem; }
 }
 @media (min-width: 1280px) {
   .hero { grid-template-columns: 1.15fr 1fr; gap: 2.5rem; }

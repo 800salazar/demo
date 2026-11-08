@@ -1,7 +1,7 @@
 "use client";
 
 import { ColorBadge } from "@/components/shared/color-badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDemoData } from "@/lib/demo/use-demo-data";
 
@@ -12,9 +12,6 @@ export function PrioritiesOverview() {
     <Card>
       <CardHeader>
         <CardTitle>Prioridades actuales</CardTitle>
-        <CardDescription>
-          Vista previa · Edición próximamente.
-        </CardDescription>
       </CardHeader>
       <CardContent>
         {data ? (

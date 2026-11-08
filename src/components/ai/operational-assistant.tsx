@@ -10,6 +10,7 @@ import { MAX_QUESTION_LENGTH } from "@/lib/ai/limits";
 import { getSnapshot } from "@/lib/demo/store";
 import { useDemoData } from "@/lib/demo/use-demo-data";
 import { notifyGuideAction } from "@/lib/guide/steps";
+import styles from "./operational-assistant.module.css";
 
 const suggestions = [
   { label: "Retrasos", question: "¿Qué órdenes están retrasadas y cuáles debo revisar primero?" },
@@ -19,15 +20,41 @@ const suggestions = [
 
 type Answer = {
   question: string; answer: string; source: "ai" | "calculations";
-  reason?: string; asOf: string; snapshot: string;
+  reason?: string; asOf: string; snapshot: string; id: number;
 };
 
-const fallbackMessages: Record<string, string> = {
-  ai_not_configured: "IA sin configurar.",
-  quota_unavailable: "IA temporalmente pausada.",
-  ai_empty: "La IA no devolvió contenido.",
-  ai_error: "La IA no pudo responder.",
-};
+function TypedAnswer({ text }: { text: string }) {
+  const [visible, setVisible] = useState(0);
+
+  useEffect(() => {
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const characters = typeof Intl.Segmenter === "function"
+      ? Array.from(new Intl.Segmenter("es-MX", { granularity: "grapheme" }).segment(text), (part) => part.segment)
+      : Array.from(text);
+    let frame = 0;
+    let start: number | undefined;
+    const duration = Math.min(4000, Math.max(600, characters.length * 12));
+    function tick(time: number) {
+      start ??= time;
+      const count = Math.min(characters.length, Math.ceil((time - start) / duration * characters.length));
+      setVisible(characters.slice(0, count).join("").length);
+      if (count < characters.length) frame = requestAnimationFrame(tick);
+    }
+    function updatePreference() {
+      cancelAnimationFrame(frame);
+      if (preference.matches) setVisible(text.length);
+      else { start = undefined; frame = requestAnimationFrame(tick); }
+    }
+    updatePreference();
+    preference.addEventListener("change", updatePreference);
+    return () => { cancelAnimationFrame(frame); preference.removeEventListener("change", updatePreference); };
+  }, [text]);
+
+  return <>
+    <span className="sr-only">{text}</span>
+    <span aria-hidden>{text.slice(0, visible)}</span>
+  </>;
+}
 
 export function OperationalAssistant() {
   const data = useDemoData();
@@ -36,6 +63,7 @@ export function OperationalAssistant() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const controller = useRef<AbortController | null>(null);
+  const answerId = useRef(0);
   useEffect(() => () => controller.current?.abort(), []);
   const changed = answer && data && answer.snapshot !== JSON.stringify(getOperationalSnapshot(data));
 
@@ -66,7 +94,7 @@ export function OperationalAssistant() {
       if (typeof result.answer !== "string" || !["ai", "calculations"].includes(result.source)) {
         throw new Error("El asistente devolvió una respuesta inválida.");
       }
-      setAnswer({ ...result, question: text, snapshot: JSON.stringify(snapshot) });
+      setAnswer({ ...result, question: text, snapshot: JSON.stringify(snapshot), id: ++answerId.current });
       notifyGuideAction("answer-ready");
     } catch (cause) {
       if (!abortController.signal.aborted) {
@@ -86,7 +114,10 @@ export function OperationalAssistant() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><Sparkles className="size-5 text-primary" aria-hidden />Asistente de producción</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <span className={styles.aiIcon} aria-hidden><Sparkles className="size-5" /></span>
+          Asistente IA de producción
+        </CardTitle>
         <CardDescription>
           Analiza tus órdenes actuales. Solo lectura.
         </CardDescription>
@@ -115,15 +146,16 @@ export function OperationalAssistant() {
         {error && <p role="alert" className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
         <div aria-live="polite" aria-busy={busy}>
           {answer && (
-            <div data-guide="ai-answer" className="space-y-3 rounded-xl border bg-muted/30 p-4">
+            <div data-guide="ai-answer" className={`space-y-3 rounded-xl border p-4 ${styles.aiAnswer}`}>
               <p className="text-sm font-semibold">{answer.question}</p>
               <p className="text-xs font-medium text-muted-foreground">
                 {answer.source === "ai" ? "IA · Verifica antes de decidir" : "Resumen calculado · Sin IA"}
                 {" · "}{new Date(answer.asOf).toLocaleString("es-MX", { timeZone: "America/Chihuahua" })}
               </p>
-              {answer.source === "calculations" && <p className="text-sm text-muted-foreground">{fallbackMessages[answer.reason ?? ""]}</p>}
               {changed && <p role="status" className="rounded-lg bg-amber-100 p-3 text-sm text-amber-950">Las órdenes cambiaron. Consulta de nuevo para actualizar.</p>}
-              <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{answer.answer}</p>
+              <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">
+                <TypedAnswer key={answer.id} text={answer.answer} />
+              </p>
             </div>
           )}
         </div>

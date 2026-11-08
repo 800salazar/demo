@@ -27,6 +27,8 @@ test.describe("mobile error prevention", () => {
     await open.click();
     const menu = page.getByRole("dialog", { name: "Menú", exact: true });
     await expect(menu).toBeVisible();
+    await expect(menu.getByRole("button", { name: "Restablecer demo", exact: true })).toHaveCount(0);
+    await expect(menu).not.toContainText("Datos ficticios · Guardado en este navegador");
     const menuBox = await menu.boundingBox();
     expect(menuBox!.width).toBeLessThanOrEqual(320);
     expect(menuBox!.height).toBeLessThanOrEqual(640);
@@ -58,12 +60,10 @@ test.describe("mobile error prevention", () => {
     await save.click();
     await expect(page.getByText("OT-1001 actualizada.", { exact: false })).toBeVisible();
     await expect(save).toBeDisabled();
-    await page.getByRole("button", { name: "Abrir menú" }).click();
-    await page.getByRole("dialog", { name: "Menú", exact: true }).getByRole("button", { name: "Restablecer demo" }).click();
+    await page.getByRole("button", { name: "Restablecer demo", exact: true }).click();
     const confirmation = page.getByRole("alertdialog");
     await expect(confirmation).toBeVisible();
     await confirmation.getByRole("button", { name: "Cancelar", exact: true }).click();
-    await page.getByRole("button", { name: "Cerrar menú", exact: true }).click();
-    await expect(cost).toHaveValue("123456");
+    await expect(cost).toHaveValue("123,456.00");
   });
 });

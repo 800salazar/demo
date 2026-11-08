@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useRef, useState, type ComponentP
 import { usePathname, useRouter } from "next/navigation";
 import { ArrowLeft, CircleHelp, Crosshair, Play, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ResetDemoButton } from "@/components/showroom/reset-demo-button";
 import { guideForPath, guides, type GuideAction, type GuideId, type GuideStep } from "@/lib/guide/steps";
 import { demoRoutes } from "@/config/routes";
 import { cn } from "@/lib/utils";
@@ -20,25 +21,50 @@ function useGuide() {
 }
 
 type GuideStartButtonProps = Pick<ComponentProps<typeof Button>, "variant" | "size" | "className"> & {
-  guide?: GuideId; children?: ReactNode; attention?: boolean;
+  guide?: GuideId; children?: ReactNode; attention?: boolean; withReset?: boolean;
 };
 
-export function GuideStartButton({ guide, children = "Guía de uso", attention, className, ...props }: GuideStartButtonProps) {
+export function GuideStartButton({ guide, children = "Guía de uso", attention, withReset, className, ...props }: GuideStartButtonProps) {
   const { start, active } = useGuide();
-  return <Button {...props} data-guide-launcher onClick={() => start(guide)} disabled={active}
+  const button = <Button {...props} data-guide-launcher onClick={() => start(guide)} disabled={active}
     className={cn(className, attention && styles.attention)}><Play aria-hidden />{children}</Button>;
+  return withReset ? (
+    <div className={styles.startControls}>
+      {button}
+      <ResetDemoButton variant="ghost" disabled={active} />
+    </div>
+  ) : button;
 }
 
 export function GuideHelpButton() {
   const { start, active } = useGuide();
   const pathname = usePathname();
-  if (pathname.replace(/\/+$/, "") === demoRoutes.home) return null;
+  const [showHint, setShowHint] = useState(false);
+  const isHome = pathname.replace(/\/+$/, "") === demoRoutes.home;
+
+  useEffect(() => {
+    if (active) return;
+    let hide: ReturnType<typeof setTimeout> | undefined;
+    const show = () => {
+      if (document.hidden) return;
+      setShowHint(true);
+      hide = setTimeout(() => setShowHint(false), 6000);
+    };
+    const first = setTimeout(show, 4000);
+    const repeat = setInterval(show, 90000);
+    return () => { clearTimeout(first); clearInterval(repeat); if (hide) clearTimeout(hide); };
+  }, [active]);
+
   return (
-    <div className={styles.launcher}>
-      <Button data-guide-launcher variant="outline" onClick={() => start()} disabled={active} aria-label="Guía de uso de esta pantalla">
-        <CircleHelp aria-hidden />Guía de uso
-      </Button>
-    </div>
+    <>
+      <div className={cn(styles.floatingGuide, active && styles.floatingGuideActive)}>
+        <Button data-guide-launcher variant="outline" className={styles.attention} onClick={() => start(isHome ? "full" : undefined)} disabled={active}>
+          <CircleHelp aria-hidden />Guía de uso
+        </Button>
+        {showHint && !active && <span className={styles.guideHint} aria-hidden>Estoy aquí para ayudarte</span>}
+      </div>
+      {!isHome && <div className={styles.launcher}><ResetDemoButton variant="ghost" disabled={active} /></div>}
+    </>
   );
 }
 
@@ -117,12 +143,17 @@ type OverlayProps = {
 };
 type View = { top: number; left: number; width: number; height: number; panelHeight: number; rect: DOMRect | null };
 
+function bottomMargin(width: number, height: number) {
+  return width >= 768 && height >= 700 ? height * 0.22 : 24;
+}
+
 function GuideOverlay({ step, onRoute, index, total, completed, onClose, onBack, onNext }: OverlayProps) {
   const panel = useRef<HTMLDivElement>(null);
   const target = useRef<HTMLElement | null>(null);
   const [view, setView] = useState<View>({ top: 0, left: 0, width: 390, height: 800, panelHeight: 260, rect: null });
   const [missing, setMissing] = useState(false);
   const [feedback, setFeedback] = useState<boolean | null>(null);
+  const [highlightCount, setHighlightCount] = useState(0);
   const finished = !step;
 
   function revealTarget(focus = false) {
@@ -130,9 +161,11 @@ function GuideOverlay({ step, onRoute, index, total, completed, onClose, onBack,
     if (!element) return;
     const viewport = window.visualViewport;
     const height = viewport?.height ?? window.innerHeight;
+    const width = viewport?.width ?? window.innerWidth;
     const panelHeight = panel.current?.getBoundingClientRect().height ?? 260;
     const rect = element.getBoundingClientRect();
-    const space = Math.max(88, (height - panelHeight - Math.min(rect.height, 120)) / 2);
+    const available = Math.max(0, height - panelHeight - bottomMargin(width, height));
+    const space = Math.max(88, (available - Math.min(rect.height, 120)) / 2);
     window.scrollBy({ top: rect.top - space - (viewport?.offsetTop ?? 0), behavior: "instant" });
     if (focus) {
       const control = element.matches("button,input,select,textarea,a[href]") ? element
@@ -213,7 +246,9 @@ function GuideOverlay({ step, onRoute, index, total, completed, onClose, onBack,
     try { localStorage.setItem("salazar-demo:guide-feedback", JSON.stringify({ useful, at: new Date().toISOString() })); } catch { /* Help also works without storage. */ }
   }
 
-  const panelTop = view.top + Math.max(12, view.height - view.panelHeight - 12);
+  const margin = bottomMargin(view.width, view.height);
+  const panelTop = view.top + Math.max(12, view.height - view.panelHeight - margin);
+  const panelWidth = Math.min(480, view.width - 24);
   const ringTop = view.rect ? Math.max(view.top + 76, view.rect.top - 6) : 0;
   const ringBottom = view.rect ? Math.min(panelTop - 12, view.rect.bottom + 6) : 0;
   const ringLeft = view.rect ? Math.max(view.left + 6, view.rect.left - 6) : 0;
@@ -222,13 +257,15 @@ function GuideOverlay({ step, onRoute, index, total, completed, onClose, onBack,
 
   return (
     <>
-      <div className={styles.spacer} style={{ "--guide-space": `${view.panelHeight + 36}px` } as CSSProperties} aria-hidden />
+      <div className={styles.spacer} style={{ "--guide-space": `${view.panelHeight + margin + 24}px` } as CSSProperties} aria-hidden />
       <div className={styles.layer}>
         {ringBottom > ringTop && ringRight > ringLeft && <div data-guide-spotlight className={styles.spotlight} aria-hidden
-          style={{ top: ringTop, left: ringLeft, width: ringRight - ringLeft, height: ringBottom - ringTop }} />}
+          style={{ top: ringTop, left: ringLeft, width: ringRight - ringLeft, height: ringBottom - ringTop }}>
+          {highlightCount > 0 && <span key={highlightCount} className={styles.spotlightPulse} />}
+        </div>}
         <div ref={panel} className={`${styles.panel} ${view.height < 480 ? styles.compact : ""}`} role="dialog" aria-modal="false"
           aria-labelledby="guide-title" aria-describedby="guide-description" tabIndex={-1}
-          style={{ top: panelTop, left: view.left + Math.max(12, view.width - 372), width: Math.min(360, view.width - 24), maxHeight: view.height - 24 }}>
+          style={{ top: panelTop, left: view.left + (view.width - panelWidth) / 2, width: panelWidth, maxHeight: view.height - 24 }}>
           <div className={styles.heading}>
             <p className={styles.counter}>{finished ? "Recorrido completado" : `Guía · ${index + 1} de ${total}`}</p>
             <Button variant="ghost" size="icon" onClick={onClose} aria-label="Cerrar guía"><X aria-hidden /></Button>
@@ -251,7 +288,7 @@ function GuideOverlay({ step, onRoute, index, total, completed, onClose, onBack,
           </> : <div className={styles.actions}>
             <div>
               <Button variant="outline" size="icon" onClick={onBack} disabled={index === 0} aria-label="Paso anterior"><ArrowLeft aria-hidden /></Button>
-              <Button variant="outline" size="icon" onClick={() => revealTarget(true)} disabled={!ready} aria-label="Ir al control resaltado"><Crosshair aria-hidden /></Button>
+              <Button variant="outline" size="icon" onClick={() => { revealTarget(true); setHighlightCount((count) => count + 1); }} disabled={!ready} aria-label="Ir al control resaltado"><Crosshair aria-hidden /></Button>
             </div>
             <div>
               {((step.action && !completed) || !ready) && <Button variant="ghost" onClick={onNext}>Omitir</Button>}

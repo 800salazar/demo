@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { CostByDepartmentChart } from "@/components/operations/cost-by-department-chart";
-import { ModulePlaceholder } from "@/components/shared/module-placeholder";
 import { PageHeader } from "@/components/shared/page-header";
 import { OperationsDashboard } from "@/components/operations/operations-dashboard";
 import { OperationalAssistant } from "@/components/ai/operational-assistant";
@@ -17,13 +16,6 @@ export default function OperacionesPage() {
         <OperationsDashboard />
         <CostByDepartmentChart />
         <OperationalAssistant />
-        <ModulePlaceholder
-          items={[
-            "Crear órdenes y moverlas en un tablero",
-            "Filtros por departamento, estado y prioridad",
-            "Historial y checklist por orden",
-          ]}
-        />
       </div>
     </>
   );

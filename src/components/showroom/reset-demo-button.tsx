@@ -18,13 +18,13 @@ import { Button } from "@/components/ui/button";
 import { resetDemoData } from "@/lib/demo/store";
 import styles from "@/components/layout/demo-theme.module.css";
 
-type ResetDemoButtonProps = Pick<ComponentProps<typeof Button>, "variant" | "size" | "className">;
+type ResetDemoButtonProps = Pick<ComponentProps<typeof Button>, "variant" | "size" | "className" | "disabled">;
 
-export function ResetDemoButton({ variant = "outline", size = "default", className }: ResetDemoButtonProps) {
+export function ResetDemoButton({ variant = "outline", size = "default", className, disabled }: ResetDemoButtonProps) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant={variant} size={size} className={className}>
+        <Button variant={variant} size={size} className={className} disabled={disabled}>
           <RotateCcw data-icon="inline-start" aria-hidden />
           Restablecer demo
         </Button>

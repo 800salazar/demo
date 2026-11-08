@@ -96,7 +96,8 @@ Después de implementar el perfil personal, las mismas 40 pruebas, TypeScript y 
 | Entrar por un enlace anterior como `/ia` | Redirige a `/demo/ia` |
 | Abrir una pestaña nueva del perfil y del demo | Icono de Salazar; el enlace de icono usa el PNG público versionado y `/favicon.ico` redirige al mismo |
 | Pulsar «Guía de uso» en un módulo y luego Escape, en escritorio y móvil | Resalta un control real, se puede operar y la ayuda se cierra devolviendo el foco |
-| Pulsar «Guía de uso» en la portada | El botón tiene un pulso suave; inicia el recorrido completo sin abrir primero otra pantalla de instrucciones. Permite guardar un cambio, consultar al asistente, retroceder y omitir; no escribe ni consulta automáticamente |
+| Pulsar «Guía de uso» en la portada | El botón es amarillo con efecto de latido; inicia el recorrido completo sin abrir primero otra pantalla de instrucciones. Permite guardar un cambio, consultar al asistente, retroceder y omitir; no escribe ni consulta automáticamente |
+| Revisar «Restablecer demo» en escritorio y móvil | Aparece debajo de la guía, fuera del menú, y pide confirmación antes de borrar los cambios |
 | Abrir una URL inexistente bajo `/demo` | Muestra el error del demo y permite volver a `/demo` |
 | Consultar `/demo/ia` por órdenes retrasadas | Respuesta basada en las órdenes ficticias del visitante |
 | Comprobar el origen de la respuesta | La interfaz muestra «IA · Verifica antes de decidir»; en `/demo/api/ai`, `source` vale `ai` |
@@ -107,5 +108,7 @@ Después de implementar el perfil personal, las mismas 40 pruebas, TypeScript y 
 | Revisar la solicitud y los recursos del navegador | No aparecen claves privadas, sesiones ni datos de Enfoca |
 
 La etiqueta «Resumen calculado · Sin IA» significa que esa consulta utilizó la alternativa del sistema. El campo `reason` permite distinguir `ai_not_configured`, `quota_unavailable`, `ai_empty` y `ai_error`; una respuesta HTTP 200 por sí sola no confirma que el modelo haya respondido.
+
+El registro del servidor `[api/ai] Gateway unavailable` clasifica fallos como `authentication`, `timeout_or_abort`, `empty_response` o `gateway_error` y, cuando está disponible, añade el código HTTP. No registra claves, preguntas, respuestas ni mensajes del proveedor. En desarrollo local, una prueba de Gateway el 2026-11-07 devolvió un error de autenticación con la clave presente en `.env.local`; verificar o sustituir esa clave de AI Gateway y reiniciar el servidor. La configuración de Production es independiente y no se comprobó desde esta sesión.
 
 El endpoint `/demo/api/health` comprueba el esquema previsto para snapshots con la clave publishable. Su campo `supabase.schemaReady` no certifica que `consume_demo_ai_quota` exista, y que `demo_sessions` todavía no esté creada no impide analizar las órdenes locales si las cuotas y Gateway están operativos.

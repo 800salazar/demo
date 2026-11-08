@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Toaster } from "@/components/ui/sonner";
 import { siteConfig } from "@/config/site";
@@ -15,7 +16,9 @@ export const metadata: Metadata = {
 export default function DemoLayout({ children }: LayoutProps<"/demo">) {
   return (
     <div className={styles.theme}>
-      <DemoGuideProvider><AppShell>{children}</AppShell></DemoGuideProvider>
+      <Suspense fallback={<main className="p-6" aria-busy="true">Cargando demo…</main>}>
+        <DemoGuideProvider><AppShell>{children}</AppShell></DemoGuideProvider>
+      </Suspense>
       <Toaster position="top-right" />
     </div>
   );

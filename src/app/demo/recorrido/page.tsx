@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { demoRoutes } from "@/config/routes";
-import { GuideStartButton } from "@/components/guide/demo-guide";
 
 export const metadata: Metadata = { title: "Guía de uso" };
 
@@ -33,7 +32,6 @@ export default function RecorridoPage() {
     <>
       <PageHeader
         title="Guía de uso"
-        actions={<GuideStartButton guide="full" />}
       />
       <div className="space-y-6">
         <ol className="grid gap-4">

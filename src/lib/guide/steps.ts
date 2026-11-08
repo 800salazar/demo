@@ -12,7 +12,7 @@ export type GuideStep = {
 
 const priorities: GuideStep = {
   id: "priorities", path: demoRoutes.administration, target: "priorities",
-  title: "Identifica la urgencia", description: "Estas prioridades distinguen las órdenes. Su edición llegará después.",
+  title: "Identifica la urgencia", description: "Estas prioridades distinguen las órdenes.",
 };
 const operations: GuideStep[] = [
   { id: "order", path: demoRoutes.operations, target: "order-select", title: "Elige una orden", description: "Selecciona un folio para revisar sus datos." },

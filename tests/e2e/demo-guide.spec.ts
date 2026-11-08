@@ -21,7 +21,14 @@ test("the full guide follows real saves and sends only a visitor-initiated query
   await expect(page.getByRole("heading", { name: "Conecta tus sistemas", exact: true })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Explorar demos", exact: true })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Recorrido de 3 minutos", exact: true })).toHaveCount(0);
-  await page.getByRole("button", { name: "Guía de uso", exact: true }).click();
+  const launcher = page.getByRole("button", { name: "Guía de uso", exact: true });
+  const initialTop = (await launcher.boundingBox())!.y;
+  const reset = page.getByRole("button", { name: "Restablecer demo", exact: true });
+  const resetTop = (await reset.boundingBox())!.y;
+  await page.evaluate(() => window.scrollTo(0, 500));
+  await expect.poll(async () => Math.abs((await launcher.boundingBox())!.y - initialTop)).toBeLessThan(5);
+  expect((await reset.boundingBox())!.y).toBeLessThan(resetTop);
+  await launcher.click();
   let guide = page.getByRole("dialog");
   await expect(page).toHaveURL(/\/demo\/administracion$/);
   await expect(guide.getByRole("heading", { name: "Identifica la urgencia" })).toBeVisible();
@@ -57,7 +64,7 @@ test("the full guide follows real saves and sends only a visitor-initiated query
   expect(JSON.parse((await page.evaluate(() => localStorage.getItem("salazar-demo:guide-feedback")))!)).toMatchObject({ useful: true });
   await guide.getByRole("button", { name: "Finalizar", exact: true }).click();
   await expect(guide).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Guía de uso de esta pantalla" })).toBeFocused();
+  await expect(page.getByRole("button", { name: "Guía de uso", exact: true })).toBeFocused();
   expect(requests).toBe(1);
 });
 
@@ -69,7 +76,7 @@ test.describe("guide on a small phone", () => {
     const cost = page.getByLabel("Costo real (MXN)");
     await expect(cost).not.toHaveValue("");
     const initial = await cost.inputValue();
-    const help = page.getByRole("button", { name: "Guía de uso de esta pantalla" });
+    const help = page.getByRole("button", { name: "Guía de uso", exact: true });
     await help.click();
     const guide = page.getByRole("dialog");
     await expect(guide.getByRole("heading", { name: "Elige una orden" })).toBeVisible();

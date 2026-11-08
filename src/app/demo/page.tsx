@@ -1,6 +1,6 @@
 import { ContactCta } from "@/components/showroom/contact-cta";
 import { DemoCard } from "@/components/showroom/demo-card";
-import { GuideStartButton } from "@/components/guide/demo-guide";
+import { ResetDemoButton } from "@/components/showroom/reset-demo-button";
 import { demoModules } from "@/config/site";
 import { SalazarLogo } from "@/components/shared/salazar-logo";
 import { ClientsVideo } from "@/components/showroom/clients-video";
@@ -17,7 +17,7 @@ export default function HomePage() {
             Menos errores. Más control.
           </p>
           <div className={styles.heroActions}>
-            <GuideStartButton guide="full" size="lg" variant="outline" className={styles.heroPrimary} attention />
+            <ResetDemoButton variant="ghost" />
           </div>
         </div>
         <ClientsVideo />

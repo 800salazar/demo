@@ -61,13 +61,17 @@ El componente del pie está en `src/components/layout/contact-footer.tsx`. Su in
 
 ## Textos y jerarquía
 
-Mostrar solo lo necesario para elegir, actuar o prevenir un error. Evitar encabezados duplicados, frases comerciales repetidas y explicaciones de controles evidentes. Las sugerencias del asistente tienen etiquetas breves; envían la pregunta completa al seleccionarlas. Las funciones pendientes de administración y operaciones se agrupan en «Próximamente», cerrado por defecto. Integraciones identifica sus opciones como aún no activas y el recorrido describe acciones disponibles.
+Mostrar solo lo necesario para elegir, actuar o prevenir un error. Evitar encabezados duplicados, frases comerciales repetidas y explicaciones de controles evidentes. Las sugerencias del asistente tienen etiquetas breves; envían la pregunta completa al seleccionarlas. No mostrar tarjetas de funciones futuras en administración ni operaciones. Integraciones identifica sus opciones como aún no activas y el recorrido describe acciones disponibles.
 
-Conservar los nombres de los campos, las etiquetas accesibles, el folio, los errores y motivos de bloqueo, la confirmación de restablecer y el origen de las respuestas. El aviso de datos ficticios y guardado local se concentra en la navegación; el asistente también identifica las órdenes como ficticias. El pie mantiene los contactos acordados.
+El «Asistente IA de producción» usa un icono con destellos ocasionales para facilitar su descubrimiento. La animación respeta la preferencia de movimiento reducido y no altera el funcionamiento del asistente.
+
+Conservar los nombres de los campos, las etiquetas accesibles, el folio, los errores y motivos de bloqueo, la confirmación de restablecer y el origen de las respuestas. Se retiró del menú el aviso de datos ficticios y guardado local; el asistente sigue identificando las órdenes como ficticias. El pie mantiene los contactos acordados.
 
 ## Ayuda interactiva
 
-«Guía de uso» es la única acción de la portada, en lugar de «Explorar demos» y «Recorrido de 3 minutos». Inicia el recorrido completo: prioridades, edición, gráfica y consulta al asistente. Su pulso suave se detiene al pasar el cursor, enfocar o iniciar la guía; se desactiva con movimiento reducido. Las demás pantallas conservan un acceso contextual con el mismo nombre. `/demo/recorrido` sigue disponible directamente. No se abre automáticamente. Los pasos se configuran en `src/lib/guide/steps.ts`; el controlador y su presentación están en `src/components/guide/`.
+«Guía de uso» permanece fija en la parte superior derecha del demo; en móvil aparece debajo del encabezado para dejar libre el menú. En la portada inicia el recorrido completo y en los módulos abre la guía contextual. El botón amarillo conserva el latido y, ocasionalmente, muestra durante unos segundos «Estoy aquí para ayudarte». El acceso se oculta mientras la guía está activa. Con movimiento reducido permanece amarillo, sin animación. `/demo/recorrido` sigue disponible directamente. Los pasos se configuran en `src/lib/guide/steps.ts`.
+
+«Restablecer demo» aparece en el contenido de la portada y los módulos; se desplaza con la página. No está en el menú lateral ni en el panel móvil. Conserva la confirmación y se deshabilita mientras la guía está activa.
 
 La portada elimina «Sin registro», el bloque «Conecta tus sistemas» y «Tu demo en cifras». Conserva los módulos, el video y la sección comercial, cuyo enlace «WhatsApp» usa el formato sencillo del pie. En la navegación quedan Inicio y tres grupos con divisor y etiqueta «Demo 1», «Demo 2», «Demo 3», cada uno con el módulo correspondiente debajo; se retiran Integraciones y el enlace adicional al recorrido.
 

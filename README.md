@@ -32,15 +32,15 @@ Referencias para continuar el desarrollo: [arquitectura y límites entre aplicac
 
 ## Funciones disponibles
 
-- Navegación adaptable, datos de demostración y restablecimiento con confirmación.
+- Navegación adaptable y restablecimiento con confirmación dentro del contenido, fuera del menú.
 - Gráfica de costo real por departamento e indicadores de órdenes, completadas y costos.
 - Edición de costo real, fecha compromiso y estado de una orden en `/demo/operaciones` y `/demo/ia`. Completar una orden requiere que sus actividades obligatorias estén realizadas.
 - Asistente operativo en ambas pantallas, con preguntas sugeridas y consulta libre. Cada consulta envía el estado actual de las órdenes del visitante.
 - Métricas recalculadas en el servidor, análisis con Vercel AI Gateway y respuestas alternativas claramente identificadas como cálculos.
 - Aviso cuando una respuesta corresponde a datos anteriores a un cambio.
-- «Guía de uso» en la portada, con pulso suave, inicia el recorrido interactivo. Las demás pantallas tienen una guía contextual con controles resaltados. El visitante realiza las acciones; puede retroceder, omitir pasos y salir. La URL `/demo/recorrido` sigue disponible, sin un enlace adicional en el menú.
+- «Guía de uso» es un botón amarillo fijo en la parte superior derecha, con un mensaje ocasional. En la portada inicia el recorrido completo; en las demás pantallas abre la guía contextual. El visitante puede retroceder, omitir pasos y salir.
 
-Las funciones pendientes de administración y operaciones se muestran bajo «Próximamente»; las integraciones identifican que aún no están activas. El asistente no realiza cambios ni integra información de Enfoca.
+Las integraciones identifican que aún no están activas. El asistente no realiza cambios ni integra información de Enfoca.
 
 La guía se configura en `src/lib/guide/steps.ts`; usa objetivos `data-guide` y señales locales después de guardar o recibir una respuesta. No llama al modelo ni altera órdenes automáticamente. La opinión final se conserva solo en el navegador, sin telemetría de visitantes. Ver [guía e identidad visual](docs/brand.md).
 
@@ -54,7 +54,7 @@ Next.js 16.4 / React 19 / TypeScript / Tailwind CSS 4 / shadcn/ui / Recharts / V
 
 ## Desarrollo
 
-Requiere Node.js 22 o superior y pnpm 10.
+Requiere Node.js 24 y pnpm 10.
 
 ```bash
 pnpm install

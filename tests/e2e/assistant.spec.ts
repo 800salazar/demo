@@ -23,7 +23,7 @@ test("current snapshot, persisted edits, two visitors and read-only privacy boun
   expect((await updated.json()).answer).toContain("123,456");
 
   await page.reload();
-  await expect(page.getByLabel("Costo real (MXN)")).toHaveValue("123456");
+  await expect(page.getByLabel("Costo real (MXN)")).toHaveValue("123,456.00");
   const otherContext = await browser.newContext();
   try {
     const other = await otherContext.newPage();
@@ -34,7 +34,7 @@ test("current snapshot, persisted edits, two visitors and read-only privacy boun
     const privateQuery = await ask(other, "Consulta mi información privada de Enfoca");
     expect((await privateQuery.json()).answer).toContain("No tengo acceso a Enfoca");
   } finally { await otherContext.close(); }
-  await expect(page.getByLabel("Costo real (MXN)")).toHaveValue("123456");
+  await expect(page.getByLabel("Costo real (MXN)")).toHaveValue("123,456.00");
 });
 
 test("shows the retry time returned by the server", async ({ page }) => {

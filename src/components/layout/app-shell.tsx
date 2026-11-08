@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { Brand } from "@/components/layout/brand";
 import { MobileHeader } from "@/components/layout/mobile-header";
-import { SidebarFooter } from "@/components/layout/sidebar-footer";
 import { SidebarNav } from "@/components/layout/sidebar-nav";
 import { ContactFooter } from "@/components/layout/contact-footer";
 import { GuideHelpButton } from "@/components/guide/demo-guide";
@@ -15,7 +14,6 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="min-h-0 flex-1 overflow-y-auto">
           <SidebarNav />
         </div>
-        <SidebarFooter />
       </aside>
       <div className={styles.content}>
         <MobileHeader />
