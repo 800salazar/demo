@@ -27,20 +27,36 @@ const resultSchema = z.object({ allowed: z.boolean(), retry_after_seconds: z.num
 export async function checkRateLimit(headers: Headers): Promise<RateLimitResult> {
   const url = getSupabaseUrl();
   const secret = process.env.SUPABASE_SECRET_KEY?.trim();
-  if (!url || !secret) return { unavailable: true };
+  if (!url || !secret) {
+    console.warn("[api/ai] Quota unavailable", { category: "missing_configuration" });
+    return { unavailable: true };
+  }
   try {
     const client = createClient(url, secret, {
       auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
     });
-    const { data, error } = await client.rpc("consume_demo_ai_quota", {
+    const { data, error, status } = await client.rpc("consume_demo_ai_quota", {
       p_client_hash: getClientBucket(headers, secret),
     }).abortSignal(AbortSignal.timeout(5_000));
+    if (error) {
+      const knownCodes = ["PGRST202", "PGRST301", "PGRST303", "42501"];
+      const code = knownCodes.includes(error.code) ? error.code : "other";
+      console.warn("[api/ai] Quota unavailable", {
+        category: "rpc_error", code,
+        ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+      });
+      return { unavailable: true };
+    }
     const parsed = resultSchema.safeParse(data);
-    if (error || !parsed.success) return { unavailable: true };
+    if (!parsed.success) {
+      console.warn("[api/ai] Quota unavailable", { category: "invalid_response" });
+      return { unavailable: true };
+    }
     return parsed.data.allowed ? { allowed: true } : {
       allowed: false, retryAfterSeconds: Math.max(1, parsed.data.retry_after_seconds),
     };
   } catch {
+    console.warn("[api/ai] Quota unavailable", { category: "connection_error" });
     return { unavailable: true };
   }
 }

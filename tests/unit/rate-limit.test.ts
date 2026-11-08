@@ -41,3 +41,14 @@ it("fails closed for missing configuration, database errors or invalid RPC resul
   mocks.result.mockResolvedValue({ data: {}, error: null });
   expect(await checkRateLimit(new Headers())).toEqual({ unavailable: true });
 });
+
+it("logs safe quota diagnostics without database messages or credentials", async () => {
+  const log = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+  try {
+    mocks.result.mockResolvedValue({ data: null, error: { code: "PGRST202", message: "private-details" }, status: 404 });
+    expect(await checkRateLimit(new Headers())).toEqual({ unavailable: true });
+    expect(log).toHaveBeenCalledWith("[api/ai] Quota unavailable", { category: "rpc_error", code: "PGRST202", status: 404 });
+    expect(JSON.stringify(log.mock.calls)).not.toContain("private-details");
+    expect(JSON.stringify(log.mock.calls)).not.toContain("test-secret");
+  } finally { log.mockRestore(); }
+});

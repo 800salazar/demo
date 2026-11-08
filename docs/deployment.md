@@ -109,6 +109,10 @@ Después de implementar el perfil personal, las mismas 40 pruebas, TypeScript y 
 
 La etiqueta «Resumen calculado · Sin IA» significa que esa consulta utilizó la alternativa del sistema. El campo `reason` permite distinguir `ai_not_configured`, `quota_unavailable`, `ai_empty` y `ai_error`; una respuesta HTTP 200 por sí sola no confirma que el modelo haya respondido.
 
+Una prueba con una orden ficticia en `www.salazar.red` devolvió `quota_unavailable`: la generación se detuvo antes de llamar al modelo. En el mismo proyecto compartido, una consulta de metadatos con la credencial local mostró la tabla `demo_ai_usage` y la RPC `consume_demo_ai_quota`; esto no verifica las variables ni permisos efectivos del deployment. `/demo/api/health` comprueba `demo_sessions`, que es independiente de la cuota de IA.
+
+Para diagnosticar cuotas, los registros del servidor muestran `[api/ai] Quota unavailable` con categorías `missing_configuration`, `rpc_error`, `invalid_response` o `connection_error`; se registra únicamente el estado HTTP y códigos conocidos, nunca claves o mensajes de la base. Los logs aparecen después de desplegar el código que los incluye. Verificar `SUPABASE_URL` y `SUPABASE_SECRET_KEY` en Production y los permisos de la RPC antes de cambiar objetos del proyecto compartido.
+
 El registro del servidor `[api/ai] Gateway unavailable` clasifica fallos como `authentication`, `timeout_or_abort`, `empty_response` o `gateway_error` y, cuando está disponible, añade el código HTTP. No registra claves, preguntas, respuestas ni mensajes del proveedor. En desarrollo local, una prueba de Gateway el 2026-11-07 devolvió un error de autenticación con la clave presente en `.env.local`; verificar o sustituir esa clave de AI Gateway y reiniciar el servidor. La configuración de Production es independiente y no se comprobó desde esta sesión.
 
 El endpoint `/demo/api/health` comprueba el esquema previsto para snapshots con la clave publishable. Su campo `supabase.schemaReady` no certifica que `consume_demo_ai_quota` exista, y que `demo_sessions` todavía no esté creada no impide analizar las órdenes locales si las cuotas y Gateway están operativos.
