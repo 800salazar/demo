@@ -1,0 +1,55 @@
+import { expect, test } from "@playwright/test";
+
+test("views retain drafts, selected orders and chat; configuration propagates and persists", async ({ page }) => {
+  await page.route("**/demo/api/ai", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ source: "ai", answer: "Tu orden sigue disponible.", asOf: "2026-11-08T12:00:00Z" }) }));
+  await page.goto("/demo/sistema");
+  const operator = page.getByRole("tab", { name: "Operador", exact: true });
+  const admin = page.getByRole("tab", { name: "Administrador", exact: true });
+  await expect(operator).toHaveAttribute("aria-selected", "true");
+  const search = page.getByRole("combobox", { name: "Orden de trabajo" });
+  await search.fill("OT-1002");
+  await page.getByRole("option", { name: /OT-1002/ }).click();
+  await page.getByLabel("Costo real (MXN)").fill("123456");
+  await page.getByLabel("Tu pregunta", { exact: true }).fill("Resume mi operación");
+  await page.getByRole("button", { name: "Consultar", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Copiar respuesta" })).toBeVisible();
+  await admin.click();
+  await expect(page.getByRole("heading", { name: "Editar orden", exact: true })).toBeHidden();
+  await expect(page.getByRole("heading", { name: "Configuración", exact: true })).toBeVisible();
+  await page.getByLabel("Estado 1 nombre", { exact: true }).fill("Por iniciar");
+  await page.getByLabel("Estado 1 color", { exact: true }).selectOption("violet");
+  await page.getByRole("button", { name: "Guardar estado 1", exact: true }).click();
+  await operator.click();
+  await expect(page.getByText("Editando OT-1002", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Costo real (MXN)")).toHaveValue("123,456.00");
+  await expect(page.getByRole("button", { name: "Guardar cambios", exact: true })).toBeEnabled();
+  await expect(page.getByRole("button", { name: "Copiar respuesta" })).toBeVisible();
+  const status = page.getByRole("combobox", { name: "Estado", exact: true });
+  await status.selectOption({ label: "Por iniciar" });
+  await expect(status).toHaveClass(/bg-violet-100/);
+  await page.getByRole("button", { name: "Guardar cambios", exact: true }).click();
+  await page.reload();
+  await search.fill("OT-1002");
+  await page.getByRole("option", { name: /OT-1002/ }).click();
+  await expect(status).toHaveClass(/bg-violet-100/);
+  await expect(status.locator("option:checked")).toHaveText("Por iniciar");
+  await page.getByRole("button", { name: "Restablecer demo", exact: true }).click();
+  await page.getByRole("alertdialog").getByRole("button", { name: "Restablecer", exact: true }).click();
+  await expect(status.locator("option").filter({ hasText: "Por iniciar" })).toHaveCount(0);
+});
+
+test("switching orders protects unsaved edits", async ({ page }) => {
+  await page.goto("/demo/sistema");
+  await page.getByLabel("Costo real (MXN)").fill("54321");
+  const search = page.getByRole("combobox", { name: "Orden de trabajo" });
+  await search.fill("OT-1002");
+  await page.getByRole("option", { name: /OT-1002/ }).click();
+  const confirmation = page.getByRole("alertdialog");
+  await expect(confirmation).toContainText("OT-1001");
+  await confirmation.getByRole("button", { name: "Seguir editando" }).click();
+  await expect(page.getByLabel("Costo real (MXN)")).toHaveValue("54,321.00");
+  await search.fill("OT-1002");
+  await page.getByRole("option", { name: /OT-1002/ }).click();
+  await confirmation.getByRole("button", { name: "Descartar cambios" }).click();
+  await expect(page.getByText("Editando OT-1002", { exact: true })).toBeVisible();
+});

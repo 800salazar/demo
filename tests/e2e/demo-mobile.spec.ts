@@ -4,7 +4,7 @@ test("footer contacts stay on one compact row on desktop", async ({ page }) => {
   await page.goto("/demo");
   const footer = page.getByRole("contentinfo");
   await expect(footer.getByRole("heading", { name: "Estamos para servirte" })).toBeVisible();
-  await expect(footer.getByRole("link")).toHaveCount(4);
+  await expect(footer.getByRole("link")).toHaveCount(5);
   await expect(footer).not.toContainText("Todos los datos son ficticios");
   const layout = await footer.evaluate((element) => ({
     height: element.getBoundingClientRect().height,
@@ -18,32 +18,23 @@ test("footer contacts stay on one compact row on desktop", async ({ page }) => {
 test.describe("mobile error prevention", () => {
   test.use({ viewport: { width: 320, height: 640 } });
 
-  test("menu fits the screen, makes the current module explicit and closes after navigation", async ({ page }) => {
-    await page.goto("/demo");
-    const open = page.getByRole("button", { name: "Abrir menú" });
-    const openBox = await open.boundingBox();
-    expect(openBox!.width).toBeGreaterThanOrEqual(44);
-    expect(openBox!.height).toBeGreaterThanOrEqual(44);
-    await open.click();
-    const menu = page.getByRole("dialog", { name: "Menú", exact: true });
-    await expect(menu).toBeVisible();
-    await expect(menu.getByRole("button", { name: "Restablecer demo", exact: true })).toHaveCount(0);
-    await expect(menu).not.toContainText("Datos ficticios · Guardado en este navegador");
-    const menuBox = await menu.boundingBox();
-    expect(menuBox!.width).toBeLessThanOrEqual(320);
-    expect(menuBox!.height).toBeLessThanOrEqual(640);
-    const current = menu.getByRole("link", { name: "Inicio", exact: true });
-    await expect(current).toHaveAttribute("aria-current", "page");
-    const surface = await menu.evaluate((element) => getComputedStyle(element).backgroundImage);
-    const selected = await current.evaluate((element) => getComputedStyle(element).backgroundImage);
-    expect(surface).toContain("linear-gradient");
-    expect(selected).toContain("linear-gradient");
-    expect(surface).not.toBe(selected);
-    await menu.getByRole("link", { name: "Operaciones", exact: false }).click();
-    await expect(page).toHaveURL(/\/demo\/operaciones$/);
-    await expect(menu).not.toBeVisible();
-    const horizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
-    expect(horizontalOverflow).toBe(false);
+  test("two views fit mobile and the footer uses two compact rows", async ({ page }) => {
+    await page.goto("/demo/sistema");
+    const operator = page.getByRole("tab", { name: "Operador", exact: true });
+    const admin = page.getByRole("tab", { name: "Administrador", exact: true });
+    await expect(operator).toHaveAttribute("aria-selected", "true");
+    const box = await admin.boundingBox();
+    expect(box!.height).toBeGreaterThanOrEqual(44);
+    await admin.click();
+    await expect(page.getByRole("heading", { name: "Configuración", exact: true })).toBeVisible();
+    await operator.click();
+    await expect(page.getByLabel("Costo real (MXN)")).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
+    const footer = page.getByRole("contentinfo");
+    await expect(footer.getByRole("link")).toHaveCount(3);
+    await expect(footer.getByRole("link", { name: "Sitio web de Salazar Consultores" })).toHaveAttribute("href", "https://salazarconsultores.com/");
+    const rows = await footer.locator("address a:visible").evaluateAll((links) => links.map((link) => link.getBoundingClientRect().y));
+    expect(Math.max(...rows) - Math.min(...rows)).toBeLessThan(2);
   });
 
   test("editing requires a change and prevents completion with unfinished activities", async ({ page }) => {

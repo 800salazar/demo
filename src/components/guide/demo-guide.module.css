@@ -2,7 +2,11 @@
 .floatingGuide { position: fixed; top: max(1rem, env(safe-area-inset-top)); right: max(1rem, env(safe-area-inset-right)); z-index: 45; display: flex; flex-direction: column; align-items: flex-end; gap: .6rem; }
 .floatingGuideActive { visibility: hidden; }
 .guideHint { max-width: min(16rem, calc(100vw - 2rem)); padding: .7rem 1rem; border: 1px solid #facc15; border-radius: 1rem 0 1rem 1rem; color: #102b49; background: #fff; box-shadow: 0 8px 24px #01172f26; font-size: .875rem; font-weight: 600; }
-@media (max-width: 1023px) { .floatingGuide { top: calc(4.5rem + max(.75rem, env(safe-area-inset-top))); } }
+.floatingGuide { top: max(.8rem, env(safe-area-inset-top)); }
+@media (max-width: 767px) {
+  .floatingLabel { display: none; }
+  .floatingGuide .floatingButton:global([data-slot="button"]) { width: 2.75rem; min-width: 2.75rem; height: 2.75rem; padding: 0; }
+}
 @media print { .floatingGuide { display: none; } }
 .startControls { display: inline-flex; flex-direction: column; align-items: stretch; gap: .875rem; }
 .attention:global([data-slot="button"][data-guide-launcher]) { color: #01172f; background: #facc15; border-color: #fde047; }

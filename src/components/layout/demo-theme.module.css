@@ -129,6 +129,8 @@
   gap: .85rem;
 }
 .footerLogo { width: 6rem; height: 1.75rem; }
+.footerLogoLink { display: inline-flex; align-items: center; border-radius: .35rem; }
+.footerLogoLink:focus-visible { outline: 2px solid #2c80e1; outline-offset: 3px; }
 .footerIdentity h2 { color: #01172f; font-size: .875rem; font-weight: 600; letter-spacing: -.02em; }
 .footerLinks { display: flex; min-width: 0; flex-wrap: wrap; align-items: center; gap: .1rem 1rem; font-size: .8125rem; font-style: normal; }
 .footerLinks a { display: inline-flex; min-height: 2.75rem; align-items: center; gap: .35rem; border-radius: .35rem; text-underline-offset: .25rem; }
@@ -238,8 +240,30 @@
   .footer { padding: .75rem 1rem; }
   .footerLinks { gap: .1rem .85rem; }
 }
+@media (max-width: 767px) {
+  .footer { flex-direction: column; align-items: center; gap: 0; padding: .5rem 1rem; }
+  .footerIdentity h2, .footerLinks .footerDesktopLink { display: none; }
+  .footerLogoLink { min-height: 2.75rem; }
+  .footerLinks { flex-wrap: nowrap; justify-content: center; gap: .75rem; }
+  .footerLinks a { white-space: nowrap; }
+  .footerLinks .footerWhatsApp { min-height: 2.5rem; padding-inline: .65rem; border-radius: .65rem; color: #0057b8; background: #eaf4ff; font-weight: 600; }
+}
 @media print {
   .clientsFigure { display: none; }
   .sidebar, .mobileHeader { display: none; }
   .shell { display: block; }
 }
+
+/* Unified demo: the two views replace the former sidebar and mobile drawer. */
+.workspaceHeader { display: flex; min-height: 4.5rem; align-items: center; gap: 1rem; padding: .75rem 12rem .75rem 1.5rem; border-bottom: 1px solid var(--border); background: #fff; }
+.workspaceHeader nav a { display: inline-flex; min-height: 2.75rem; align-items: center; padding: .5rem .75rem; border-radius: .75rem; font-size: .875rem; font-weight: 500; }
+.workspaceHeader nav a:hover { background: #e5f0ff; }
+.workspaceHeader nav a:focus-visible { outline: 2px solid #2c80e1; outline-offset: 2px; }
+.content .main { padding-top: 1.75rem; }
+@media (max-width: 767px) {
+  .workspaceHeader { padding: .75rem 4.5rem .75rem 1rem; gap: .4rem; }
+  .workspaceHeader :global(img) { object-fit: contain; }
+  .workspaceHeader > a > span { width: 8.5rem; }
+  .workspaceHeader nav { margin-left: auto; }
+}
+@media print { .workspaceHeader { display: none; } }

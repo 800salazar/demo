@@ -22,9 +22,9 @@ El despliegue de este repositorio usa el dominio `salazar.red` asignado por el p
 | Ubicación | Función |
 | --- | --- |
 | `salazar.red/` · `src/app/(landing)/` | Perfil profesional de Adán Salazar y herramienta de conferencia para estudiantes en `#conferencia`, con identidad azul y layout propio. No monta datos ni navegación de Demo o Enfoca. |
-| `salazar.red/demo` · `src/app/demo/` | Showroom público, sus módulos, su navegación y sus APIs |
+| `salazar.red/demo` · `src/app/demo/` | Portada pública y sistema unificado con dos vistas, más sus APIs |
 | `src/app/layout.tsx` | Estructura HTML, fuentes y estilos generales; no monta el menú ni los datos del demo |
-| `src/app/demo/layout.tsx` | Menú, marca, pie de demostración y notificaciones, exclusivos de `/demo` |
+| `src/app/demo/layout.tsx` | Encabezado, marca, pie y notificaciones, exclusivos de `/demo` |
 
 Los enlaces del showroom permanecen bajo `/demo`, incluido el regreso al inicio. La landing no monta el store del demo ni lo promueve mediante enlaces o contenido. El estado sigue usando la clave existente `salazar-demo:data` de `localStorage`; cambiar la ruta conserva los datos anteriores en ese mismo navegador y origen.
 
@@ -75,3 +75,11 @@ Las variables preferidas son `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` y `SUPAB
 El modelo seleccionado para las pruebas gratuitas es `nvidia/nemotron-3.5-lightning-free`. El endpoint gratuito es para pruebas con datos ficticios y el proveedor puede registrar entradas y salidas. La disponibilidad y la gratuidad deben verificarse antes del lanzamiento; no hay garantía de permanencia. No configurar un modelo de pago como alternativa automática sin decisión del propietario.
 
 Ver [despliegue y verificaciones](deployment.md) para los pasos operativos y [README](../README.md) para el contrato del asistente.
+
+## Demo unificado
+
+Desde el 2026-11-08, `/demo/sistema` reemplaza las tres experiencias anteriores. `?vista=operador` muestra edición y chat; `?vista=administrador` muestra costos y catálogos. Las rutas anteriores redirigen. El shell utiliza encabezado y acceso a Inicio, sin menú lateral.
+
+`DemoWorkspace` conserva ambos paneles montados con `forceMount` y oculta el inactivo mediante `hidden`, preservando borradores y conversación temporal. El cambio manual de pestaña usa History API integrada con Next, sin solicitudes a Supabase. La guía navega a la misma pantalla con la vista de cada paso y observa los cambios de visibilidad.
+
+`editCatalogItem` valida nombres y colores y conserva IDs, `kind`, orden y referencias. Las escrituras usan el store y la versión de datos existentes: no se necesitan migraciones ni descartar los datos del visitante. Los nombres actualizados forman parte del snapshot que recibe el asistente. Las vistas simulan responsabilidades, sin conceder privilegios ni sustituir un sistema de autorización. Ver [flujo y verificaciones](demo-workspace.md).

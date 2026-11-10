@@ -2,10 +2,10 @@
 
 import { createContext, useContext, useEffect, useRef, useState, type ComponentProps, type CSSProperties, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { ArrowLeft, CircleHelp, Crosshair, Play, X } from "lucide-react";
+import { ArrowLeft, CircleHelp, Crosshair, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ResetDemoButton } from "@/components/showroom/reset-demo-button";
-import { guideForPath, guides, type GuideAction, type GuideId, type GuideStep } from "@/lib/guide/steps";
+import { guideStepUrl, guides, type GuideAction, type GuideId, type GuideStep } from "@/lib/guide/steps";
 import { demoRoutes } from "@/config/routes";
 import { cn } from "@/lib/utils";
 import styles from "./demo-guide.module.css";
@@ -27,7 +27,7 @@ type GuideStartButtonProps = Pick<ComponentProps<typeof Button>, "variant" | "si
 export function GuideStartButton({ guide, children = "Guía de uso", attention, withReset, className, ...props }: GuideStartButtonProps) {
   const { start, active } = useGuide();
   const button = <Button {...props} data-guide-launcher onClick={() => start(guide)} disabled={active}
-    className={cn(className, attention && styles.attention)}><Play aria-hidden />{children}</Button>;
+    className={cn(className, attention && styles.attention)}><CircleHelp aria-hidden />{children}</Button>;
   return withReset ? (
     <div className={styles.startControls}>
       {button}
@@ -58,8 +58,8 @@ export function GuideHelpButton() {
   return (
     <>
       <div className={cn(styles.floatingGuide, active && styles.floatingGuideActive)}>
-        <Button data-guide-launcher variant="outline" className={styles.attention} onClick={() => start(isHome ? "full" : undefined)} disabled={active}>
-          <CircleHelp aria-hidden />Guía de uso
+        <Button data-guide-launcher variant="outline" className={cn(styles.attention, styles.floatingButton)} aria-label="Guía de uso" onClick={() => start(isHome ? "full" : undefined)} disabled={active}>
+          <CircleHelp aria-hidden /><span className={styles.floatingLabel}>Guía de uso</span>
         </Button>
         {showHint && !active && <span className={styles.guideHint} aria-hidden>Estoy aquí para ayudarte</span>}
       </div>
@@ -87,18 +87,18 @@ export function DemoGuideProvider({ children }: { children: ReactNode }) {
     });
   }
 
-  function start(guide = guideForPath(pathname)) {
+  function start(guide: GuideId = "full") {
     returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setRun({ guide, index: 0, completed: [] });
     const first = guides[guide][0];
-    if (pathname !== first.path) router.push(first.path);
+    router.push(guideStepUrl(first), { scroll: false });
   }
 
   function move(index: number) {
     if (!run) return;
     setRun({ ...run, index });
     const next = steps[index];
-    if (next && pathname !== next.path) router.push(next.path);
+    if (next) router.push(guideStepUrl(next), { scroll: false });
   }
 
   useEffect(() => {
@@ -141,7 +141,7 @@ type OverlayProps = {
   step?: GuideStep; onRoute: boolean; index: number; total: number; completed: boolean;
   onClose: () => void; onBack: () => void; onNext: () => void;
 };
-type View = { top: number; left: number; width: number; height: number; panelHeight: number; rect: DOMRect | null };
+type View = { top: number; left: number; width: number; height: number; panelHeight: number; rect: DOMRect | null; expanded: boolean };
 
 function bottomMargin(width: number, height: number) {
   return width >= 768 && height >= 700 ? height * 0.22 : 24;
@@ -150,7 +150,7 @@ function bottomMargin(width: number, height: number) {
 function GuideOverlay({ step, onRoute, index, total, completed, onClose, onBack, onNext }: OverlayProps) {
   const panel = useRef<HTMLDivElement>(null);
   const target = useRef<HTMLElement | null>(null);
-  const [view, setView] = useState<View>({ top: 0, left: 0, width: 390, height: 800, panelHeight: 260, rect: null });
+  const [view, setView] = useState<View>({ top: 0, left: 0, width: 390, height: 800, panelHeight: 260, rect: null, expanded: false });
   const [missing, setMissing] = useState(false);
   const [feedback, setFeedback] = useState<boolean | null>(null);
   const [highlightCount, setHighlightCount] = useState(0);
@@ -179,8 +179,11 @@ function GuideOverlay({ step, onRoute, index, total, completed, onClose, onBack,
     let frame = 0;
     let previousDescription: string | null = null;
     let previousTabIndex: string | null = null;
+    let expandedElement: HTMLElement | null = null;
     const resize = new ResizeObserver(() => schedule());
     function detach() {
+      if (expandedElement) resize.unobserve(expandedElement);
+      expandedElement = null;
       if (!target.current) return;
       resize.unobserve(target.current);
       if (previousDescription === null) target.current.removeAttribute("aria-describedby");
@@ -207,19 +210,38 @@ function GuideOverlay({ step, onRoute, index, total, completed, onClose, onBack,
         }
       }
       const viewport = window.visualViewport;
+      const expanded = found?.querySelector<HTMLElement>("[data-guide-expand]") ?? null;
+      if (expanded !== expandedElement) {
+        if (expandedElement) resize.unobserve(expandedElement);
+        expandedElement = expanded;
+        if (expanded) {
+          resize.observe(expanded);
+          // Leave as much room as possible for the open list above the guide.
+          const top = found!.getBoundingClientRect().top;
+          const desiredTop = (viewport?.offsetTop ?? 0) + 88;
+          if (top > desiredTop) window.scrollBy({ top: top - desiredTop, behavior: "instant" });
+        }
+      }
+      const targetRect = found?.getBoundingClientRect() ?? null;
+      const expandedRect = expanded?.getBoundingClientRect();
+      const rect = targetRect && expandedRect ? DOMRect.fromRect({
+        x: Math.min(targetRect.left, expandedRect.left), y: Math.min(targetRect.top, expandedRect.top),
+        width: Math.max(targetRect.right, expandedRect.right) - Math.min(targetRect.left, expandedRect.left),
+        height: Math.max(targetRect.bottom, expandedRect.bottom) - Math.min(targetRect.top, expandedRect.top),
+      }) : targetRect;
       const next: View = {
         top: viewport?.offsetTop ?? 0, left: viewport?.offsetLeft ?? 0,
         width: viewport?.width ?? window.innerWidth, height: viewport?.height ?? window.innerHeight,
         panelHeight: panel.current?.getBoundingClientRect().height ?? 260,
-        rect: found?.getBoundingClientRect() ?? null,
+        rect, expanded: Boolean(expanded),
       };
       setView((old) => old.top === next.top && old.left === next.left && old.width === next.width && old.height === next.height
-        && old.panelHeight === next.panelHeight && old.rect?.x === next.rect?.x && old.rect?.y === next.rect?.y
+        && old.panelHeight === next.panelHeight && old.expanded === next.expanded && old.rect?.x === next.rect?.x && old.rect?.y === next.rect?.y
         && old.rect?.width === next.rect?.width && old.rect?.height === next.rect?.height ? old : next);
     }
     function schedule() { if (!frame) frame = requestAnimationFrame(measure); }
     const mutations = new MutationObserver(schedule);
-    mutations.observe(document.body, { childList: true, subtree: true });
+    mutations.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["hidden", "data-state"] });
     if (panel.current) resize.observe(panel.current);
     const viewportResize = () => { revealTarget(); schedule(); };
     window.addEventListener("scroll", schedule, true);
@@ -249,8 +271,9 @@ function GuideOverlay({ step, onRoute, index, total, completed, onClose, onBack,
   const margin = bottomMargin(view.width, view.height);
   const panelTop = view.top + Math.max(12, view.height - view.panelHeight - margin);
   const panelWidth = Math.min(480, view.width - 24);
+  const hidePanel = Boolean(view.expanded && view.rect && view.rect.bottom + 12 > panelTop);
   const ringTop = view.rect ? Math.max(view.top + 76, view.rect.top - 6) : 0;
-  const ringBottom = view.rect ? Math.min(panelTop - 12, view.rect.bottom + 6) : 0;
+  const ringBottom = view.rect ? Math.min(hidePanel ? view.top + view.height - 6 : panelTop - 12, view.rect.bottom + 6) : 0;
   const ringLeft = view.rect ? Math.max(view.left + 6, view.rect.left - 6) : 0;
   const ringRight = view.rect ? Math.min(view.left + view.width - 6, view.rect.right + 6) : 0;
   const ready = Boolean(view.rect && onRoute);
@@ -263,9 +286,9 @@ function GuideOverlay({ step, onRoute, index, total, completed, onClose, onBack,
           style={{ top: ringTop, left: ringLeft, width: ringRight - ringLeft, height: ringBottom - ringTop }}>
           {highlightCount > 0 && <span key={highlightCount} className={styles.spotlightPulse} />}
         </div>}
-        <div ref={panel} className={`${styles.panel} ${view.height < 480 ? styles.compact : ""}`} role="dialog" aria-modal="false"
+        <div ref={panel} className={`${styles.panel} ${view.height < 480 ? styles.compact : ""}`} role="dialog" aria-modal="false" aria-hidden={hidePanel || undefined}
           aria-labelledby="guide-title" aria-describedby="guide-description" tabIndex={-1}
-          style={{ top: panelTop, left: view.left + (view.width - panelWidth) / 2, width: panelWidth, maxHeight: view.height - 24 }}>
+          style={{ visibility: hidePanel ? "hidden" : undefined, top: panelTop, left: view.left + (view.width - panelWidth) / 2, width: panelWidth, maxHeight: view.height - 24 }}>
           <div className={styles.heading}>
             <p className={styles.counter}>{finished ? "Recorrido completado" : `Guía · ${index + 1} de ${total}`}</p>
             <Button variant="ghost" size="icon" onClick={onClose} aria-label="Cerrar guía"><X aria-hidden /></Button>

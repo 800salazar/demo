@@ -84,6 +84,7 @@ export function OperationalAssistant() {
     const content = conversationContent.current;
     if (!container || !content) return;
     const observer = new ResizeObserver(() => {
+      if (!container.getClientRects().length) return;
       if (followLatest.current) container.scrollTop = container.scrollHeight;
       if (keepComposerVisible.current && composer.current) {
         const viewport = window.visualViewport;
@@ -184,7 +185,7 @@ export function OperationalAssistant() {
   return (
     <Card className={styles.assistantCard}>
       <CardHeader className={styles.assistantHeader}>
-        <CardTitle className={styles.assistantTitle}>
+        <CardTitle role="heading" aria-level={2} className={styles.assistantTitle}>
           <span className={styles.aiIcon} aria-hidden><Sparkles className="size-5" /></span>
           Asistente IA de producción
         </CardTitle>

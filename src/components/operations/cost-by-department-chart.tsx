@@ -28,7 +28,7 @@ export function CostByDepartmentChart() {
   const maxCost = Math.max(0, ...departments.map((item) => item.actualCost));
   return (
     <Card>
-      <CardHeader><CardTitle>Costo por departamento (MXN)</CardTitle></CardHeader>
+      <CardHeader><CardTitle role="heading" aria-level={2}>Costo por departamento (MXN)</CardTitle></CardHeader>
       <CardContent>
         {data ? (
           <div data-guide="cost-chart" className="space-y-2" aria-label="Costos por departamento">

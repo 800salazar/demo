@@ -10,10 +10,9 @@ El dominio configurado por el propietario en Vercel es **`salazar.red`**. Este d
 | --- | --- |
 | `https://salazar.red/` | Landing breve de Adán Salazar: Conferencia, Perfil, Qué hago y Contacto, con identidad azul y layout independiente. |
 | `https://salazar.red/demo` | Inicio del showroom de demostraciones |
-| `/demo/administracion` | Administración del demo |
-| `/demo/operaciones` | Dashboard, órdenes y asistente operativo |
-| `/demo/ia` | Análisis con IA |
-| `/demo/recorrido` y `/demo/integraciones` | Recorrido y catálogo de integraciones |
+| `/demo/sistema` | Un demo con vistas Operador y Administrador |
+| `/demo/administracion`, `/demo/operaciones`, `/demo/ia`, `/demo/integraciones` | Enlaces anteriores: redirigen al sistema |
+| `/demo/recorrido` | Acceso al recorrido interactivo |
 | `/demo/api/ai` y `/demo/api/health` | Endpoints del demo |
 
 La landing tiene su propio layout en `src/app/(landing)/`. El menú, el pie, la marca y las notificaciones del demo solo se montan en `src/app/demo/layout.tsx`. La raíz no redirige a `/demo` ni carga los datos de demostración. Las antiguas rutas del showroom, como `/ia`, redirigen a su nueva ubicación; las redirecciones son explícitas y no capturan todas las rutas del dominio.
@@ -32,15 +31,16 @@ Referencias para continuar el desarrollo: [arquitectura y límites entre aplicac
 
 ## Funciones disponibles
 
-- Navegación adaptable y restablecimiento con confirmación dentro del contenido, fuera del menú.
-- Gráfica de costo real por departamento e indicadores de órdenes, completadas y costos.
-- Edición de costo real, fecha compromiso y estado de una orden en `/demo/operaciones` y `/demo/ia`. Completar una orden requiere que sus actividades obligatorias estén realizadas.
-- Asistente operativo en ambas pantallas, con preguntas sugeridas y consulta libre. Cada consulta envía el estado actual de las órdenes del visitante.
+- Una entrada «Abrir demo», encabezado compacto y pestañas Operador / Administrador. Ver [demo unificado](docs/demo-workspace.md).
+- Configuración local de nombres y colores de estados y prioridades, conservando las reglas de cierre y referencias.
+- Gráfica de costo real por departamento e indicadores compartidos de órdenes, retrasadas y costo real.
+- Edición de costo real, fecha compromiso y estado de una orden en la vista Operador de `/demo/sistema`. Completar una orden requiere que sus actividades obligatorias estén realizadas.
+- Un único asistente operativo en Operador, con preguntas sugeridas y consulta libre. Cada consulta envía el estado actual de las órdenes del visitante.
 - Métricas recalculadas en el servidor, análisis con Vercel AI Gateway y respuestas alternativas claramente identificadas como cálculos.
 - Aviso cuando una respuesta corresponde a datos anteriores a un cambio.
-- «Guía de uso» es un botón amarillo fijo en la parte superior derecha, con un mensaje ocasional. En la portada inicia el recorrido completo; en las demás pantallas abre la guía contextual. El visitante puede retroceder, omitir pasos y salir.
+- «Guía de uso» es un botón amarillo fijo en la parte superior derecha, con un mensaje ocasional. En la portada inicia el recorrido completo; en el sistema inicia el mismo recorrido de siete pasos. El visitante puede retroceder, omitir pasos y salir.
 
-Las integraciones identifican que aún no están activas. El asistente no realiza cambios ni integra información de Enfoca.
+El asistente no realiza cambios ni integra información de Enfoca.
 
 La guía se configura en `src/lib/guide/steps.ts`; usa objetivos `data-guide` y señales locales después de guardar o recibir una respuesta. No llama al modelo ni altera órdenes automáticamente. La opinión final se conserva solo en el navegador, sin telemetría de visitantes. Ver [guía e identidad visual](docs/brand.md).
 

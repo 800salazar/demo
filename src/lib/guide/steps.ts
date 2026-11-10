@@ -1,55 +1,34 @@
 import { demoRoutes } from "@/config/routes";
 
-export type GuideAction = "order-saved" | "answer-ready";
+export type GuideAction = "order-saved" | "answer-ready" | "catalog-saved" | "view-admin" | "view-operator";
+export type DemoView = "operador" | "administrador";
 export type GuideStep = {
-  id: string;
-  path: string;
-  target: string;
-  title: string;
-  description: string;
-  action?: GuideAction;
+  id: string; path: string; target: string; title: string; description: string;
+  action?: GuideAction; view?: DemoView;
 };
 
-const priorities: GuideStep = {
-  id: "priorities", path: demoRoutes.administration, target: "priorities",
-  title: "Identifica la urgencia", description: "Estas prioridades distinguen las órdenes.",
-};
-const operations: GuideStep[] = [
-  { id: "order", path: demoRoutes.operations, target: "order-select", title: "Elige una orden", description: "Selecciona un folio para revisar sus datos." },
-  { id: "cost", path: demoRoutes.operations, target: "order-cost", title: "Prueba un cambio", description: "Escribe otro costo. Solo cambiarás los datos de tu demo." },
-  { id: "save", path: demoRoutes.operations, target: "order-save", title: "Guarda el cambio", description: "Haz clic en Guardar cambios. Se habilita al editar un campo.", action: "order-saved" },
-  { id: "chart", path: demoRoutes.operations, target: "cost-chart", title: "Comprueba el resultado", description: "La gráfica ya refleja tus cambios. Toca una barra para ver el costo." },
-];
-const ai: GuideStep[] = [
-  { id: "ask", path: demoRoutes.ai, target: "ai-suggestions", title: "Haz una consulta", description: "Elige una pregunta para enviarla al asistente y espera la respuesta.", action: "answer-ready" },
-  { id: "answer", path: demoRoutes.ai, target: "ai-answer", title: "Revisa el análisis", description: "Usa tus órdenes actuales. La etiqueta distingue una respuesta de IA de un resumen calculado." },
+const full: GuideStep[] = [
+  { id: "order", path: demoRoutes.workspace, view: "operador", target: "order-select", title: "Elige una orden", description: "Busca un folio y revisa sus datos." },
+  { id: "edit", path: demoRoutes.workspace, view: "operador", target: "order-edit", title: "Prueba un cambio", description: "Cambia el costo real y guarda la orden.", action: "order-saved" },
+  { id: "ask", path: demoRoutes.workspace, view: "operador", target: "ai-suggestions", title: "Pregunta a la IA", description: "Elige una pregunta. El análisis usará tus cambios.", action: "answer-ready" },
+  { id: "admin", path: demoRoutes.workspace, view: "operador", target: "view-selector", title: "Cambia de perspectiva", description: "Selecciona Administrador para revisar resultados.", action: "view-admin" },
+  { id: "chart", path: demoRoutes.workspace, view: "administrador", target: "cost-chart", title: "Revisa los costos", description: "Toca una barra para ver las órdenes y sus importes." },
+  { id: "settings", path: demoRoutes.workspace, view: "administrador", target: "catalog-settings", title: "Adapta tu sistema", description: "Cambia el nombre o color de un estado y guarda.", action: "catalog-saved" },
+  { id: "operator", path: demoRoutes.workspace, view: "administrador", target: "view-selector", title: "Comprueba el cambio", description: "Vuelve a Operador. Los estados ya usan tu configuración.", action: "view-operator" },
 ];
 
 export const guides = {
-  home: [
-    { id: "modules", path: demoRoutes.home, target: "demo-modules", title: "Elige qué explorar", description: "Cada tarjeta abre una experiencia diferente." },
-    { id: "contact", path: demoRoutes.home, target: "demo-contact", title: "Hablemos de tu proceso", description: "Este botón abre WhatsApp para conversar sobre tu proyecto." },
-  ],
-  administration: [priorities],
-  operations,
-  ai,
-  integrations: [
-    { id: "integrations", path: demoRoutes.integrations, target: "integrations", title: "Conecta tu operación", description: "Estas son opciones de integración. En este demo aún no están activas." },
-  ],
-  full: [priorities, ...operations, ...ai],
+  home: full,
+  full,
+  // Keep the public guide entry points compatible with the former routes.
+  administration: full.slice(4),
+  operations: full,
+  ai: full,
+  integrations: full,
 } satisfies Record<string, GuideStep[]>;
-
 export type GuideId = keyof typeof guides;
-
-export function guideForPath(pathname: string): GuideId {
-  switch (pathname.replace(/\/+$/, "")) {
-    case demoRoutes.administration: return "administration";
-    case demoRoutes.operations: return "operations";
-    case demoRoutes.ai: return "ai";
-    case demoRoutes.integrations: return "integrations";
-    case demoRoutes.home: return "home";
-    default: return "full";
-  }
+export function guideStepUrl(step: GuideStep): string {
+  return step.view ? `${step.path}?vista=${step.view}` : step.path;
 }
 
 /** Local UI signal only; no analytics, payloads, network calls or database access. */

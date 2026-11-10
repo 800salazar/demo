@@ -15,29 +15,27 @@ test("domain root is independent and does not initialize demo data", async ({ pa
   expect(await page.evaluate(() => localStorage.getItem("salazar-demo:data"))).toBeNull();
 });
 
-test("demo navigation stays below /demo and marks only the current page", async ({ page }) => {
+test("one entry opens the shared workspace and navigation stays below /demo", async ({ page }) => {
   await page.goto("/demo");
-  const navigation = page.getByRole("navigation", { name: "Principal" });
-  await expect(navigation.getByRole("link", { name: "Integraciones", exact: true })).toHaveCount(0);
-  await expect(navigation.getByRole("link", { name: "Recorrido de 3 minutos", exact: true })).toHaveCount(0);
-  for (const number of [1, 2, 3]) {
-    await expect(navigation.getByRole("group", { name: `Demo ${number}`, exact: true })).toBeVisible();
-  }
-  await expect(navigation.getByRole("link", { name: "Inicio", exact: true })).toHaveAttribute("aria-current", "page");
-  for (const link of await navigation.getByRole("link").all()) {
-    expect(await link.getAttribute("href")).toMatch(/^\/demo(?:\/|$)/);
-  }
-  await navigation.getByRole("link", { name: "IA empresarial", exact: false }).click();
-  await expect(page).toHaveURL(/\/demo\/ia$/);
-  await expect(navigation.getByRole("link", { name: "Inicio", exact: true })).not.toHaveAttribute("aria-current", "page");
-  await expect(navigation.getByRole("link", { name: "IA empresarial", exact: false })).toHaveAttribute("aria-current", "page");
-  await navigation.getByRole("link", { name: "Inicio", exact: true }).click();
+  await expect(page.getByRole("link", { name: "Abrir demo", exact: true })).toHaveCount(1);
+  await expect(page.getByRole("group", { name: /Demo [123]/ })).toHaveCount(0);
+  await page.getByRole("link", { name: "Abrir demo", exact: true }).click();
+  await expect(page).toHaveURL(/\/demo\/sistema$/);
+  await expect(page.getByRole("tab", { name: "Operador", exact: true })).toHaveAttribute("aria-selected", "true");
+  await page.getByRole("navigation", { name: "Principal" }).getByRole("link", { name: "Inicio", exact: true }).click();
   await expect(page).toHaveURL(/\/demo$/);
 });
 
+for (const [path, view] of [["administracion", "administrador"], ["operaciones", "operador"], ["ia", "operador"]]) {
+  test(`legacy ${path} opens its unified view`, async ({ page }) => {
+    await page.goto(`/demo/${path}`);
+    await expect(page).toHaveURL(new RegExp(`/demo/sistema\\?vista=${view}$`));
+  });
+}
+
 test("legacy links lead to the relocated demo and its 404 stays in the demo", async ({ page }) => {
   await page.goto("/ia");
-  await expect(page).toHaveURL(/\/demo\/ia$/);
+  await expect(page).toHaveURL(/\/demo\/sistema\?vista=operador$/);
   await page.goto("/demo/no-existe");
   await expect(page.getByRole("heading", { name: "No encontramos esta demostración" })).toBeVisible();
   await page.getByRole("link", { name: "Volver al demo" }).click();

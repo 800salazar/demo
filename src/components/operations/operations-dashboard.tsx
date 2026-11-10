@@ -3,6 +3,8 @@
 import { useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
+import theme from "@/components/layout/demo-theme.module.css";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { updateDemoData } from "@/lib/demo/store";
@@ -11,17 +13,19 @@ import { useDemoData } from "@/lib/demo/use-demo-data";
 import { formatCostInput, formatMexicanDate, formatMXN, parseCostInput } from "@/lib/format";
 import { COLOR_STYLES } from "@/lib/demo/colors";
 import { cn } from "@/lib/utils";
+import { ColorBadge } from "@/components/shared/color-badge";
 import { notifyGuideAction } from "@/lib/guide/steps";
 
 const fieldClass = "w-full rounded-lg border bg-background px-3 py-2 text-sm";
 
-function OrderEditor({ order, data }: { order: WorkOrder; data: DemoData }) {
+function OrderEditor({ order, data, onDirty }: { order: WorkOrder; data: DemoData; onDirty: (dirty: boolean) => void }) {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [hasEdits, setHasEdits] = useState(false);
   const [cost, setCost] = useState(() => formatMXN(order.actualCost).replace("$", ""));
   const [dueDate, setDueDate] = useState(order.dueDate);
   const [statusId, setStatusId] = useState(order.statusId);
+  const priority = data.priorities.find((item) => item.id === order.priorityId);
   const selectedStatus = data.statuses.find((status) => status.id === statusId);
   const requiredRemaining = data.checklist.filter((item) => item.orderId === order.id && item.required && !item.done).length;
 
@@ -56,13 +60,15 @@ function OrderEditor({ order, data }: { order: WorkOrder; data: DemoData }) {
       }],
     }));
     setHasEdits(false);
+    onDirty(false);
     setMessage(`${order.folio} actualizada.`);
     notifyGuideAction("order-saved");
   }
 
   return (
-    <form onSubmit={save} onChange={() => { setHasEdits(true); setMessage(""); setError(""); }} className="space-y-4">
+    <form onSubmit={save} onChange={() => { setHasEdits(true); onDirty(true); setMessage(""); setError(""); }} className="space-y-4">
       <p className="text-sm text-muted-foreground"><strong className="font-semibold text-foreground">Editando {order.folio}</strong> · {order.title} · {order.assignee}</p>
+      {priority && <ColorBadge color={priority.color}>{priority.name}</ColorBadge>}
       <div className="grid gap-4 sm:grid-cols-3">
         <label data-guide="order-cost" className="space-y-2 text-sm font-medium">Costo real (MXN)
           <input name="actualCost" type="text" inputMode="decimal" value={cost} maxLength={20} required className={fieldClass}
@@ -132,7 +138,7 @@ function OrderSearch({ orders, order, onSelect }: { orders: WorkOrder[]; order: 
           onBlur={() => setOpen(false)} />
         <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
       </div>
-      {open && <ul id="order-options" role="listbox" aria-label="Órdenes de trabajo" className="absolute z-30 max-h-60 w-full overflow-y-auto rounded-xl border bg-popover p-1 text-popover-foreground shadow-lg">
+      {open && <ul data-guide-expand id="order-options" role="listbox" aria-label="Órdenes de trabajo" className="absolute z-30 max-h-60 w-full overflow-y-auto rounded-xl border bg-popover p-1 text-popover-foreground shadow-lg">
         {matches.length ? matches.map((item, index) => <li key={item.id} id={`order-option-${item.id}`} role="option" aria-selected={item.id === order.id}
           className={cn("min-h-11 cursor-pointer rounded-lg px-3 py-3", index === highlight && "bg-accent text-accent-foreground")}
           onMouseDown={(event) => event.preventDefault()} onClick={() => choose(item)} onMouseEnter={() => setHighlight(index)}>{label(item)}</li>)
@@ -145,24 +151,47 @@ function OrderSearch({ orders, order, onSelect }: { orders: WorkOrder[]; order: 
 export function OperationsDashboard() {
   const data = useDemoData();
   const [selectedId, setSelectedId] = useState("");
+  const [editedOrder, setEditedOrder] = useState<string | null>(null);
+  const [pendingSelection, setPendingSelection] = useState<string | null>(null);
   if (!data) return <Skeleton className="h-72 w-full" aria-label="Cargando órdenes" />;
   const order = data.orders.find((o) => o.id === selectedId) ?? data.orders[0];
-  const completed = data.orders.filter((o) => data.statuses.find((s) => s.id === o.statusId)?.kind === "completed").length;
-  const cost = data.orders.reduce((sum, o) => sum + o.actualCost, 0);
+  const orderKey = order ? `${order.id}:${data.seededAt}` : "";
+  function selectOrder(id: string) {
+    if (id === order?.id) return;
+    if (editedOrder === orderKey) setPendingSelection(id);
+    else setSelectedId(id);
+  }
   return (
-    <div className="space-y-5">
-      <div className="grid gap-3 sm:grid-cols-3">
-        {[ ["Órdenes", data.orders.length], ["Completadas", completed], ["Costo real", formatMXN(cost)] ].map(([label, value]) => (
-          <Card key={label}><CardHeader><CardDescription>{label}</CardDescription><CardTitle className="text-2xl">{value}</CardTitle></CardHeader></Card>
-        ))}
-      </div>
-      <Card>
-        <CardHeader><CardTitle>Editar orden</CardTitle></CardHeader>
+    <div data-guide="order-edit">
+      <Card style={{ overflow: "visible" }}>
+        <CardHeader><CardTitle role="heading" aria-level={2}>Editar orden</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          {order && <OrderSearch orders={data.orders} order={order} onSelect={setSelectedId} />}
-          {order && <OrderEditor key={`${order.id}:${data.seededAt}`} order={order} data={data} />}
+          {order && <OrderSearch orders={data.orders} order={order} onSelect={selectOrder} />}
+          {order && <OrderEditor key={orderKey} order={order} data={data} onDirty={(dirty) => setEditedOrder(dirty ? orderKey : null)} />}
         </CardContent>
       </Card>
+      <AlertDialog open={pendingSelection !== null} onOpenChange={(open) => { if (!open) setPendingSelection(null); }}>
+        <AlertDialogContent className={`${theme.theme} ${theme.resetDialog}`}>
+          <AlertDialogHeader><AlertDialogTitle>¿Cambiar de orden?</AlertDialogTitle><AlertDialogDescription>Tienes cambios sin guardar en {order?.folio}.</AlertDialogDescription></AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Seguir editando</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={() => { if (pendingSelection) setSelectedId(pendingSelection); setEditedOrder(null); setPendingSelection(null); }}>Descartar cambios</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
+}
+
+export function OperationsMetrics() {
+  const data = useDemoData();
+  if (!data) return <Skeleton className="h-24 w-full" aria-label="Cargando indicadores" />;
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Chihuahua" });
+  const late = data.orders.filter((order) => order.dueDate < today && data.statuses.find((s) => s.id === order.statusId)?.kind !== "completed").length;
+  const cost = data.orders.reduce((sum, order) => sum + order.actualCost, 0);
+  return <div className="grid grid-cols-3 gap-2 sm:gap-3" aria-label="Indicadores de órdenes">
+    {[["Órdenes", data.orders.length], ["Retrasadas", late], ["Costo real", formatMXN(cost)]].map(([label, value]) => (
+      <Card key={label}><CardHeader className="px-3 sm:px-5"><CardDescription className="text-xs sm:text-sm">{label}</CardDescription><CardTitle className="break-words text-sm tabular-nums sm:text-xl">{value}</CardTitle></CardHeader></Card>
+    ))}
+  </div>;
 }

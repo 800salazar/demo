@@ -7,14 +7,16 @@ export function ContactFooter() {
   return (
     <footer className={styles.footer} aria-labelledby="demo-contact-title">
       <div className={styles.footerIdentity}>
-        <SalazarLogo variant="black" className={styles.footerLogo} />
+        <a href={siteConfig.website} target="_blank" rel="noopener noreferrer" aria-label="Sitio web de Salazar Consultores" className={styles.footerLogoLink}>
+          <SalazarLogo variant="black" className={styles.footerLogo} />
+        </a>
         <h2 id="demo-contact-title">Estamos para servirte</h2>
       </div>
       <address className={styles.footerLinks}>
         <a href={`mailto:${siteConfig.email}`}><span aria-hidden>📩</span><span>{siteConfig.email}</span></a>
-        <a href={`tel:${siteConfig.phone}`}><span aria-hidden>📞</span><span>{siteConfig.phoneLabel}</span></a>
-        <a href={getWhatsAppUrl()} target="_blank" rel="noopener noreferrer"><span aria-hidden>💬</span><span>WhatsApp</span></a>
-        <a href={siteConfig.website} target="_blank" rel="noopener noreferrer"><span aria-hidden>🌐</span><span>{siteConfig.websiteLabel}</span></a>
+        <a className={styles.footerDesktopLink} href={`tel:${siteConfig.phone}`}><span aria-hidden>📞</span><span>{siteConfig.phoneLabel}</span></a>
+        <a className={styles.footerWhatsApp} href={getWhatsAppUrl()} target="_blank" rel="noopener noreferrer"><span aria-hidden>💬</span><span>WhatsApp</span></a>
+        <a className={styles.footerDesktopLink} href={siteConfig.website} target="_blank" rel="noopener noreferrer"><span aria-hidden>🌐</span><span>{siteConfig.websiteLabel}</span></a>
       </address>
     </footer>
   );

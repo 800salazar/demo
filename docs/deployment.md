@@ -4,7 +4,7 @@ Esta guía conserva la arquitectura acordada: **Salazar Demo y Enfoca comparten 
 
 ## Dominio de publicación
 
-El propietario indicó que `salazar.red` ya está asignado al proyecto en Vercel. La versión de este repositorio debe servir la landing independiente en `/` y el showroom en `/demo`, con la IA en `/demo/ia` y sus endpoints en `/demo/api/*`.
+El propietario indicó que `salazar.red` ya está asignado al proyecto en Vercel. La versión de este repositorio debe servir la landing independiente en `/` y el showroom en `/demo`, con la pantalla unificada en `/demo/sistema` y sus endpoints en `/demo/api/*`.
 
 No cambiar el dominio a otro proyecto ni configurar un `basePath` global. El cambio se implementa con carpetas y layouts del App Router dentro del despliegue existente. La raíz contiene el perfil profesional de Adán Salazar, con contenido público estático y diseño azul inspirado en `layout2`. No requiere nuevas variables ni migraciones de Supabase. Ver [edición del perfil](profile.md).
 
@@ -92,14 +92,14 @@ Después de implementar el perfil personal, las mismas 40 pruebas, TypeScript y 
 | Abrir la raíz en celular | Tarjeta de perfil adaptable y menú inferior desplegable; sin desplazamiento horizontal |
 | Comprobar los recursos de `landing` sin iniciar sesión | Foto `yo.jpeg`, icono y logotipos públicos accesibles; no se necesitan claves para servirlos |
 | Pulsar «Imprimir perfil» | Diálogo de impresión con una versión clara del perfil, apta para guardar como PDF |
-| Abrir `https://salazar.red/demo` y navegar entre módulos | Todos los enlaces del showroom permanecen bajo `/demo`; «Inicio» vuelve al showroom |
-| Entrar por un enlace anterior como `/ia` | Redirige a `/demo/ia` |
+| Abrir `https://salazar.red/demo` y abrir el demo y cambiar de vista | Todos los enlaces del showroom permanecen bajo `/demo`; «Inicio» vuelve al showroom |
+| Entrar por un enlace anterior como `/ia` | Redirige a `/demo/sistema?vista=operador` |
 | Abrir una pestaña nueva del perfil y del demo | Icono de Salazar; el enlace de icono usa el PNG público versionado y `/favicon.ico` redirige al mismo |
-| Pulsar «Guía de uso» en un módulo y luego Escape, en escritorio y móvil | Resalta un control real, se puede operar y la ayuda se cierra devolviendo el foco |
+| Pulsar «Guía de uso» en el sistema y luego Escape, en escritorio y móvil | Resalta un control real, se puede operar y la ayuda se cierra devolviendo el foco |
 | Pulsar «Guía de uso» en la portada | El botón es amarillo con efecto de latido; inicia el recorrido completo sin abrir primero otra pantalla de instrucciones. Permite guardar un cambio, consultar al asistente, retroceder y omitir; no escribe ni consulta automáticamente |
 | Revisar «Restablecer demo» en escritorio y móvil | Aparece debajo de la guía, fuera del menú, y pide confirmación antes de borrar los cambios |
 | Abrir una URL inexistente bajo `/demo` | Muestra el error del demo y permite volver a `/demo` |
-| Consultar `/demo/ia` por órdenes retrasadas | Respuesta basada en las órdenes ficticias del visitante |
+| Consultar el asistente en Operador por órdenes retrasadas | Respuesta basada en las órdenes ficticias del visitante |
 | Comprobar el origen de la respuesta | La interfaz muestra «IA · Verifica antes de decidir»; en `/demo/api/ai`, `source` vale `ai` |
 | Modificar el costo de una orden y volver a consultar | La siguiente respuesta refleja el nuevo costo |
 | Abrir otro navegador o una ventana incógnita | Mantiene su propio escenario, sin copiar los cambios del primer visitante |
@@ -116,3 +116,14 @@ Para diagnosticar cuotas, los registros del servidor muestran `[api/ai] Quota un
 El registro del servidor `[api/ai] Gateway unavailable` clasifica fallos como `authentication`, `timeout_or_abort`, `empty_response` o `gateway_error` y, cuando está disponible, añade el código HTTP. No registra claves, preguntas, respuestas ni mensajes del proveedor. En desarrollo local, una prueba de Gateway el 2026-11-07 devolvió un error de autenticación con la clave presente en `.env.local`; verificar o sustituir esa clave de AI Gateway y reiniciar el servidor. La configuración de Production es independiente y no se comprobó desde esta sesión.
 
 El endpoint `/demo/api/health` comprueba el esquema previsto para snapshots con la clave publishable. Su campo `supabase.schemaReady` no certifica que `consume_demo_ai_quota` exista, y que `demo_sessions` todavía no esté creada no impide analizar las órdenes locales si las cuotas y Gateway están operativos.
+
+## Validación del demo unificado (2026-11-08)
+
+- `/demo` tiene una única entrada «Abrir demo». `/demo/sistema` conserva dos vistas sobre el mismo escenario local, sin autenticación adicional.
+- Verificar que los borradores, la orden seleccionada y la conversación sobrevivan al cambiar de vista; que cambiar de orden con edición pendiente requiera confirmación.
+- En Administrador, editar nombre/color de un estado, volver a Operador, comprobar el selector y recargar para verificar persistencia. Restablecer debe recuperar catálogos y órdenes juntos.
+- Recorrer los siete pasos: selección, edición/guardado, consulta, Administrador, gráfica, configuración y regreso a Operador. Solo las acciones del visitante escriben o consultan.
+- Las antiguas rutas de administración, operaciones, IA e integraciones redirigen; `/` y los endpoints existentes conservan su función.
+- No hay variables nuevas, migraciones ni cambios remotos de Supabase por esta reorganización. Las restricciones del navegador y las pruebas realizadas se registran en `docs/demo-workspace.md`.
+
+Verificación final de esta reorganización: 53 pruebas unitarias, ESLint, TypeScript, build alternativo con webpack y build habitual con Turbopack aprobados. Este último requirió regenerar su caché local de producción. La ejecución de Chrome y la revisión visual siguen pendientes; no se ha desplegado esta versión.

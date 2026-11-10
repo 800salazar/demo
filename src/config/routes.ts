@@ -1,6 +1,7 @@
 /** The domain root belongs to the independent landing; the showroom lives entirely under /demo. */
 export const demoRoutes = {
   home: "/demo",
+  workspace: "/demo/sistema",
   administration: "/demo/administracion",
   operations: "/demo/operaciones",
   ai: "/demo/ia",

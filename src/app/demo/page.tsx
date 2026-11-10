@@ -1,7 +1,10 @@
 import { ContactCta } from "@/components/showroom/contact-cta";
-import { DemoCard } from "@/components/showroom/demo-card";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { demoRoutes } from "@/config/routes";
 import { ResetDemoButton } from "@/components/showroom/reset-demo-button";
-import { demoModules } from "@/config/site";
+import { GuideStartButton } from "@/components/guide/demo-guide";
 import { SalazarLogo } from "@/components/shared/salazar-logo";
 import { ClientsVideo } from "@/components/showroom/clients-video";
 import styles from "@/components/layout/demo-theme.module.css";
@@ -17,25 +20,12 @@ export default function HomePage() {
             Menos errores. Más control.
           </p>
           <div className={styles.heroActions}>
+            <GuideStartButton guide="full" variant="outline" attention />
+            <Button asChild variant="outline" className={styles.heroPrimary}><Link href={demoRoutes.workspace}>Abrir demo<ArrowRight aria-hidden /></Link></Button>
             <ResetDemoButton variant="ghost" />
           </div>
         </div>
         <ClientsVideo />
-      </section>
-
-      <section id="demos" aria-labelledby="demos-title" className={styles.sectionAnchor}>
-        <div className={styles.sectionHeading}>
-          <h2 id="demos-title">Explora los demos</h2>
-        </div>
-        <div data-guide="demo-modules" className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {demoModules.map((module) => (
-            <DemoCard
-              key={module.href}
-              module={module}
-              className={module.number === 3 ? "md:col-span-2 xl:col-span-1" : undefined}
-            />
-          ))}
-        </div>
       </section>
 
       <ContactCta />

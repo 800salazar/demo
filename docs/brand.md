@@ -7,12 +7,12 @@ Indicaciones del propietario aplicadas al showroom `/demo` el **2026-11-06**. El
 | Uso | Degradado | Texto |
 | --- | --- | --- |
 | Acentos visuales y contenedores de iconos | `#8cc3fcff` → `#2c80e1ff` | Blanco en los iconos; etiquetas legibles fuera del acento |
-| Elementos clave, fondo del menú lateral y botones principales | `#0057b8e6` → `#01172fe6` | Blanco |
-| Sección activa del menú | `#8cc3fcff` → `#2c80e1ff`, borde e indicador lateral | Azul marino `#01172f`, con marca visible y `aria-current` |
+| Elementos clave, pestaña activa y botones principales | `#0057b8e6` → `#01172fe6` | Blanco |
+| Selección de vista | `#8cc3fcff` → `#2c80e1ff`, borde e indicador lateral | Azul marino `#01172f`, con marca visible y `aria-current` |
 | Portada y cierre comercial | Degradado oscuro sobre una base azul marino, con luz y retícula sutiles | Blanco y azul claro para énfasis |
 | Tarjetas y encabezado móvil | Fondos claros, bordes suaves, sombras discretas | Azul marino |
 
-El diseño es moderno, futurista y minimalista: paneles redondeados, jerarquía clara y movimiento discreto. Los tokens y estilos están en `src/components/layout/demo-theme.module.css`. Se aplican al layout del demo y al menú móvil que se monta en un portal; no se escriben sobre los colores globales de la landing personal.
+El diseño es moderno, futurista y minimalista: paneles redondeados, jerarquía clara y movimiento discreto. Los tokens y estilos están en `src/components/layout/demo-theme.module.css`. Se aplican al layout del demo y sus diálogos; no se escriben sobre los colores globales de la landing personal.
 
 ## Material proporcionado
 
@@ -22,8 +22,8 @@ Los recursos están en el bucket público `landing` del proyecto Supabase compar
 | --- | --- |
 | `animo-stairway-720p.webm` | Video de clientes en la primera sección, junto a la presentación del showroom |
 | `icon.png` | Icono del sitio en las páginas del demo, definido en metadata |
-| `logonew2025-azul.png` | Marca en el encabezado móvil claro |
-| `logonew2025-blanco.png` | Marca en el menú lateral, el panel móvil y los degradados oscuros de portada y contacto |
+| `logonew2025-azul.png` | Marca en el encabezado claro |
+| `logonew2025-blanco.png` | Marca en los degradados oscuros de portada y contacto |
 | `logonew2025-negro.png` | Marca sobre la superficie clara del pie |
 
 La portada usa el video en formato **1:1**, sin recortarlo, con controles para pausar, reproducción silenciosa, bucle y soporte para reproducción dentro de la página en móvil. Precarga metadatos e intenta reproducirse al montar; con movimiento reducido se deja al usuario iniciar la reproducción. Un cambio a movimiento reducido pausa el video y una pausa manual no se reinicia por actualizaciones de datos del demo.
@@ -36,7 +36,7 @@ El perfil personal sigue exportando `profileAssets` y `profileMedia` con las mis
 
 ## Contacto comercial confirmado
 
-El pie de todas las pantallas muestra el logo negro, «Estamos para servirte» y los cuatro enlaces de contacto dispuestos horizontalmente. El diseño es compacto; en móvil permite que los contactos se repartan en las filas necesarias sin desbordarse ni convertirse en una columna de bloques. Se retiró la leyenda «Demostración de Salazar Consultores · Todos los datos son ficticios» del pie.
+En escritorio el pie muestra el logo negro, «Estamos para servirte» y cuatro enlaces horizontales. En móvil tiene dos filas: logo enlazado al sitio corporativo y, debajo, correo y WhatsApp. Se retiró la leyenda «Demostración de Salazar Consultores · Todos los datos son ficticios» del pie.
 
 | Enlace | Destino |
 | --- | --- |
@@ -52,8 +52,7 @@ El componente del pie está en `src/components/layout/contact-footer.tsx`. Su in
 ## Uso móvil y prevención de errores (poka-yoke)
 
 - Controles y enlaces de contacto con al menos 44 px de altura táctil; campos a 16 px en móvil para evitar el zoom automático de iOS.
-- Menú lateral y panel móvil con fondo degradado oscuro. La selección tiene otro degradado, texto de alto contraste, marca de verificación, borde e indicador lateral; no depende únicamente del color. El contraste mínimo del texto activo contra los extremos del degradado es aproximadamente 4.53:1.
-- Panel móvil limitado al ancho y alto visibles, con áreas seguras, navegación desplazable y botón de cierre de 44 px. Se cierra al elegir una sección y conserva los comportamientos de foco y Escape del diálogo.
+- Encabezado compacto y pestañas Operador / Administrador con nombres, iconos, selección visible y navegación por teclado; sin menú lateral ni drawer móvil.
 - El editor identifica el folio de la orden. Guardar está deshabilitado hasta editar un campo y vuelve a deshabilitarse tras guardar para evitar escrituras repetidas.
 - Los estados completados se deshabilitan si hay actividades obligatorias pendientes y se explica el motivo antes de guardar. La validación del manejador sigue activa como segunda comprobación.
 - Restablecer datos requiere confirmación; el botón de confirmación tiene aspecto destructivo y el cuadro se adapta al espacio móvil.
@@ -65,17 +64,17 @@ Mostrar solo lo necesario para elegir, actuar o prevenir un error. Evitar encabe
 
 El «Asistente IA de producción» usa un icono con destellos ocasionales para facilitar su descubrimiento. La animación respeta la preferencia de movimiento reducido y no altera el funcionamiento del asistente.
 
-La conversación muestra como máximo los dos intercambios más recientes mediante burbujas dentro de una ventana gris de altura limitada. Las sugerencias acompañan al campo de pregunta; la ventana sigue la respuesta al crecer y el campo se mantiene visible cuando el visitante no se desplaza manualmente. Los intercambios se guardan únicamente en memoria del componente y desaparecen al recargar. El intercambio anterior pasa a un tono más tenue y el nuevo aparece con movimiento suave. Se interpreta únicamente la negrita marcada con `**`; el texto se presenta como texto seguro, sin ejecutar HTML. Copiar usa la respuesta completa sin marcadores y reintentar vuelve a consultar con el estado actual de las órdenes. Cada solicitud se analiza de forma independiente: la conversación visual no se envía como historial al modelo ni se guarda en Supabase.
+La conversación muestra como máximo los dos intercambios más recientes mediante burbujas dentro de una tarjeta morada de altura limitada, con burbujas claras y controles de alto contraste. Las sugerencias acompañan al campo de pregunta; la ventana sigue la respuesta al crecer y el campo se mantiene visible cuando el visitante no se desplaza manualmente. Los intercambios se guardan únicamente en memoria del componente y desaparecen al recargar. El intercambio anterior pasa a un tono más tenue y el nuevo aparece con movimiento suave. Se interpreta únicamente la negrita marcada con `**`; el texto se presenta como texto seguro, sin ejecutar HTML. Copiar usa la respuesta completa sin marcadores y reintentar vuelve a consultar con el estado actual de las órdenes. Cada solicitud se analiza de forma independiente: la conversación visual no se envía como historial al modelo ni se guarda en Supabase.
 
 Conservar los nombres de los campos, las etiquetas accesibles, el folio, los errores y motivos de bloqueo, la confirmación de restablecer y el origen de las respuestas. Se retiró del menú el aviso de datos ficticios y guardado local; el asistente sigue identificando las órdenes como ficticias. El pie mantiene los contactos acordados.
 
 ## Ayuda interactiva
 
-«Guía de uso» permanece fija en la parte superior derecha del demo; en móvil aparece debajo del encabezado para dejar libre el menú. En la portada inicia el recorrido completo y en los módulos abre la guía contextual. El botón amarillo conserva el latido y, ocasionalmente, muestra durante unos segundos «Estoy aquí para ayudarte». El acceso se oculta mientras la guía está activa. Con movimiento reducido permanece amarillo, sin animación. `/demo/recorrido` sigue disponible directamente. Los pasos se configuran en `src/lib/guide/steps.ts`.
+«Guía de uso» permanece fija en la parte superior derecha del demo; en móvil muestra solo el icono con nombre accesible y en escritorio conserva el texto. La portada añade una segunda entrada animada. Ambos inician el recorrido unificado de siete pasos. El botón amarillo conserva el latido y, ocasionalmente, muestra durante unos segundos «Estoy aquí para ayudarte». El acceso se oculta mientras la guía está activa. Con movimiento reducido permanece amarillo, sin animación. `/demo/recorrido` sigue disponible directamente. Los pasos se configuran en `src/lib/guide/steps.ts`.
 
 «Restablecer demo» aparece en el contenido de la portada y los módulos; se desplaza con la página. No está en el menú lateral ni en el panel móvil. Conserva la confirmación y se deshabilita mientras la guía está activa.
 
-La portada elimina «Sin registro», el bloque «Conecta tus sistemas» y «Tu demo en cifras». Conserva los módulos, el video y la sección comercial, cuyo enlace «WhatsApp» usa el formato sencillo del pie. En la navegación quedan Inicio y tres grupos con divisor y etiqueta «Demo 1», «Demo 2», «Demo 3», cada uno con el módulo correspondiente debajo; se retiran Integraciones y el enlace adicional al recorrido.
+La portada conserva video, guía, una única entrada «Abrir demo» y contacto. La pantalla `/demo/sistema` tiene dos vistas complementarias: Operador con editor y asistente; Administrador con gráfica y configuración. La navegación Demo 1/2/3 se retiró. Ver [demo unificado](demo-workspace.md).
 
 El contorno destaca el objetivo real (`data-guide`), conserva sus controles disponibles y desplaza el contenido para dejar espacio al panel. Se recalcula al desplazar, redimensionar y abrir el teclado móvil usando `visualViewport`. El panel es un diálogo no modal: permite retroceder, omitir, cerrar, usar Escape o llevar el foco al control resaltado. Al cerrar devuelve el foco al acceso a la ayuda; los atributos temporales del objetivo se restauran.
 
