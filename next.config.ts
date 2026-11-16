@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
     remotePatterns: Object.values(profileAssets).map((url) => new URL(url)),
   },
   redirects: async () => legacyDemoRedirects,
+  experimental: { agentUpgrade: "security" },
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {
