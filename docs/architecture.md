@@ -22,7 +22,7 @@ El despliegue de este repositorio usa el dominio `salazar.red` asignado por el p
 | Ubicación | Función |
 | --- | --- |
 | `salazar.red/` · `src/app/(landing)/` | Perfil profesional de Adán Salazar y herramienta de conferencia para estudiantes en `#conferencia`, con identidad azul y layout propio. No monta datos ni navegación de Demo o Enfoca. |
-| `salazar.red/demo` · `src/app/demo/` | Portada pública y sistema unificado con dos vistas, más sus APIs |
+| `salazar.red/demo` · `src/app/demo/` | Portada pública y sistema unificado con tres vistas, más sus APIs |
 | `src/app/layout.tsx` | Estructura HTML, fuentes y estilos generales; no monta el menú ni los datos del demo |
 | `src/app/demo/layout.tsx` | Encabezado, marca, pie y notificaciones, exclusivos de `/demo` |
 
@@ -78,8 +78,12 @@ Ver [despliegue y verificaciones](deployment.md) para los pasos operativos y [RE
 
 ## Demo unificado
 
-Desde el 2026-11-08, `/demo/sistema` reemplaza las tres experiencias anteriores. `?vista=operador` muestra edición y chat; `?vista=administrador` muestra costos y catálogos. Las rutas anteriores redirigen. El shell utiliza encabezado y acceso a Inicio, sin menú lateral.
+Desde el 2026-11-08, `/demo/sistema` reemplaza las tres experiencias anteriores. `?vista=operador` muestra solicitudes y edición; `?vista=administrador` muestra costos y catálogos; `?vista=direccion` muestra indicadores y actividad. El chat es compartido y permanece a la derecha. Las rutas anteriores redirigen. El shell utiliza encabezado y acceso a Inicio, sin menú lateral.
 
-`DemoWorkspace` conserva ambos paneles montados con `forceMount` y oculta el inactivo mediante `hidden`, preservando borradores y conversación temporal. El cambio manual de pestaña usa History API integrada con Next, sin solicitudes a Supabase. La guía navega a la misma pantalla con la vista de cada paso y observa los cambios de visibilidad.
+`DemoWorkspace` conserva los tres paneles montados con `forceMount` y oculta el inactivo mediante `hidden`, preservando borradores y conversación temporal. El cambio manual de pestaña usa History API integrada con Next, sin solicitudes a Supabase. La guía navega a la misma pantalla con la vista de cada paso y observa los cambios de visibilidad.
 
 `editCatalogItem` valida nombres y colores y conserva IDs, `kind`, orden y referencias. Las escrituras usan el store y la versión de datos existentes: no se necesitan migraciones ni descartar los datos del visitante. Los nombres actualizados forman parte del snapshot que recibe el asistente. Las vistas simulan responsabilidades, sin conceder privilegios ni sustituir un sistema de autorización. Ver [flujo y verificaciones](demo-workspace.md).
+
+## Operación de planta (2026-11-16)
+
+El asistente permanece montado fuera de las pestañas Operador/Administrador/Dirección. Tabla, PDF y gráficos consumen el mismo store del visitante. `workflow.ts` valida solicitudes y checklist; `report.ts` crea PDF local bajo demanda. Los campos opcionales `statusLabel`/`priorityLabel` conservan nombres anteriores según la decisión de renombrado, manteniendo la versión de datos. El snapshot de IA incluye fechas, pendientes de checklist y dos cambios recientes por orden para contextualizar consultas; el servidor calcula la serie de altas/cierres. No son series de costo histórico ni nuevas integraciones. Ver `demo-workspace.md`.

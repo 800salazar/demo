@@ -11,7 +11,8 @@ test("Salazar icons are declared on both pages and at the conventional favicon U
   }
 });
 
-test("the unified guide follows edits, AI, administrator configuration and return to operator", async ({ page }) => {
+test("the guide follows operations, AI, catalogs, direction and PDF", async ({ page }) => {
+  await page.route("**/demo/api/ai", route => route.fulfill({ json: { source: "ai", answer: "Análisis de las órdenes actuales.", asOf: new Date().toISOString() } }));
   let requests = 0;
   page.on("request", (request) => { if (request.url().endsWith("/demo/api/ai")) requests++; });
   await page.goto("/demo");
@@ -37,6 +38,8 @@ test("the unified guide follows edits, AI, administrator configuration and retur
   await page.getByRole("button", { name: "Guardar cambios", exact: true }).click();
   await expect(guide.getByText("Listo. Puedes continuar.", { exact: true })).toBeVisible();
   await guide.getByRole("button", { name: "Siguiente", exact: true }).click();
+  await expect(guide.getByRole("heading", { name: "Cierra sin omisiones" })).toBeVisible();
+  await guide.getByRole("button", { name: "Siguiente", exact: true }).click();
   expect(requests).toBe(0);
   const response = page.waitForResponse((response) => response.url().endsWith("/demo/api/ai"));
   await page.getByRole("button", { name: "Sobrecostos", exact: true }).click();
@@ -46,13 +49,22 @@ test("the unified guide follows edits, AI, administrator configuration and retur
   await page.getByRole("tab", { name: "Administrador", exact: true }).click();
   await expect(guide.getByText("Listo. Puedes continuar.", { exact: true })).toBeVisible();
   await guide.getByRole("button", { name: "Siguiente", exact: true }).click();
-  await expect(guide.getByRole("heading", { name: "Revisa los costos" })).toBeVisible();
-  await guide.getByRole("button", { name: "Siguiente", exact: true }).click();
-  await page.getByLabel("Estado 1 color", { exact: true }).selectOption("violet");
+
+  await page.getByRole("button", { name: "Editar estado 1", exact: true }).click();
+  await page.getByRole("group", { name: "Estado 1 color" }).getByRole("radio", { name: "Violeta" }).check();
   await page.getByRole("button", { name: "Guardar estado 1", exact: true }).click();
   await expect(guide.getByText("Listo. Puedes continuar.", { exact: true })).toBeVisible();
   await guide.getByRole("button", { name: "Siguiente", exact: true }).click();
-  await page.getByRole("tab", { name: "Operador", exact: true }).click();
+  await expect(guide.getByRole("heading", { name: "Encuentra lo importante" })).toBeVisible();
+  await guide.getByRole("button", { name: "Siguiente", exact: true }).click();
+  await page.getByRole("tab", { name: "Dirección", exact: true }).click();
+  await expect(guide.getByText("Listo. Puedes continuar.", { exact: true })).toBeVisible();
+  await guide.getByRole("button", { name: "Siguiente", exact: true }).click();
+  await expect(guide.getByRole("heading", { name: "Entiende cada pico" })).toBeVisible();
+  await guide.getByRole("button", { name: "Siguiente", exact: true }).click();
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Reporte PDF", exact: true }).click();
+  expect((await download).suggestedFilename()).toBe("salazar-reporte-operativo.pdf");
   await expect(guide.getByText("Listo. Puedes continuar.", { exact: true })).toBeVisible();
   await guide.getByRole("button", { name: "Terminar", exact: true }).click();
   await guide.getByRole("button", { name: "La guía fue útil", exact: true }).click();
@@ -87,7 +99,10 @@ test.describe("guide on a small phone", () => {
     await guide.getByRole("button", { name: "Siguiente", exact: true }).click();
     await expect(guide.getByRole("button", { name: "Siguiente", exact: true })).toBeDisabled();
     await guide.getByRole("button", { name: "Omitir", exact: true }).click();
+    await expect(guide.getByRole("heading", { name: "Cierra sin omisiones" })).toBeVisible();
+    await guide.getByRole("button", { name: "Siguiente", exact: true }).click();
     await expect(guide.getByRole("heading", { name: "Pregunta a la IA" })).toBeVisible();
+    await expect(page.getByLabel("Tu pregunta", { exact: true })).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(guide).toHaveCount(0);
     await expect(cost).toHaveValue(initial);

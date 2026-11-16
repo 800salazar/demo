@@ -1,46 +1,103 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Tabs } from "radix-ui";
-import { ClipboardList, SlidersHorizontal } from "lucide-react";
-import { OperationsDashboard, OperationsMetrics } from "@/components/operations/operations-dashboard";
+import { ClipboardList, SlidersHorizontal, ChartNoAxesCombined, Download, Sparkles, X } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { OperationsDashboard, OperationsMetrics, type OrderEditorControl } from "@/components/operations/operations-dashboard";
 import { CostByDepartmentChart } from "@/components/operations/cost-by-department-chart";
-import { OperationalAssistant } from "@/components/ai/operational-assistant";
+import { NewOrderForm } from "@/components/operations/new-order";
+import { OperationalAssistant, type AssistantControl } from "@/components/ai/operational-assistant";
+import { ChangeHistory } from "@/components/admin/change-history";
 import { CatalogSettings } from "@/components/admin/catalog-settings";
+import { getSnapshot } from "@/lib/demo/store";
 import { demoRoutes } from "@/config/routes";
 import { notifyGuideAction } from "@/lib/guide/steps";
+import { OrdersTable } from "./orders-table";
+import { DirectorDashboard } from "./director-dashboard";
 import styles from "./demo-workspace.module.css";
 
 export function DemoWorkspace() {
   const params = useSearchParams();
-  const view = params.get("vista") === "administrador" ? "administrador" : "operador";
+  const requested = params.get("vista");
+  const view = requested === "administrador" || requested === "direccion" ? requested : "operador";
+  const [aiOpen, setAiOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const assistant = useRef<AssistantControl>(null);
+  const editor = useRef<OrderEditorControl>(null);
+  const launcher = useRef<HTMLButtonElement>(null);
+  const rail = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    function sizePanel() {
+      rail.current?.style.setProperty("--assistant-viewport", `${viewport?.height ?? window.innerHeight}px`);
+      rail.current?.style.setProperty("--assistant-bottom", `${Math.max(8, window.innerHeight - (viewport?.height ?? window.innerHeight) - (viewport?.offsetTop ?? 0) + 8)}px`);
+    }
+    sizePanel();
+    viewport?.addEventListener("resize", sizePanel);
+    viewport?.addEventListener("scroll", sizePanel);
+    return () => { viewport?.removeEventListener("resize", sizePanel); viewport?.removeEventListener("scroll", sizePanel); };
+  }, []);
+  useEffect(() => {
+    function guideTarget(event: Event) { setAiOpen(String((event as CustomEvent).detail).startsWith("ai-")); }
+    window.addEventListener("salazar:guide-target", guideTarget);
+    return () => window.removeEventListener("salazar:guide-target", guideTarget);
+  }, []);
   function changeView(next: string) {
-    // Native history integrates with Next and retains the editor and chat in memory.
     window.history.pushState(null, "", `${demoRoutes.workspace}?vista=${next}`);
-    notifyGuideAction(next === "administrador" ? "view-admin" : "view-operator");
+    notifyGuideAction(next === "direccion" ? "view-director" : next === "administrador" ? "view-admin" : "view-operator");
   }
-  return (
-    <div className={styles.workspace}>
-      <h1 className={styles.title}>Control de órdenes</h1>
-      <Tabs.Root value={view} onValueChange={changeView}>
-        <Tabs.List aria-label="Vista del demo" className={styles.viewSelector} data-guide="view-selector">
-          <Tabs.Trigger value="operador" className={styles.viewButton}><ClipboardList aria-hidden />Operador</Tabs.Trigger>
-          <Tabs.Trigger value="administrador" className={styles.viewButton}><SlidersHorizontal aria-hidden />Administrador</Tabs.Trigger>
-        </Tabs.List>
-        <OperationsMetrics />
-        <Tabs.Content value="operador" forceMount hidden={view !== "operador"} className={styles.panel}>
-          <div className={styles.operatorGrid}>
-            <OperationsDashboard />
-            <OperationalAssistant />
-          </div>
-        </Tabs.Content>
-        <Tabs.Content value="administrador" forceMount hidden={view !== "administrador"} className={styles.panel}>
-          <div className={styles.adminGrid}>
-            <CostByDepartmentChart />
-            <CatalogSettings />
-          </div>
-        </Tabs.Content>
-      </Tabs.Root>
+  function ask(question: string) { setAiOpen(true); assistant.current?.askQuestion(question); }
+  function edit(id: string) {
+    changeView("operador"); editor.current?.selectOrder(id);
+    requestAnimationFrame(() => document.querySelector('[data-guide="order-edit"]')?.scrollIntoView({ block: "start", behavior: "instant" }));
+  }
+  async function download() {
+    const snapshot = getSnapshot();
+    if (!snapshot || exporting) return;
+    setExporting(true);
+    try {
+      const { buildOperationalPdf } = await import("@/lib/demo/report");
+      buildOperationalPdf(snapshot).save("salazar-reporte-operativo.pdf");
+      notifyGuideAction("report-ready");
+    } catch { toast.error("No se pudo generar el PDF. Intenta de nuevo."); }
+    finally { setExporting(false); }
+  }
+  return <div className={styles.workspace}>
+    <div className={styles.workspaceGrid}>
+      <div className={styles.workArea}>
+        <div className={styles.topline}><div><p className={styles.eyebrow}>Operación de planta</p><h1 className={styles.title}>Control de órdenes</h1></div>
+          <Button data-guide="report-download" variant="outline" disabled={exporting} onClick={() => void download()}><Download aria-hidden />{exporting ? "Generando…" : "Reporte PDF"}</Button>
+        </div>
+        <Tabs.Root value={view} onValueChange={changeView}>
+          <Tabs.List aria-label="Vista del demo" className={styles.viewSelector} data-guide="view-selector">
+            <Tabs.Trigger value="operador" className={styles.viewButton}><ClipboardList aria-hidden />Operador</Tabs.Trigger>
+            <Tabs.Trigger value="administrador" className={styles.viewButton}><SlidersHorizontal aria-hidden />Administrador</Tabs.Trigger>
+            <Tabs.Trigger value="direccion" className={styles.viewButton}><ChartNoAxesCombined aria-hidden />Dirección</Tabs.Trigger>
+          </Tabs.List>
+          {view !== "direccion" && <OperationsMetrics />}
+          <Tabs.Content value="operador" forceMount hidden={view !== "operador"} className={styles.panel}>
+            <NewOrderForm onCreated={edit} />
+            <OperationsDashboard controlRef={editor} onAsk={ask} />
+          </Tabs.Content>
+          <Tabs.Content value="administrador" forceMount hidden={view !== "administrador"} className={styles.panel}>
+            <CatalogSettings /><ChangeHistory />
+          </Tabs.Content>
+          <Tabs.Content value="direccion" forceMount hidden={view !== "direccion"} className={styles.panel}>
+            <DirectorDashboard onAsk={ask} /><CostByDepartmentChart onAsk={ask} />
+          </Tabs.Content>
+        </Tabs.Root>
+        <OrdersTable onEdit={edit} onAsk={ask} />
+      </div>
+      <aside ref={rail} data-guide-fixed id="workspace-assistant" className={styles.assistantRail} data-open={aiOpen} aria-label="Asistente de la operación" onKeyDown={event => {
+        if (event.key === "Escape" && window.matchMedia("(max-width: 1099px)").matches) { setAiOpen(false); launcher.current?.focus(); }
+      }}>
+        <div className={styles.mobileClose}><Button variant="ghost" onClick={() => { setAiOpen(false); launcher.current?.focus(); }}><X aria-hidden />Volver a la operación</Button></div>
+        <OperationalAssistant controlRef={assistant} />
+      </aside>
     </div>
-  );
+    <button ref={launcher} className={styles.mobileAiButton} aria-controls="workspace-assistant" aria-expanded={aiOpen} onClick={() => { setAiOpen(!aiOpen); if (!aiOpen) requestAnimationFrame(() => document.getElementById("operational-question")?.focus({ preventScroll: true })); }}><Sparkles aria-hidden />Asistente IA</button>
+  </div>;
 }

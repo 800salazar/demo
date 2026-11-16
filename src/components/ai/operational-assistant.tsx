@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, useImperativeHandle, type Ref, type FormEvent } from "react";
 import { Copy, LoaderCircle, RotateCw, Send, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -64,9 +64,17 @@ function TypedAnswer({ text }: { text: string }) {
   </>;
 }
 
-export function OperationalAssistant() {
+export type AssistantControl = { askQuestion: (text: string) => void };
+
+export function OperationalAssistant({ controlRef }: { controlRef?: Ref<AssistantControl> }) {
+  const input = useRef<HTMLTextAreaElement>(null);
   const data = useDemoData();
   const [question, setQuestion] = useState("");
+  useImperativeHandle(controlRef, () => ({ askQuestion(text) {
+    if (controller.current) { toast.info("Espera a que termine la consulta actual."); return; }
+    void ask(text.slice(0, MAX_QUESTION_LENGTH), false);
+  } }));
+
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [pendingQuestion, setPendingQuestion] = useState("");
   const [error, setError] = useState("");
@@ -77,7 +85,6 @@ export function OperationalAssistant() {
   const conversationContent = useRef<HTMLDivElement>(null);
   const composer = useRef<HTMLFormElement>(null);
   const followLatest = useRef(true);
-  const keepComposerVisible = useRef(false);
   useEffect(() => () => controller.current?.abort(), []);
   useEffect(() => {
     const container = conversation.current;
@@ -86,12 +93,7 @@ export function OperationalAssistant() {
     const observer = new ResizeObserver(() => {
       if (!container.getClientRects().length) return;
       if (followLatest.current) container.scrollTop = container.scrollHeight;
-      if (keepComposerVisible.current && composer.current) {
-        const viewport = window.visualViewport;
-        const bottom = (viewport?.offsetTop ?? 0) + (viewport?.height ?? window.innerHeight) - 16;
-        const rect = composer.current.getBoundingClientRect();
-        if (rect.bottom > bottom && rect.top < bottom) window.scrollBy({ top: rect.bottom - bottom, behavior: "instant" });
-      }
+
     });
     observer.observe(content);
     return () => observer.disconnect();
@@ -100,23 +102,6 @@ export function OperationalAssistant() {
     const container = conversation.current;
     if (container && followLatest.current) container.scrollTop = container.scrollHeight;
   }, [answers, pendingQuestion]);
-  useEffect(() => {
-    const stopFollowing = () => { keepComposerVisible.current = false; };
-    const onKeyDown = (event: globalThis.KeyboardEvent) => {
-      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
-      if (["PageUp", "PageDown", "Home", "End", "ArrowUp", "ArrowDown"].includes(event.key)) stopFollowing();
-    };
-    window.addEventListener("wheel", stopFollowing, { passive: true });
-    window.addEventListener("touchmove", stopFollowing, { passive: true });
-    window.addEventListener("pointerdown", stopFollowing, { passive: true });
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      window.removeEventListener("wheel", stopFollowing);
-      window.removeEventListener("touchmove", stopFollowing);
-      window.removeEventListener("pointerdown", stopFollowing);
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, []);
   const currentSnapshot = data ? JSON.stringify(getOperationalSnapshot(data)) : null;
 
   async function ask(text: string, clearDraft = true) {
@@ -128,11 +113,6 @@ export function OperationalAssistant() {
     const abortController = new AbortController();
     controller.current = abortController;
     followLatest.current = true;
-    const rect = composer.current?.getBoundingClientRect();
-    const viewport = window.visualViewport;
-    const viewportTop = viewport?.offsetTop ?? 0;
-    const viewportBottom = viewportTop + (viewport?.height ?? window.innerHeight);
-    keepComposerVisible.current = Boolean(rect && rect.top < viewportBottom && rect.bottom > viewportTop);
     setBusy(true);
     setPendingQuestion(text);
     setError("");
@@ -160,6 +140,7 @@ export function OperationalAssistant() {
       if (!abortController.signal.aborted) {
         setError(cause instanceof Error ? cause.message : "No se pudo conectar. Intenta de nuevo.");
         if (clearDraft) setQuestion(text);
+        else toast.error("No se pudo completar la consulta. Intenta nuevamente.");
       }
     } finally {
       controller.current = null;
@@ -238,7 +219,7 @@ export function OperationalAssistant() {
             ))}
           </div>
           <label htmlFor="operational-question" className="sr-only">Tu pregunta</label>
-          <textarea id="operational-question" value={question} onChange={(e) => setQuestion(e.target.value)}
+          <textarea ref={input} id="operational-question" value={question} onChange={(e) => setQuestion(e.target.value)}
             placeholder="¿Qué cambió en OT-1001?" required minLength={3} maxLength={MAX_QUESTION_LENGTH}
             rows={2} disabled={busy} className={styles.messageInput} />
           <div className="flex flex-wrap items-center justify-between gap-3">

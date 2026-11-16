@@ -53,6 +53,9 @@ export interface WorkOrder {
   assignee: string;
   priorityId: string;
   statusId: string;
+  /** Optional display snapshots when a catalog rename preserves existing records. */
+  statusLabel?: string;
+  priorityLabel?: string;
   /** ISO 8601 */
   createdAt: string;
   /** Fecha compromiso, `YYYY-MM-DD` en hora local. */
@@ -83,7 +86,10 @@ export interface HistoryEntry {
   detail: string;
 }
 
+export type DateDisplayFormat = "short" | "numeric";
+
 export interface DemoData {
+  dateDisplayFormat?: DateDisplayFormat;
   version: number;
   /** Momento en que se generó el escenario; las fechas de ejemplo son relativas a este instante. */
   seededAt: string;

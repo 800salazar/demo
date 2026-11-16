@@ -24,8 +24,8 @@ export function parseCostInput(value: string): number | null {
   return Number.isFinite(amount) && amount <= 1_000_000_000 ? amount : null;
 }
 
-export function formatMexicanDate(iso: string): string {
+export function formatMexicanDate(iso: string, format: "short" | "numeric" = "short"): string {
   const [year, month, day] = iso.split("-");
   const months = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
-  return months[Number(month) - 1] && day && year ? `${day} ${months[Number(month) - 1]} ${year}` : "Selecciona una fecha";
+  return months[Number(month) - 1] && day && year ? (format === "numeric" ? `${day}/${month}/${year}` : `${day} ${months[Number(month) - 1]} ${year}`) : "Selecciona una fecha";
 }

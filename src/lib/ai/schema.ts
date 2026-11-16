@@ -22,6 +22,11 @@ export const operationalSnapshotSchema = z.strictObject({
     estimatedCost: money,
     actualCost: money,
     observations: z.string().max(800),
+    description: z.string().max(800).optional(),
+    statusLabel: name.optional(), priorityLabel: name.optional(),
+    createdAt: z.iso.datetime().optional(), completedAt: z.iso.datetime().nullable().optional(),
+    requiredRemaining: z.number().int().min(0).max(100).optional(),
+    recentChanges: z.array(z.strictObject({ at: z.iso.datetime(), detail: z.string().max(400) })).max(2).optional(),
   })).max(100),
 }).superRefine((data, ctx) => {
   for (const key of ["departments", "priorities", "statuses", "orders"] as const) {

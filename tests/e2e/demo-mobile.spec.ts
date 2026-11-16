@@ -18,7 +18,7 @@ test("footer contacts stay on one compact row on desktop", async ({ page }) => {
 test.describe("mobile error prevention", () => {
   test.use({ viewport: { width: 320, height: 640 } });
 
-  test("two views fit mobile and the footer uses two compact rows", async ({ page }) => {
+  test("three views fit mobile and the footer uses two compact rows", async ({ page }) => {
     await page.goto("/demo/sistema");
     const operator = page.getByRole("tab", { name: "Operador", exact: true });
     const admin = page.getByRole("tab", { name: "Administrador", exact: true });
@@ -27,6 +27,8 @@ test.describe("mobile error prevention", () => {
     expect(box!.height).toBeGreaterThanOrEqual(44);
     await admin.click();
     await expect(page.getByRole("heading", { name: "Configuración", exact: true })).toBeVisible();
+    await page.getByRole("tab", { name: "Dirección", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "Actividad · últimos 14 días" })).toBeVisible();
     await operator.click();
     await expect(page.getByLabel("Costo real (MXN)")).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);

@@ -10,7 +10,7 @@ El dominio configurado por el propietario en Vercel es **`salazar.red`**. Este d
 | --- | --- |
 | `https://salazar.red/` | Landing breve de Adán Salazar: Conferencia, Perfil, Qué hago y Contacto, con identidad azul y layout independiente. |
 | `https://salazar.red/demo` | Inicio del showroom de demostraciones |
-| `/demo/sistema` | Un demo con vistas Operador y Administrador |
+| `/demo/sistema` | Un demo con vistas Operador, Administrador y Dirección |
 | `/demo/administracion`, `/demo/operaciones`, `/demo/ia`, `/demo/integraciones` | Enlaces anteriores: redirigen al sistema |
 | `/demo/recorrido` | Acceso al recorrido interactivo |
 | `/demo/api/ai` y `/demo/api/health` | Endpoints del demo |
@@ -31,14 +31,14 @@ Referencias para continuar el desarrollo: [arquitectura y límites entre aplicac
 
 ## Funciones disponibles
 
-- Una entrada «Abrir demo», encabezado compacto y pestañas Operador / Administrador. Ver [demo unificado](docs/demo-workspace.md).
+- Una entrada «Abrir demo», encabezado compacto y pestañas Operador / Administrador / Dirección. Ver [demo unificado](docs/demo-workspace.md).
 - Configuración local de nombres y colores de estados y prioridades, conservando las reglas de cierre y referencias.
 - Gráfica de costo real por departamento e indicadores compartidos de órdenes, retrasadas y costo real.
-- Edición de costo real, fecha compromiso y estado de una orden en la vista Operador de `/demo/sistema`. Completar una orden requiere que sus actividades obligatorias estén realizadas.
-- Un único asistente operativo en Operador, con preguntas sugeridas y consulta libre. Cada consulta envía el estado actual de las órdenes del visitante.
+- Creación de solicitudes, checklist e historial. Edición de costo real, observaciones, fecha compromiso y estado de una orden en la vista Operador de `/demo/sistema`. Completar una orden requiere que sus actividades obligatorias estén realizadas.
+- Un único asistente operativo fijo a la derecha en todas las vistas (panel desplegable en móvil), con preguntas sugeridas y consulta libre. Cada consulta envía el estado actual de las órdenes del visitante.
 - Métricas recalculadas en el servidor, análisis con Vercel AI Gateway y respuestas alternativas claramente identificadas como cálculos.
 - Aviso cuando una respuesta corresponde a datos anteriores a un cambio.
-- «Guía de uso» es un botón amarillo fijo en la parte superior derecha, con un mensaje ocasional. En la portada inicia el recorrido completo; en el sistema inicia el mismo recorrido de siete pasos. El visitante puede retroceder, omitir pasos y salir.
+- «Guía de uso» es un botón amarillo fijo en la parte superior derecha, con un mensaje ocasional. En la portada inicia el recorrido completo; en el sistema inicia el mismo recorrido de diez pasos. El visitante puede retroceder, omitir pasos y salir.
 
 El asistente no realiza cambios ni integra información de Enfoca.
 
@@ -124,7 +124,7 @@ La prueba SQL en `supabase/tests/ai_usage_limits.sql` verifica permisos, la llam
 El servidor:
 
 1. Rechaza solicitudes de otros orígenes y formatos distintos de JSON.
-2. Limita el cuerpo a 96 KiB reales en UTF-8, incluso sin `Content-Length`, y la pregunta a 300 caracteres.
+2. Limita el cuerpo a 1 MiB reales en UTF-8, incluso sin `Content-Length`, y la pregunta a 300 caracteres.
 3. Valida forma, longitudes, costos, fechas, identificadores únicos y referencias entre las órdenes y catálogos; admite hasta 100 órdenes.
 4. Recalcula totales, costos por departamento, sobrecostos por orden y retrasos con fecha de Chihuahua. No confunde una orden completada con un retraso abierto.
 5. Reserva la cuota persistente y envía únicamente estos datos a Gateway, sin herramientas de consulta o escritura.

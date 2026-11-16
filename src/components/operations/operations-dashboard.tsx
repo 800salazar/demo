@@ -1,6 +1,8 @@
 "use client";
 
-import { useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { AiAction } from "@/components/ai/ai-action";
+import { useRef, useState, useImperativeHandle, type Ref, type FormEvent, type KeyboardEvent } from "react";
+import { OrderActivity } from "./order-activity";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
@@ -16,7 +18,7 @@ import { cn } from "@/lib/utils";
 import { ColorBadge } from "@/components/shared/color-badge";
 import { notifyGuideAction } from "@/lib/guide/steps";
 
-const fieldClass = "w-full rounded-lg border bg-background px-3 py-2 text-sm";
+const fieldClass = "min-h-11 w-full rounded-lg border bg-background px-3 py-2 text-base";
 
 function OrderEditor({ order, data, onDirty }: { order: WorkOrder; data: DemoData; onDirty: (dirty: boolean) => void }) {
   const [message, setMessage] = useState("");
@@ -24,6 +26,7 @@ function OrderEditor({ order, data, onDirty }: { order: WorkOrder; data: DemoDat
   const [hasEdits, setHasEdits] = useState(false);
   const [cost, setCost] = useState(() => formatMXN(order.actualCost).replace("$", ""));
   const [dueDate, setDueDate] = useState(order.dueDate);
+  const [observations, setObservations] = useState(order.observations);
   const [statusId, setStatusId] = useState(order.statusId);
   const priority = data.priorities.find((item) => item.id === order.priorityId);
   const selectedStatus = data.statuses.find((status) => status.id === statusId);
@@ -51,12 +54,13 @@ function OrderEditor({ order, data, onDirty }: { order: WorkOrder; data: DemoDat
     updateDemoData((current) => ({
       ...current,
       orders: current.orders.map((o) => o.id === order.id ? {
-        ...o, actualCost, dueDate, statusId,
+        ...o, actualCost, dueDate, statusId, observations,
+        statusLabel: statusId === o.statusId ? o.statusLabel : undefined,
         completedAt: status.kind === "completed" ? o.completedAt ?? now : null,
       } : o),
       history: [...current.history, {
         id: crypto.randomUUID(), orderId: order.id, at: now, action: "updated",
-        detail: `Actualización manual: costo ${formatMXN(actualCost)}, compromiso ${dueDate}, estado ${status.name}.`,
+        detail: `Actualización manual: costo ${formatMXN(actualCost)}, compromiso ${dueDate}, estado ${statusId === order.statusId ? order.statusLabel ?? status.name : status.name}. Observaciones: ${observations || "Sin observaciones"}.`,
       }],
     }));
     setHasEdits(false);
@@ -68,7 +72,7 @@ function OrderEditor({ order, data, onDirty }: { order: WorkOrder; data: DemoDat
   return (
     <form onSubmit={save} onChange={() => { setHasEdits(true); onDirty(true); setMessage(""); setError(""); }} className="space-y-4">
       <p className="text-sm text-muted-foreground"><strong className="font-semibold text-foreground">Editando {order.folio}</strong> · {order.title} · {order.assignee}</p>
-      {priority && <ColorBadge color={priority.color}>{priority.name}</ColorBadge>}
+      {priority && <ColorBadge color={priority.color}>{order.priorityLabel ?? priority.name}</ColorBadge>}
       <div className="grid gap-4 sm:grid-cols-3">
         <label data-guide="order-cost" className="space-y-2 text-sm font-medium">Costo real (MXN)
           <input name="actualCost" type="text" inputMode="decimal" value={cost} maxLength={20} required className={fieldClass}
@@ -84,7 +88,7 @@ function OrderEditor({ order, data, onDirty }: { order: WorkOrder; data: DemoDat
         </label>
         <label className="space-y-2 text-sm font-medium">Fecha compromiso
           <span className="relative block rounded-lg focus-within:ring-2 focus-within:ring-ring">
-            <span aria-hidden className={`${fieldClass} flex items-center`}>{formatMexicanDate(dueDate)}</span>
+            <span aria-hidden className={`${fieldClass} flex items-center`}>{formatMexicanDate(dueDate, data.dateDisplayFormat)}</span>
             <input name="dueDate" type="date" value={dueDate} onChange={(event) => setDueDate(event.target.value)} required
               onClick={(event) => { try { event.currentTarget.showPicker?.(); } catch { /* El control nativo sigue disponible. */ } }}
               className="absolute inset-0 h-full w-full cursor-pointer opacity-0" />
@@ -95,15 +99,18 @@ function OrderEditor({ order, data, onDirty }: { order: WorkOrder; data: DemoDat
             className={cn(fieldClass, "rounded-full font-medium ring-1 ring-inset", selectedStatus && COLOR_STYLES[selectedStatus.color].badge)}>
             {data.statuses.filter((s) => s.active || s.id === order.statusId).map((s) => (
               <option key={s.id} value={s.id} className={COLOR_STYLES[s.color].badge} disabled={s.kind === "completed" && requiredRemaining > 0}>
-                {s.name}{s.kind === "completed" && requiredRemaining > 0 ? " · actividades pendientes" : ""}
+                {s.id === order.statusId ? order.statusLabel ?? s.name : s.name}{s.kind === "completed" && requiredRemaining > 0 ? " · actividades pendientes" : ""}
               </option>
             ))}
           </select>
         </label>
       </div>
+      <label className="block space-y-2 text-sm font-medium">Observaciones
+        <textarea value={observations} onChange={event => setObservations(event.target.value)} maxLength={800} rows={2} className={fieldClass} placeholder="Hallazgos o motivo del cambio" />
+      </label>
       {requiredRemaining > 0 && <p id="order-status-help" className="text-xs text-muted-foreground">Cierre bloqueado: {requiredRemaining} actividades obligatorias pendientes.</p>}
       <div className="flex flex-wrap items-center gap-3">
-        <Button data-guide="order-save" type="submit" disabled={!hasEdits}>Guardar cambios</Button>
+        <Button className="!bg-emerald-700 !text-white hover:!bg-emerald-800" data-guide="order-save" type="submit" disabled={!hasEdits}>Guardar cambios</Button>
         {hasEdits && <p role="status" className="text-xs text-muted-foreground">Cambios sin guardar en {order.folio}.</p>}
       </div>
       {message && <p role="status" className="text-sm text-green-700">{message}</p>}
@@ -148,26 +155,31 @@ function OrderSearch({ orders, order, onSelect }: { orders: WorkOrder[]; order: 
   );
 }
 
-export function OperationsDashboard() {
+export type OrderEditorControl = { selectOrder: (id: string) => void };
+
+export function OperationsDashboard({ controlRef, onAsk }: { controlRef?: Ref<OrderEditorControl>; onAsk?: (question: string) => void }) {
   const data = useDemoData();
   const [selectedId, setSelectedId] = useState("");
   const [editedOrder, setEditedOrder] = useState<string | null>(null);
   const [pendingSelection, setPendingSelection] = useState<string | null>(null);
-  if (!data) return <Skeleton className="h-72 w-full" aria-label="Cargando órdenes" />;
-  const order = data.orders.find((o) => o.id === selectedId) ?? data.orders[0];
-  const orderKey = order ? `${order.id}:${data.seededAt}` : "";
+  const order = data?.orders.find((o) => o.id === selectedId) ?? data?.orders[0];
+  const orderKey = order ? `${order.id}:${data?.seededAt}` : "";
   function selectOrder(id: string) {
     if (id === order?.id) return;
     if (editedOrder === orderKey) setPendingSelection(id);
     else setSelectedId(id);
   }
+  useImperativeHandle(controlRef, () => ({ selectOrder }));
+  if (!data) return <Skeleton className="h-72 w-full" aria-label="Cargando órdenes" />;
   return (
     <div data-guide="order-edit">
       <Card style={{ overflow: "visible" }}>
         <CardHeader><CardTitle role="heading" aria-level={2}>Editar orden</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           {order && <OrderSearch orders={data.orders} order={order} onSelect={selectOrder} />}
-          {order && <OrderEditor key={orderKey} order={order} data={data} onDirty={(dirty) => setEditedOrder(dirty ? orderKey : null)} />}
+          {order && <OrderEditor key={`editor:${orderKey}`} order={order} data={data} onDirty={(dirty) => setEditedOrder(dirty ? orderKey : null)} />}
+          {order && <OrderActivity key={`activity:${orderKey}`} order={order} data={data} />}
+          {order && onAsk && <AiAction onClick={() => onAsk(`Analiza ${order.folio}: estado, costos, observaciones y actividades pendientes. ¿Qué debo revisar?`)}>Consultar esta orden con IA</AiAction>}
         </CardContent>
       </Card>
       <AlertDialog open={pendingSelection !== null} onOpenChange={(open) => { if (!open) setPendingSelection(null); }}>
@@ -189,9 +201,9 @@ export function OperationsMetrics() {
   const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Chihuahua" });
   const late = data.orders.filter((order) => order.dueDate < today && data.statuses.find((s) => s.id === order.statusId)?.kind !== "completed").length;
   const cost = data.orders.reduce((sum, order) => sum + order.actualCost, 0);
-  return <div className="grid grid-cols-3 gap-2 sm:gap-3" aria-label="Indicadores de órdenes">
+  return <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3" aria-label="Indicadores de órdenes">
     {[["Órdenes", data.orders.length], ["Retrasadas", late], ["Costo real", formatMXN(cost)]].map(([label, value]) => (
-      <Card key={label}><CardHeader className="px-3 sm:px-5"><CardDescription className="text-xs sm:text-sm">{label}</CardDescription><CardTitle className="break-words text-sm tabular-nums sm:text-xl">{value}</CardTitle></CardHeader></Card>
+      <Card key={label} className="min-w-0 rounded-xl border-slate-200 shadow-sm"><CardHeader className="min-w-0 px-4 sm:px-5"><CardDescription className="text-sm font-medium">{label}</CardDescription><CardTitle className="min-w-0 overflow-x-auto whitespace-nowrap text-lg font-bold tracking-tight tabular-nums sm:text-xl">{value}</CardTitle></CardHeader></Card>
     ))}
   </div>;
 }

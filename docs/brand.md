@@ -52,7 +52,7 @@ El componente del pie está en `src/components/layout/contact-footer.tsx`. Su in
 ## Uso móvil y prevención de errores (poka-yoke)
 
 - Controles y enlaces de contacto con al menos 44 px de altura táctil; campos a 16 px en móvil para evitar el zoom automático de iOS.
-- Encabezado compacto y pestañas Operador / Administrador con nombres, iconos, selección visible y navegación por teclado; sin menú lateral ni drawer móvil.
+- Encabezado compacto y pestañas Operador / Administrador / Dirección con nombres, iconos, selección visible y navegación por teclado; sin menú lateral ni drawer móvil.
 - El editor identifica el folio de la orden. Guardar está deshabilitado hasta editar un campo y vuelve a deshabilitarse tras guardar para evitar escrituras repetidas.
 - Los estados completados se deshabilitan si hay actividades obligatorias pendientes y se explica el motivo antes de guardar. La validación del manejador sigue activa como segunda comprobación.
 - Restablecer datos requiere confirmación; el botón de confirmación tiene aspecto destructivo y el cuadro se adapta al espacio móvil.
@@ -70,11 +70,11 @@ Conservar los nombres de los campos, las etiquetas accesibles, el folio, los err
 
 ## Ayuda interactiva
 
-«Guía de uso» permanece fija en la parte superior derecha del demo; en móvil muestra solo el icono con nombre accesible y en escritorio conserva el texto. La portada añade una segunda entrada animada. Ambos inician el recorrido unificado de siete pasos. El botón amarillo conserva el latido y, ocasionalmente, muestra durante unos segundos «Estoy aquí para ayudarte». El acceso se oculta mientras la guía está activa. Con movimiento reducido permanece amarillo, sin animación. `/demo/recorrido` sigue disponible directamente. Los pasos se configuran en `src/lib/guide/steps.ts`.
+«Guía de uso» permanece fija en la parte superior derecha del demo; en móvil muestra solo el icono con nombre accesible y en escritorio conserva el texto. La portada añade una segunda entrada animada. Ambos inician el recorrido unificado de diez pasos. El botón amarillo conserva el latido y, ocasionalmente, muestra durante unos segundos «Estoy aquí para ayudarte». El acceso se oculta mientras la guía está activa. Con movimiento reducido permanece amarillo, sin animación. `/demo/recorrido` sigue disponible directamente. Los pasos se configuran en `src/lib/guide/steps.ts`.
 
 «Restablecer demo» aparece en el contenido de la portada y los módulos; se desplaza con la página. No está en el menú lateral ni en el panel móvil. Conserva la confirmación y se deshabilita mientras la guía está activa.
 
-La portada conserva video, guía, una única entrada «Abrir demo» y contacto. La pantalla `/demo/sistema` tiene dos vistas complementarias: Operador con editor y asistente; Administrador con gráfica y configuración. La navegación Demo 1/2/3 se retiró. Ver [demo unificado](demo-workspace.md).
+La portada conserva video, guía, una única entrada «Abrir demo» y contacto. La pantalla `/demo/sistema` tiene tres vistas: Operador con solicitudes/editor/checklist, Administrador con costos/configuración y Dirección con KPIs/actividad. Todas comparten tabla y asistente morado a la derecha, con acceso flotante en móvil. La navegación Demo 1/2/3 se retiró. Ver [demo unificado](demo-workspace.md).
 
 El contorno destaca el objetivo real (`data-guide`), conserva sus controles disponibles y desplaza el contenido para dejar espacio al panel. Se recalcula al desplazar, redimensionar y abrir el teclado móvil usando `visualViewport`. El panel es un diálogo no modal: permite retroceder, omitir, cerrar, usar Escape o llevar el foco al control resaltado. Al cerrar devuelve el foco al acceso a la ayuda; los atributos temporales del objetivo se restauran.
 

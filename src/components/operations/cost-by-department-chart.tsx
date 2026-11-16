@@ -1,5 +1,6 @@
 "use client";
 
+import { AiAction } from "@/components/ai/ai-action";
 import { useEffect, useRef, useState } from "react";
 import { Popover } from "radix-ui";
 import { X } from "lucide-react";
@@ -9,7 +10,7 @@ import { formatMXN } from "@/lib/format";
 import { summarizeByDepartment } from "@/lib/demo/selectors";
 import { useDemoData } from "@/lib/demo/use-demo-data";
 
-export function CostByDepartmentChart() {
+export function CostByDepartmentChart({ onAsk }: { onAsk?: (question: string) => void }) {
   const data = useDemoData();
   const [openId, setOpenId] = useState<string | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -25,28 +26,43 @@ export function CostByDepartmentChart() {
   }
 
   const departments = data ? summarizeByDepartment(data) : [];
-  const maxCost = Math.max(0, ...departments.map((item) => item.actualCost));
+  const total = departments.reduce((sum, item) => sum + item.actualCost, 0);
+  const colors = ["#2563eb", "#7c3aed", "#0891b2", "#d97706", "#16a34a", "#db2777"];
+  const segments = departments.map((item, index) => {
+    const percentage = total ? item.actualCost / total * 100 : 0;
+    const start = total ? departments.slice(0, index).reduce((sum, previous) => sum + previous.actualCost, 0) / total * 100 : 0;
+    return { percentage, midpoint: start + percentage / 2, color: colors[index % colors.length], start, end: start + percentage };
+  });
+  const stops = segments.map(segment => `${segment.color} ${segment.start}% ${segment.end}%`);
+  const percent = (value: number) => `${new Intl.NumberFormat("es-MX", { maximumFractionDigits: 1 }).format(value)}%`;
   return (
     <Card>
       <CardHeader><CardTitle role="heading" aria-level={2}>Costo por departamento (MXN)</CardTitle></CardHeader>
       <CardContent>
         {data ? (
-          <div data-guide="cost-chart" className="space-y-2" aria-label="Costos por departamento">
-            {departments.map((department) => (
+          <div data-guide="cost-chart" aria-label="Costos por departamento">
+            <div className="relative mx-auto mb-5 grid size-64 max-w-full place-items-center rounded-full" aria-hidden style={{ aspectRatio: "1", background: total ? `conic-gradient(${stops.join(",")})` : "#e5e7eb" }}>
+              <div className="grid h-[58%] w-[58%] place-content-center rounded-full bg-white text-center"><span className="text-xs text-muted-foreground">Costo total</span><strong className="text-sm">{formatMXN(total)}</strong></div>
+              {segments.map((segment, index) => {
+                if (segment.percentage < 6) return null;
+                const angle = segment.midpoint * Math.PI / 50 - Math.PI / 2;
+                return <span key={departments[index].departmentId} className="absolute -translate-x-1/2 -translate-y-1/2 rounded bg-slate-950/75 px-1 py-0.5 text-xs font-bold text-white" style={{ left: `${50 + 40 * Math.cos(angle)}%`, top: `${50 + 40 * Math.sin(angle)}%` }}>{percent(segment.percentage)}</span>;
+              })}
+            </div>
+            <p className="sr-only">Costo total: {formatMXN(total)}. Selecciona un departamento para ver el desglose.</p>
+            <div className="space-y-1">{departments.map((department, index) => (
               <Popover.Root key={department.departmentId} open={openId === department.departmentId}
                 onOpenChange={(open) => { cancelClose(); setOpenId(open ? department.departmentId : null); }}>
                 <Popover.Trigger asChild>
                   <button type="button" className="group w-full rounded-xl px-2 py-2 text-left hover:bg-accent/60 focus-visible:outline-2 focus-visible:outline-ring"
-                    aria-label={`${department.department}: ${formatMXN(department.actualCost)}. Ver desglose`}
+                    aria-label={`${department.department}: ${formatMXN(department.actualCost)}, ${percent(segments[index].percentage)} del total. Ver desglose`}
                     onPointerEnter={(event) => { if (event.pointerType === "mouse") { cancelClose(); setOpenId(department.departmentId); } }}
                     onPointerLeave={(event) => { if (event.pointerType === "mouse") scheduleClose(); }}>
                     <span className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-sm">
-                      <span className="font-medium">{department.department}</span>
-                      <span className="font-semibold tabular-nums">{formatMXN(department.actualCost)}</span>
+                      <span className="flex items-center gap-2 font-medium"><span className="size-3 rounded-full" style={{ backgroundColor: colors[index % colors.length] }} aria-hidden />{department.department}</span>
+                      <span className="font-semibold tabular-nums">{formatMXN(department.actualCost)} <span className="text-muted-foreground">· {percent(segments[index].percentage)}</span></span>
                     </span>
-                    <span className="mt-2 block h-3 overflow-hidden rounded-full bg-muted" aria-hidden>
-                      <span className="block h-full rounded-full bg-primary" style={{ width: `${maxCost ? department.actualCost / maxCost * 100 : 0}%` }} />
-                    </span>
+
                   </button>
                 </Popover.Trigger>
                 <Popover.Portal>
@@ -70,10 +86,11 @@ export function CostByDepartmentChart() {
                         </li>)}
                       </ul> : <p className="text-sm text-muted-foreground">Sin órdenes.</p>}
                     </div>
+                    {onAsk && <AiAction className="mt-3 w-full" onClick={() => { setOpenId(null); onAsk(`Analiza los costos de ${department.department}. ¿Qué órdenes explican su costo y cuáles requieren atención?`); }}>Analizar con IA</AiAction>}
                   </Popover.Content>
                 </Popover.Portal>
               </Popover.Root>
-            ))}
+            ))}</div>
           </div>
         ) : <Skeleton className="h-72 w-full" aria-busy="true" aria-label="Cargando gráfica" />}
       </CardContent>

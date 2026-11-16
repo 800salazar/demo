@@ -35,3 +35,16 @@ describe("visitor catalog configuration", () => {
     expect(() => editCatalogItem(data, "statuses", id, "Estado", "unknown" as "blue")).toThrow();
   });
 });
+
+it("renames departments and types globally, preserving associations and previous history", async () => {
+  const { renameNamedCatalog } = await import("@/lib/demo/catalog");
+  const data = seed();
+  for (const key of ["departments", "categories"] as const) {
+    const item = data[key][0];
+    const updated = renameNamedCatalog(data, key, item.id, "Nuevo nombre");
+    expect(updated[key][0].name).toBe("Nuevo nombre");
+    expect(updated.orders).toBe(data.orders);
+    expect(updated.history.slice(0, data.history.length)).toEqual(data.history);
+    expect(() => renameNamedCatalog(data, key, item.id, data[key][1].name)).toThrow(/ya existe/);
+  }
+});

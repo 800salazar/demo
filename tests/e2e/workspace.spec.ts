@@ -16,8 +16,9 @@ test("views retain drafts, selected orders and chat; configuration propagates an
   await admin.click();
   await expect(page.getByRole("heading", { name: "Editar orden", exact: true })).toBeHidden();
   await expect(page.getByRole("heading", { name: "Configuración", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Editar estado 1", exact: true }).click();
   await page.getByLabel("Estado 1 nombre", { exact: true }).fill("Por iniciar");
-  await page.getByLabel("Estado 1 color", { exact: true }).selectOption("violet");
+  await page.getByRole("group", { name: "Estado 1 color" }).getByRole("radio", { name: "Violeta" }).check();
   await page.getByRole("button", { name: "Guardar estado 1", exact: true }).click();
   await operator.click();
   await expect(page.getByText("Editando OT-1002", { exact: true })).toBeVisible();

@@ -119,11 +119,13 @@ El endpoint `/demo/api/health` comprueba el esquema previsto para snapshots con 
 
 ## Validación del demo unificado (2026-11-08)
 
-- `/demo` tiene una única entrada «Abrir demo». `/demo/sistema` conserva dos vistas sobre el mismo escenario local, sin autenticación adicional.
+- `/demo` tiene una única entrada «Abrir demo». `/demo/sistema` conserva tres vistas sobre el mismo escenario local, sin autenticación adicional.
 - Verificar que los borradores, la orden seleccionada y la conversación sobrevivan al cambiar de vista; que cambiar de orden con edición pendiente requiera confirmación.
 - En Administrador, editar nombre/color de un estado, volver a Operador, comprobar el selector y recargar para verificar persistencia. Restablecer debe recuperar catálogos y órdenes juntos.
-- Recorrer los siete pasos: selección, edición/guardado, consulta, Administrador, gráfica, configuración y regreso a Operador. Solo las acciones del visitante escriben o consultan.
+- Recorrer los diez pasos: selección, edición/guardado, checklist, IA, Administrador, configuración, tabla, Dirección, actividad y PDF. Solo las acciones del visitante escriben o consultan.
 - Las antiguas rutas de administración, operaciones, IA e integraciones redirigen; `/` y los endpoints existentes conservan su función.
 - No hay variables nuevas, migraciones ni cambios remotos de Supabase por esta reorganización. Las restricciones del navegador y las pruebas realizadas se registran en `docs/demo-workspace.md`.
 
 Verificación final de esta reorganización: 53 pruebas unitarias, ESLint, TypeScript, build alternativo con webpack y build habitual con Turbopack aprobados. Este último requirió regenerar su caché local de producción. La ejecución de Chrome y la revisión visual siguen pendientes; no se ha desplegado esta versión.
+
+Pruebas adicionales: crear una solicitud y completar su checklist; conservar nombres anteriores al renombrar y comprobar IA/PDF; verificar asistente sticky en escritorio y panel móvil; descargar un PDF y cotejar importes con los datos actuales. No requiere variables de entorno nuevas ni migraciones.

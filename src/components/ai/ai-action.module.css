@@ -1,0 +1,6 @@
+.action.action:global([data-slot="button"][data-variant="default"]) { min-height: 44px; border: 1px solid #b28aea; border-radius: .8rem; color: white; background: linear-gradient(135deg, #9455de, #582797); box-shadow: 0 4px 14px #7134bb40; }
+.action.action:global([data-slot="button"][data-variant="default"]):hover { color: white; background: linear-gradient(135deg, #ad6bf0, #7134bb); }
+.action.action:global([data-slot="button"][data-variant="default"]):focus-visible { outline: 3px solid #8b5cf6; outline-offset: 3px; }
+.icon { animation: shimmer 3s ease-in-out infinite; }
+@keyframes shimmer { 0%, 65%, 100% { opacity: .8; transform: scale(1); } 75%, 90% { opacity: 1; transform: scale(1.22); filter: drop-shadow(0 0 5px white); } 82% { opacity: .65; transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .icon { animation: none; } }

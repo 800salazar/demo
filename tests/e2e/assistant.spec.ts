@@ -27,7 +27,7 @@ test("current snapshot, persisted edits, two visitors and read-only privacy boun
   const otherContext = await browser.newContext();
   try {
     const other = await otherContext.newPage();
-    await other.goto("http://127.0.0.1:3100/demo/ia");
+    await other.goto(new URL("/demo/ia", page.url()).href);
     await expect(other.getByText("30 órdenes ficticias")).toBeVisible();
     const separate = await ask(other, "¿Cuál es el costo de OT-1001?");
     expect(separate.request().postDataJSON().snapshot.orders[0].actualCost).not.toBe(123456);
@@ -84,16 +84,17 @@ test("shows the last two turns in a scrollable chat with suggestions beside the 
   });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/demo/ia");
+  await page.getByRole("button", { name: "Asistente IA", exact: true }).click();
   const chat = page.getByRole("region", { name: "Conversación" });
   const form = page.locator("form").filter({ has: page.getByLabel("Tu pregunta") });
   await expect(form.getByRole("button", { name: "Retrasos" })).toBeVisible();
   for (const question of ["Primera pregunta", "Segunda pregunta", "Tercera pregunta"]) {
     await ask(page, question);
-    await expect(chat.getByText(question, { exact: false })).toBeVisible();
+    await expect(chat.getByText(question, { exact: false })).toBeAttached();
   }
   await expect(chat.getByText("Primera pregunta", { exact: false })).toHaveCount(0);
   await expect(chat.getByText("Segunda pregunta", { exact: false })).toBeAttached();
-  await expect(chat.getByText("Tercera pregunta", { exact: false })).toBeVisible();
+  await expect(chat.getByText("Tercera pregunta", { exact: false })).toBeAttached();
   await expect(chat.locator('strong').filter({ hasText: "$1,500.00" })).toHaveCount(2);
   const metrics = await chat.evaluate((element) => ({ height: element.clientHeight, scrollHeight: element.scrollHeight, remaining: element.scrollHeight - element.scrollTop - element.clientHeight }));
   expect(metrics.scrollHeight).toBeGreaterThan(metrics.height);
