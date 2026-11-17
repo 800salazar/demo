@@ -233,7 +233,14 @@ export function OperationalAssistant({ controlRef, getDraft, onPrepare }: { cont
           <label htmlFor="operational-question" className="sr-only">Tu pregunta</label>
           <textarea ref={input} id="operational-question" value={question} onChange={(e) => setQuestion(e.target.value)}
             placeholder="Pregunta o dicta una nueva solicitud…" required minLength={3} maxLength={MAX_QUESTION_LENGTH}
-            rows={2} disabled={busy || listening} className={styles.messageInput} />
+            rows={2} disabled={busy || listening} className={styles.messageInput}
+            onKeyDown={(event) => {
+              if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) return;
+              event.preventDefault();
+              if (!event.repeat && data && !busy && !listening && question.trim().length >= 3) {
+                event.currentTarget.form?.requestSubmit();
+              }
+            }} />
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className={styles.composerMeta}>{data ? `${data.orders.length} órdenes ficticias` : "Cargando órdenes…"} · {question.length}/{MAX_QUESTION_LENGTH}</p>
             <div className="flex flex-wrap items-center justify-end gap-2">

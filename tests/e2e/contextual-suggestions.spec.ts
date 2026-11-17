@@ -16,7 +16,7 @@ test("suggestions change with the response and send full prompts with history wh
   const suggestions = page.locator('[data-guide="ai-suggestions"]');
   await expect(suggestions.getByRole("button")).toHaveCount(3);
   await page.getByLabel("Tu pregunta", { exact: true }).fill("Investiga costos de Mantenimiento");
-  await page.getByRole("button", { name: "Consultar", exact: true }).click();
+  await page.getByLabel("Tu pregunta", { exact: true }).press("Enter");
   await expect(suggestions.getByRole("button")).toHaveCount(2);
   await expect(suggestions.getByRole("button", { name: "Retrasos", exact: true })).toHaveCount(0);
   await page.getByLabel("Tu pregunta", { exact: true }).fill("Mi siguiente pregunta sin enviar");

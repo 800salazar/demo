@@ -5,7 +5,7 @@ export const productHelp = {
     guide: "helpStatus", label: "Mostrar dónde cambiar el estado",
   },
   renameStatus: {
-    answer: "En **Administrador → Estados**, pulsa **Editar**. Cambia el nombre o el color, elige si actualizar las órdenes existentes o conservar sus nombres y guarda.",
+    answer: "En **Administrador → Estados**, pulsa el **lápiz**. Cambia el nombre o el color, elige si actualizar las órdenes existentes o conservar sus nombres y guarda.",
     guide: "helpCatalog", label: "Mostrar configuración de estados",
   },
   checklist: {
@@ -60,4 +60,4 @@ export function findProductHelp(question: string): ProductHelpId | undefined {
   if (has("pdf", "reporte", "reportes") && (how || has("descargar", "descarga", "descargo", "generar", "genero", "obtener", "sacar"))) return "report";
 }
 
-export const PRODUCT_HELP_CONTEXT = Object.values(productHelp).map(item => item.answer).join("\n");
+export const PRODUCT_HELP_CONTEXT = Object.values(productHelp).map(item => item.answer).join("\n") + "\nEn Administrador, los cuatro catálogos (Departamentos, Tipos de solicitud, Estados y Prioridades) permiten Agregar, editar con lápiz y eliminar con papelera. Al eliminar una opción usada, el visitante debe elegir conservarla en las órdenes anteriores y retirarla de nuevas asignaciones, o sustituirla por otra opción activa. El historial anterior se conserva. Los estados nuevos requieren comportamiento Pendiente, En proceso o Completada. No se pueden completar órdenes con actividades obligatorias pendientes ni retirar el último estado pendiente o completado. El asistente explica estos pasos; no modifica catálogos.";
