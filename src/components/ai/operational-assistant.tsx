@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState, useImperativeHandle, type Ref, type FormEvent } from "react";
 import { Copy, LoaderCircle, RotateCw, Send, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { GuideStartButton } from "@/components/guide/demo-guide";
+import { isProductHelpId, productHelp, type ProductHelpId } from "@/lib/ai/product-help";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getOperationalSnapshot } from "@/lib/ai/analysis";
@@ -21,7 +23,7 @@ const suggestions = [
 ];
 
 type Answer = {
-  question: string; answer: string; source: "ai" | "calculations";
+  question: string; answer: string; source: "ai" | "calculations" | "help"; helpId?: ProductHelpId;
   reason?: string; asOf: string; snapshot: string; id: number;
 };
 
@@ -130,7 +132,7 @@ export function OperationalAssistant({ controlRef }: { controlRef?: Ref<Assistan
           ? `Se alcanzó el límite de consultas. Intenta en ${Math.ceil(retry / 60)} min.`
           : result.message || "No se pudo completar la consulta.");
       }
-      if (typeof result.answer !== "string" || !["ai", "calculations"].includes(result.source)) {
+      if (typeof result.answer !== "string" || !["ai", "calculations", "help"].includes(result.source)) {
         throw new Error("El asistente devolvió una respuesta inválida.");
       }
       const next = { ...result, question: text, snapshot: JSON.stringify(snapshot), id: ++answerId.current } as Answer;
@@ -185,16 +187,17 @@ export function OperationalAssistant({ controlRef }: { controlRef?: Ref<Assistan
           {!answers.length && !pendingQuestion && <div className={styles.emptyChat}><span className={styles.emptyIcon} aria-hidden><Sparkles /></span><p>¿Qué quieres saber?</p></div>}
           {(busy ? answers.slice(-1) : answers).map((answer, index, shown) => {
             const previous = busy || index < shown.length - 1;
-            const changed = currentSnapshot !== null && answer.snapshot !== currentSnapshot;
+            const changed = answer.source !== "help" && currentSnapshot !== null && answer.snapshot !== currentSnapshot;
             return <div key={answer.id} className={previous ? styles.previousTurn : styles.currentTurn}>
               <div className={styles.questionBubble}><span className="sr-only">Tu pregunta: </span>{answer.question}</div>
               <div data-guide={!previous ? "ai-answer" : undefined} className={styles.aiAnswer}>
                 <p className={styles.source}>
-                  {answer.source === "ai" ? "IA · Verifica antes de decidir" : "Resumen calculado · Sin IA"}
+                  {answer.source === "help" ? "Ayuda del sistema" : answer.source === "ai" ? "IA · Verifica antes de decidir" : "Resumen calculado · Sin IA"}
                   {" · "}{new Date(answer.asOf).toLocaleString("es-MX", { timeZone: "America/Chihuahua" })}
                 </p>
                 {changed && <p role="status" className="rounded-lg bg-amber-100 p-3 text-sm text-amber-950">Las órdenes cambiaron. Consulta de nuevo para actualizar.</p>}
                 <p className="whitespace-pre-wrap break-words text-sm leading-relaxed"><TypedAnswer text={answer.answer} /></p>
+                {isProductHelpId(answer.helpId) && <GuideStartButton guide={productHelp[answer.helpId].guide} variant="outline" className={styles.helpAction}>{productHelp[answer.helpId].label}</GuideStartButton>}
                 <div className="flex items-center justify-end gap-1">
                   <Button type="button" variant="ghost" size="icon" className={styles.responseAction} aria-label="Copiar respuesta" title="Copiar respuesta" onClick={() => void copyAnswer(answer.answer)}><Copy aria-hidden /></Button>
                   <Button type="button" variant="ghost" size="icon" className={styles.responseAction} aria-label="Reintentar respuesta" title="Reintentar respuesta" disabled={!data || busy} onClick={() => void ask(answer.question, false)}><RotateCw aria-hidden /></Button>

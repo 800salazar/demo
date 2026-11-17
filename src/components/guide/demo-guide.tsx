@@ -154,7 +154,7 @@ function GuideOverlay({ step, onRoute, index, total, completed, onClose, onBack,
   const [view, setView] = useState<View>({ top: 0, left: 0, width: 390, height: 800, panelHeight: 260, rect: null, expanded: false, fixed: false });
   const [missing, setMissing] = useState(false);
   const [feedback, setFeedback] = useState<boolean | null>(null);
-  const [highlightCount, setHighlightCount] = useState(0);
+  const [highlightCount, setHighlightCount] = useState(1);
   const finished = !step;
 
   function revealTarget(focus = false) {

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { APICallError, gateway, generateText } from "ai";
 import { getAiConfig } from "@/lib/ai/config";
 import { buildOperationalAnalysis, getCalculatedFallback } from "@/lib/ai/analysis";
+import { findProductHelp, productHelp, PRODUCT_HELP_CONTEXT } from "@/lib/ai/product-help";
 import { SYSTEM_PROMPT } from "@/lib/ai/prompt";
 import { checkRateLimit, getClientBucket } from "@/lib/ai/rate-limit";
 import { aiRequestSchema } from "@/lib/ai/schema";
@@ -73,6 +74,9 @@ export async function POST(request: Request) {
     answer: getCalculatedFallback(question, analysis), source: "calculations", reason, asOf: analysis.asOf,
   }, { headers: privateHeaders });
 
+  const helpId = findProductHelp(question);
+  if (helpId) return NextResponse.json({ answer: productHelp[helpId].answer, source: "help", helpId, asOf: analysis.asOf }, { headers: privateHeaders });
+
   const config = getAiConfig();
   if (!config.available) return fallback("ai_not_configured");
   const limit = await checkRateLimit(request.headers);
@@ -84,7 +88,7 @@ export async function POST(request: Request) {
   }
   try {
     const response = await generateText({
-      model: gateway(config.model), system: SYSTEM_PROMPT,
+      model: gateway(config.model), system: `${SYSTEM_PROMPT}\nAyuda del producto verificada:\n${PRODUCT_HELP_CONTEXT}`,
       prompt: JSON.stringify({ pregunta: question, datos: analysis }),
       // This model can exhaust the output budget on reasoning before returning text.
       ...(config.model === "nvidia/nemotron-3.5-lightning-free" ? { reasoning: "none" as const } : {}),

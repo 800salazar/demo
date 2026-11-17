@@ -139,3 +139,15 @@ describe("POST /demo/api/ai", () => {
     expect(mocks.generateText).not.toHaveBeenCalled();
   });
 });
+
+it("explains state changes with a trusted guide even without Gateway, without model or quota calls", async () => {
+  vi.stubEnv("AI_GATEWAY_API_KEY", "");
+  vi.stubEnv("AI_MODEL", "");
+  const input = { ...body(), question: "como hacer un cambio de estado?" };
+  const response = await POST(request(input));
+  const result = await response.json();
+  expect(result).toMatchObject({ source: "help", helpId: "changeStatus" });
+  expect(result.answer).toContain("Guardar cambios");
+  expect(mocks.generateText).not.toHaveBeenCalled();
+  expect(mocks.checkRateLimit).not.toHaveBeenCalled();
+});

@@ -21,6 +21,11 @@ const full: GuideStep[] = [
 ];
 
 export const guides = {
+  helpStatus: [{ id: "status", path: demoRoutes.workspace, view: "operador", target: "order-status", title: "Cambia el estado", description: "Elige el nuevo estado y pulsa Guardar cambios. Para completar, verifica primero las actividades obligatorias." }],
+  helpCatalog: [{ id: "catalog", path: demoRoutes.workspace, view: "administrador", target: "status-settings", title: "Edita tus estados", description: "Pulsa Editar en un estado, ajusta el nombre o color y guarda." }],
+  helpChecklist: [full[2]],
+  helpCost: [{ id: "cost", path: demoRoutes.workspace, view: "operador", target: "order-cost", title: "Actualiza el costo", description: "Escribe el costo real y pulsa Guardar cambios para aplicar tu edición." }],
+  helpReport: [{ id: "report-help", path: demoRoutes.workspace, view: "operador", target: "report-download", title: "Descarga tu reporte", description: "Este botón genera el PDF con los datos guardados de tu escenario." }],
   home: full,
   full,
   // Keep the public guide entry points compatible with the former routes.

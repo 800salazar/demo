@@ -94,7 +94,7 @@ function OrderEditor({ order, data, onDirty }: { order: WorkOrder; data: DemoDat
               className="absolute inset-0 h-full w-full cursor-pointer opacity-0" />
           </span>
         </label>
-        <label className="space-y-2 text-sm font-medium">Estado
+        <label data-guide="order-status" className="space-y-2 text-sm font-medium">Estado
           <select name="statusId" value={statusId} onChange={(event) => setStatusId(event.target.value)} aria-describedby={requiredRemaining ? "order-status-help" : undefined}
             className={cn(fieldClass, "rounded-full font-medium ring-1 ring-inset", selectedStatus && COLOR_STYLES[selectedStatus.color].badge)}>
             {data.statuses.filter((s) => s.active || s.id === order.statusId).map((s) => (

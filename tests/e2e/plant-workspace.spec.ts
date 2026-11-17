@@ -73,3 +73,16 @@ test("direction shows visible thresholds and switches activity periods", async (
   await page.getByRole("button", { name: "14 días", exact: true }).click();
   await expect(page.getByRole("region", { name: "Actividad diaria" }).getByRole("button")).toHaveCount(14);
 });
+
+test("assistant help opens the editor guide without changing the order", async ({ page }) => {
+  await page.goto("/demo/sistema?vista=direccion");
+  await page.getByLabel("Tu pregunta", { exact: true }).fill("como hacer un cambio de estado?");
+  await page.getByRole("button", { name: "Consultar", exact: true }).click();
+  await page.getByRole("button", { name: "Mostrar dónde cambiar el estado", exact: true }).click();
+  await expect(page).toHaveURL(/vista=operador/);
+  const guide = page.getByRole("dialog");
+  await expect(guide.getByRole("heading", { name: "Cambia el estado", exact: true })).toBeVisible();
+  await expect(page.locator('[data-guide="order-status"]')).toBeVisible();
+  await expect(page.locator('[data-guide-spotlight]')).toBeVisible();
+  await expect(page.getByRole("button", { name: "Guardar cambios", exact: true })).toBeDisabled();
+});
