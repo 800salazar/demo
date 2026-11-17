@@ -82,3 +82,5 @@
 .assistantHeader :global([data-slot="card-description"]) { padding-left: 0; margin-top: .4rem; }
 
 .assistantCard .helpAction:global([data-slot="button"]) { color: #fff; background: #6743a2; border: 1px solid #b994e5; white-space: normal; height: auto; min-height: 44px; padding: .65rem; }
+.assistantCard .sendButton:global([data-slot="button"]) { min-height: 44px; min-width: 44px; }
+.assistantCard .sendButton:global([aria-pressed="true"]) { background: #b42342; border-color: #ffd4dd; }

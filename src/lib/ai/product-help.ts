@@ -17,7 +17,7 @@ export const productHelp = {
     guide: "helpCost", label: "Mostrar dónde editar el costo",
   },
   report: {
-    answer: "Pulsa **Reporte PDF**, arriba del área de trabajo. Descarga los indicadores y todas las órdenes guardadas de este navegador; los cambios sin guardar no se incluyen.",
+    answer: "Pulsa **Reporte PDF** y elige **Últimos 7 días** o **Últimos 14 días**. El PDF se adapta a tu vista: Operador, Administrador o Dirección. Incluye órdenes con altas, cierres o cambios en ese periodo; los costos son actuales. No incluye borradores.",
     guide: "helpReport", label: "Mostrar descarga del reporte",
   },
 } as const;

@@ -64,7 +64,8 @@ test("the guide follows operations, AI, catalogs, direction and PDF", async ({ p
   await guide.getByRole("button", { name: "Siguiente", exact: true }).click();
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Reporte PDF", exact: true }).click();
-  expect((await download).suggestedFilename()).toBe("salazar-reporte-operativo.pdf");
+  await page.getByRole("menuitem", { name: "Últimos 14 días", exact: true }).click();
+  expect((await download).suggestedFilename()).toBe("salazar-reporte-direccion-14-dias.pdf");
   await expect(guide.getByText("Listo. Puedes continuar.", { exact: true })).toBeVisible();
   await guide.getByRole("button", { name: "Terminar", exact: true }).click();
   await guide.getByRole("button", { name: "La guía fue útil", exact: true }).click();

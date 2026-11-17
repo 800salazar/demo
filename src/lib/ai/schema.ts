@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { draftContextSchema } from "./order-draft";
 
 import { MAX_QUESTION_LENGTH } from "./limits";
 const id = z.string().min(1).max(80);
@@ -50,6 +51,11 @@ export const aiRequestSchema = z.strictObject({
   question: z.string().trim().min(3, "Escribe una pregunta más completa.")
     .max(MAX_QUESTION_LENGTH, `La pregunta no puede exceder ${MAX_QUESTION_LENGTH} caracteres.`),
   snapshot: operationalSnapshotSchema,
+  draftContext: draftContextSchema.optional(),
+  history: z.array(z.strictObject({
+    question: z.string().trim().min(3).max(MAX_QUESTION_LENGTH),
+    answer: z.string().trim().min(1).max(5000),
+  })).max(2).optional(),
 });
 
 export type OperationalSnapshot = z.infer<typeof operationalSnapshotSchema>;

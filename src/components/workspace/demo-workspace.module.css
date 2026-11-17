@@ -42,7 +42,7 @@
 .barPair b { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); font-size: .7rem; color: #334155; font-weight: 500; }
 @media (min-width: 1100px) {
   .workspaceGrid { grid-template-columns: minmax(0, 1fr) minmax(350px, 390px); }
-  .assistantRail { position: sticky; top: 5.5rem; height: calc(100dvh - 6.5rem); min-height: 0; max-height: 900px; }
+  .assistantRail { position: sticky; top: 5.5rem; height: var(--assistant-desktop-height, calc(100dvh - 10rem)); min-height: 0; max-height: 900px; }
   .assistantRail > :global([data-slot="card"]) { height: 100%; }
 }
 @media (max-width: 1099px) {
@@ -84,3 +84,7 @@
 .critical .metricValue { animation: criticalBlink 2.4s ease-in-out infinite; }
 @keyframes criticalBlink { 0%, 100% { opacity: 1; } 50% { opacity: .48; } }
 @media (prefers-reduced-motion: reduce) { .critical .metricValue { animation: none; } }
+
+.reportMenu { z-index: 100; min-width: 10.5rem; padding: .3rem; border: 1px solid #cbd5e1; border-radius: .8rem; background: white; color: #153755; box-shadow: 0 10px 30px #082b5226; }
+.reportOption { display: flex; align-items: center; min-height: 44px; padding: .6rem .8rem; border-radius: .5rem; font-size: .875rem; cursor: pointer; outline: none; }
+.reportOption[data-highlighted] { color: #fff; background: #0057b8; }

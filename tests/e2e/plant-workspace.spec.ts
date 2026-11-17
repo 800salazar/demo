@@ -13,7 +13,7 @@ test("creates a request, prevents premature closure, and updates the shared tabl
   await page.getByRole("button", { name: "Crear solicitud", exact: true }).click();
   await expect(page.getByText("Editando OT-1031", { exact: true })).toBeVisible();
   const status = page.getByRole("combobox", { name: "Estado", exact: true });
-  await expect(status.locator('option').filter({ hasText: "Completada" })).toBeDisabled();
+  await expect(status.locator('option').filter({ hasText: "Completada" })).toHaveJSProperty("disabled", true);
   await page.getByLabel("Confirmar la solicitud con el responsable", { exact: true }).check();
   await page.getByLabel("Verificar el resultado antes del cierre", { exact: true }).check();
   await status.selectOption({ label: "Completada" });
@@ -42,7 +42,8 @@ test("right assistant remains in place, context is prepared, and PDF downloads",
   await expect(page.getByRole("region", { name: "Conversación" })).toContainText(/actividad del \d{4}-\d{2}-\d{2}/);
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Reporte PDF" }).click();
-  expect((await download).suggestedFilename()).toBe("salazar-reporte-operativo.pdf");
+  await page.getByRole("menuitem", { name: "Últimos 14 días", exact: true }).click();
+  expect((await download).suggestedFilename()).toBe("salazar-reporte-direccion-14-dias.pdf");
 });
 
 test("mobile assistant can open and close without losing its draft or overflowing", async ({ page }) => {

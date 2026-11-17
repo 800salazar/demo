@@ -3,11 +3,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ generateText: vi.fn(), checkRateLimit: vi.fn() }));
 vi.mock("ai", () => ({
   generateText: mocks.generateText,
+  Output: { object: (options: unknown) => options, json: () => ({ type: "json" }) },
   gateway: (id: string) => id,
   APICallError: { isInstance: () => false },
 }));
 vi.mock("@/lib/ai/rate-limit", () => ({ checkRateLimit: mocks.checkRateLimit, getClientBucket: () => "hashed-visitor" }));
 
+import { initialSuggestions } from "@/lib/ai/suggestions";
+import { draftCatalogs, emptyOrderDraft } from "@/lib/ai/order-draft";
 import { POST } from "@/app/demo/api/ai/route";
 import { getOperationalSnapshot } from "@/lib/ai/analysis";
 import { createSeedData } from "@/lib/demo/seed";
@@ -40,8 +43,9 @@ describe("POST /demo/api/ai", () => {
     const call = mocks.generateText.mock.calls[0][0];
     expect(call.model).toBe("test/model");
     const prompt = JSON.parse(call.prompt);
-    expect(prompt.datos.orders).toHaveLength(30);
-    expect(prompt.datos.orders[0].actualCost).toBe(123456);
+    expect(prompt.datos.totals.orders).toBe(30);
+    expect(prompt.datos.orders.length).toBeLessThanOrEqual(8);
+    expect(prompt.datos.orders.find((o: { folio: string }) => o.folio === "OT-1001").actualCost).toBe(123456);
     expect(call).not.toHaveProperty("tools");
     expect(JSON.stringify(result)).not.toContain("private-test");
   });
@@ -53,8 +57,8 @@ describe("POST /demo/api/ai", () => {
     await POST(request(a));
     await POST(request(b));
     const prompts = mocks.generateText.mock.calls.map(([call]) => JSON.parse(call.prompt));
-    expect(prompts[0].datos.orders[0].actualCost).toBe(999999);
-    expect(prompts[1].datos.orders[0].actualCost).toBe(b.snapshot.orders[0].actualCost);
+    expect(prompts[0].datos.orders.find((o: { folio: string }) => o.folio === "OT-1001").actualCost).toBe(999999);
+    expect(prompts[1].datos.totals.actualCost).not.toBe(prompts[0].datos.totals.actualCost);
   });
 
   it("preserves output for the free Nemotron model without changing other model settings", async () => {
@@ -150,4 +154,57 @@ it("explains state changes with a trusted guide even without Gateway, without mo
   expect(result.answer).toContain("Guardar cambios");
   expect(mocks.generateText).not.toHaveBeenCalled();
   expect(mocks.checkRateLimit).not.toHaveBeenCalled();
+});
+
+
+describe("draft preparation endpoint", () => {
+  const context = () => ({ ...draftCatalogs(createSeedData(new Date("2026-11-16T18:00:00Z"))), draft: null });
+  it("returns a validated proposal and missing fields without tools or creation", async () => {
+    const draft = { ...emptyOrderDraft(), title: "Revisar sensor", departmentId: context().departments[0].id };
+    mocks.generateText.mockResolvedValue({ text: "structured", output: { answer: "Preparé el borrador.", draft, suggestions: initialSuggestions } });
+    const result = await (await POST(request({ ...body(), question: "Crea una solicitud para revisar sensor", draftContext: context() }))).json();
+    expect(result.source).toBe("ai");
+    expect(result.draft).toEqual(draft);
+    expect(result.answer).toContain("responsable");
+    expect(result.answer).toContain("Revisa los datos");
+    expect(mocks.generateText.mock.calls[0][0]).not.toHaveProperty("tools");
+  });
+  it("rejects a model proposal with a nonexistent department", async () => {
+    mocks.generateText.mockResolvedValue({ text: "structured", output: { answer: "Propuesta", draft: { ...emptyOrderDraft(), departmentId: "invented" }, suggestions: initialSuggestions } });
+    const result = await (await POST(request({ ...body(), draftContext: context() }))).json();
+    expect(result.source).toBe("calculations");
+    expect(result).not.toHaveProperty("draft");
+    expect(result.answer).toContain("no se aplicó ningún borrador");
+  });
+  it("sends the current draft for follow-up instructions and retains quota checks", async () => {
+    mocks.generateText.mockResolvedValue({ text: "structured", output: { answer: "Consulta", draft: null, suggestions: initialSuggestions } });
+    const draftContext = { ...context(), draft: { ...emptyOrderDraft(), assignee: "Ana" } };
+    await POST(request({ ...body(), question: "El presupuesto es de 1200 pesos", draftContext }));
+    expect(JSON.parse(mocks.generateText.mock.calls[0][0].prompt).contextoBorrador.draft.assignee).toBe("Ana");
+    expect(mocks.checkRateLimit).toHaveBeenCalledOnce();
+  });
+});
+
+describe("generated follow-up suggestions", () => {
+  it("returns the model's suggestions and supplies the bounded conversation to the same call", async () => {
+    const suggestions = [{ label: "Analizar área", question: "Analiza presupuesto y costo real del departamento de Mantenimiento y cita los folios con sobrecosto." }];
+    mocks.generateText.mockResolvedValue({ text: "structured", output: { answer: "Revisa los costos del área.", draft: null, suggestions } });
+    const draftContext = { ...draftCatalogs(createSeedData(new Date("2026-11-16T18:00:00Z"))), draft: null };
+    const history = [{ question: "Analiza costos", answer: "Revisa el presupuesto por departamento." }];
+    const result = await (await POST(request({ ...body(), draftContext, history }))).json();
+    expect(result.suggestions).toEqual(suggestions);
+    expect(JSON.parse(mocks.generateText.mock.calls[0][0].prompt).historial).toEqual(history);
+    expect(mocks.generateText).toHaveBeenCalledOnce();
+    expect(mocks.checkRateLimit).toHaveBeenCalledOnce();
+  });
+  it("includes contextual local suggestions in calculated and help responses without extra model calls", async () => {
+    vi.stubEnv("AI_MODEL", "");
+    const costs = await (await POST(request({ ...body(), question: `Analiza costos de ${body().snapshot.departments[0].name}` }))).json();
+    expect(costs.source).toBe("calculations");
+    expect(costs.suggestions[0].question).toContain(body().snapshot.departments[0].name);
+    const help = await (await POST(request({ ...body(), question: "¿Cómo cambio el estado?" }))).json();
+    expect(help.source).toBe("help");
+    expect(help.suggestions.length).toBeGreaterThan(0);
+    expect(mocks.generateText).not.toHaveBeenCalled();
+  });
 });

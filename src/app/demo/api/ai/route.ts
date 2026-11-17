@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
-import { APICallError, gateway, generateText } from "ai";
+import { APICallError, gateway, generateText, Output } from "ai";
 import { getAiConfig } from "@/lib/ai/config";
 import { buildOperationalAnalysis, getCalculatedFallback } from "@/lib/ai/analysis";
 import { findProductHelp, productHelp, PRODUCT_HELP_CONTEXT } from "@/lib/ai/product-help";
+import { assistantOutputSchema, DRAFT_PROMPT, draftReview, validateDraft } from "@/lib/ai/order-draft";
+import { fallbackSuggestions, readSuggestions, SUGGESTIONS_PROMPT } from "@/lib/ai/suggestions";
+import { compactModelContext, FREE_NEMOTRON_MODEL, NEMOTRON_JSON_PROMPT, NEMOTRON_SYSTEM_PROMPT, parseNemotronResponse } from "@/lib/ai/model-context";
 import { SYSTEM_PROMPT } from "@/lib/ai/prompt";
 import { checkRateLimit, getClientBucket } from "@/lib/ai/rate-limit";
 import { aiRequestSchema } from "@/lib/ai/schema";
@@ -22,7 +25,8 @@ function gatewayDiagnostic(error: unknown) {
     || (name === "GatewayError" && error.message.startsWith("Unauthenticated.")));
   const status = APICallError.isInstance(error) && typeof error.statusCode === "number"
     && error.statusCode >= 100 && error.statusCode <= 599 ? error.statusCode : undefined;
-  const category = authentication ? "authentication" : name === "AbortError" || name === "TimeoutError" ? "timeout_or_abort" : "gateway_error";
+  const invalidOutput = ["AI_NoObjectGeneratedError", "AI_NoOutputGeneratedError", "AI_TypeValidationError", "ZodError"].includes(name);
+  const category = invalidOutput ? "invalid_output" : authentication ? "authentication" : name === "AbortError" || name === "TimeoutError" ? "timeout_or_abort" : "gateway_error";
   return { category, ...(status === undefined ? {} : { status }) };
 }
 
@@ -68,16 +72,17 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return errorResponse("invalid_request", "Revisa la pregunta y los datos de las órdenes de la demostración.", 400);
   }
-  const { question, snapshot } = parsed.data;
+  const { question, snapshot, draftContext, history } = parsed.data;
   const analysis = buildOperationalAnalysis(snapshot, new Date());
+  const suggestions = fallbackSuggestions(question, snapshot, draftContext?.draft);
   const fallback = (reason: string) => NextResponse.json({
-    answer: getCalculatedFallback(question, analysis), source: "calculations", reason, asOf: analysis.asOf,
+    answer: `${draftContext ? "La IA no pudo responder. Este resumen usa cálculos; no se aplicó ningún borrador.\n" : ""}${getCalculatedFallback(question, analysis)}`, suggestions, source: "calculations", reason, asOf: analysis.asOf,
   }, { headers: privateHeaders });
 
   const helpId = findProductHelp(question);
-  if (helpId) return NextResponse.json({ answer: productHelp[helpId].answer, source: "help", helpId, asOf: analysis.asOf }, { headers: privateHeaders });
+  if (helpId) return NextResponse.json({ answer: productHelp[helpId].answer, suggestions, source: "help", helpId, asOf: analysis.asOf }, { headers: privateHeaders });
 
-  const config = getAiConfig();
+  const config = getAiConfig(request.headers);
   if (!config.available) return fallback("ai_not_configured");
   const limit = await checkRateLimit(request.headers);
   if ("unavailable" in limit) return fallback("quota_unavailable");
@@ -87,12 +92,14 @@ export async function POST(request: Request) {
     });
   }
   try {
+    const freeNemotron = config.model === FREE_NEMOTRON_MODEL;
     const response = await generateText({
-      model: gateway(config.model), system: `${SYSTEM_PROMPT}\nAyuda del producto verificada:\n${PRODUCT_HELP_CONTEXT}`,
-      prompt: JSON.stringify({ pregunta: question, datos: analysis }),
+      model: gateway(config.model), system: `${freeNemotron ? NEMOTRON_SYSTEM_PROMPT : SYSTEM_PROMPT}\n${draftContext ? `${DRAFT_PROMPT}\n${SUGGESTIONS_PROMPT}\n${freeNemotron ? NEMOTRON_JSON_PROMPT : ""}` : ""}\nAyuda del producto verificada:\n${PRODUCT_HELP_CONTEXT}`,
+      prompt: JSON.stringify({ pregunta: question, datos: compactModelContext(analysis, question), ...(history?.length ? { historial: history } : {}), ...(draftContext ? { contextoBorrador: draftContext } : {}) }),
+      ...(draftContext ? { output: freeNemotron ? Output.json() : Output.object({ schema: assistantOutputSchema }) } : {}),
       // This model can exhaust the output budget on reasoning before returning text.
-      ...(config.model === "nvidia/nemotron-3.5-lightning-free" ? { reasoning: "none" as const } : {}),
-      maxOutputTokens: 1500, maxRetries: 0, timeout: 25_000, abortSignal: request.signal,
+      ...(freeNemotron ? { reasoning: "none" as const } : {}),
+      maxOutputTokens: 2200, maxRetries: 0, timeout: 25_000, abortSignal: request.signal,
       providerOptions: { gateway: {
         user: getClientBucket(request.headers, process.env.SUPABASE_SECRET_KEY!),
         tags: ["salazar-demo", "operational-assistant"],
@@ -102,7 +109,13 @@ export async function POST(request: Request) {
       console.warn("[api/ai] Gateway unavailable", { category: "empty_response", finishReason: response.finishReason });
       return fallback("ai_empty");
     }
-    return NextResponse.json({ answer: response.text, source: "ai", asOf: analysis.asOf }, { headers: privateHeaders });
+    if (draftContext) {
+      const output = freeNemotron ? parseNemotronResponse(response.output, draftContext.draft, question) : assistantOutputSchema.parse(response.output);
+      const draft = output.draft ? validateDraft(output.draft, draftContext) : null;
+      const followUps = readSuggestions(output.suggestions, question);
+      return NextResponse.json({ answer: draft ? draftReview(draft) : output.answer, draft, suggestions: followUps.length ? followUps : suggestions, source: "ai", asOf: analysis.asOf }, { headers: privateHeaders });
+    }
+    return NextResponse.json({ answer: response.text, suggestions, source: "ai", asOf: analysis.asOf }, { headers: privateHeaders });
   } catch (error) {
     // Never log questions, snapshots, credentials or provider error bodies.
     console.warn("[api/ai] Gateway unavailable", gatewayDiagnostic(error));

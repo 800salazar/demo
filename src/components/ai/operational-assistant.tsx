@@ -14,16 +14,15 @@ import { getSnapshot } from "@/lib/demo/store";
 import { useDemoData } from "@/lib/demo/use-demo-data";
 import { notifyGuideAction } from "@/lib/guide/steps";
 import { answerParts, plainAnswer } from "@/lib/ai/answer-format";
+import { draftCatalogs, validateDraft, type OrderDraft } from "@/lib/ai/order-draft";
+import { initialSuggestions, fallbackSuggestions, readSuggestions, type Suggestion } from "@/lib/ai/suggestions";
+import { VoiceInput } from "./voice-input";
 import styles from "./operational-assistant.module.css";
 
-const suggestions = [
-  { label: "Retrasos", question: "¿Qué órdenes están retrasadas y cuáles debo revisar primero?" },
-  { label: "Sobrecostos", question: "¿Qué departamento tiene mayor costo y qué órdenes superan su presupuesto?" },
-  { label: "Resumen", question: "Dame un resumen de las órdenes y tres recomendaciones." },
-];
 
 type Answer = {
   question: string; answer: string; source: "ai" | "calculations" | "help"; helpId?: ProductHelpId;
+  draft?: OrderDraft | null; suggestions: Suggestion[];
   reason?: string; asOf: string; snapshot: string; id: number;
 };
 
@@ -68,9 +67,10 @@ function TypedAnswer({ text }: { text: string }) {
 
 export type AssistantControl = { askQuestion: (text: string) => void };
 
-export function OperationalAssistant({ controlRef }: { controlRef?: Ref<AssistantControl> }) {
+export function OperationalAssistant({ controlRef, getDraft, onPrepare }: { controlRef?: Ref<AssistantControl>; getDraft?: () => OrderDraft | null; onPrepare?: (draft: OrderDraft) => boolean }) {
   const input = useRef<HTMLTextAreaElement>(null);
   const data = useDemoData();
+  const [listening, setListening] = useState(false);
   const [question, setQuestion] = useState("");
   useImperativeHandle(controlRef, () => ({ askQuestion(text) {
     if (controller.current) { toast.info("Espera a que termine la consulta actual."); return; }
@@ -104,6 +104,7 @@ export function OperationalAssistant({ controlRef }: { controlRef?: Ref<Assistan
     const container = conversation.current;
     if (container && followLatest.current) container.scrollTop = container.scrollHeight;
   }, [answers, pendingQuestion]);
+  const suggestions = answers.at(-1)?.suggestions ?? initialSuggestions;
   const currentSnapshot = data ? JSON.stringify(getOperationalSnapshot(data)) : null;
 
   async function ask(text: string, clearDraft = true) {
@@ -122,7 +123,7 @@ export function OperationalAssistant({ controlRef }: { controlRef?: Ref<Assistan
     try {
       const response = await fetch(demoRoutes.aiApi, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: text, snapshot }),
+        body: JSON.stringify({ question: text, snapshot, history: answers.map(({ question, answer }) => ({ question, answer })), ...(onPrepare ? { draftContext: { ...draftCatalogs(current), draft: getDraft?.() ?? null } } : {}) }),
         signal: abortController.signal,
       });
       const result = await response.json();
@@ -135,6 +136,13 @@ export function OperationalAssistant({ controlRef }: { controlRef?: Ref<Assistan
       if (typeof result.answer !== "string" || !["ai", "calculations", "help"].includes(result.source)) {
         throw new Error("El asistente devolvió una respuesta inválida.");
       }
+      if (result.draft) {
+        if (result.source !== "ai") throw new Error("El borrador requiere una respuesta de IA.");
+        result.draft = validateDraft(result.draft, { ...draftCatalogs(getSnapshot() ?? current), draft: null });
+        onPrepare?.(result.draft);
+      }
+      const generatedSuggestions = readSuggestions(result.suggestions, text);
+      result.suggestions = generatedSuggestions.length ? generatedSuggestions : fallbackSuggestions(text, snapshot, result.draft ?? getDraft?.());
       const next = { ...result, question: text, snapshot: JSON.stringify(snapshot), id: ++answerId.current } as Answer;
       setAnswers((previous) => [...previous.slice(-1), next]);
       notifyGuideAction("answer-ready");
@@ -173,7 +181,7 @@ export function OperationalAssistant({ controlRef }: { controlRef?: Ref<Assistan
           Asistente IA de producción
         </CardTitle>
         <CardDescription>
-          Consulta tus órdenes · Solo lectura
+          Consulta órdenes · Prepara solicitudes para revisar
         </CardDescription>
       </CardHeader>
       <CardContent className={styles.assistantContent}>
@@ -197,6 +205,7 @@ export function OperationalAssistant({ controlRef }: { controlRef?: Ref<Assistan
                 </p>
                 {changed && <p role="status" className="rounded-lg bg-amber-100 p-3 text-sm text-amber-950">Las órdenes cambiaron. Consulta de nuevo para actualizar.</p>}
                 <p className="whitespace-pre-wrap break-words text-sm leading-relaxed"><TypedAnswer text={answer.answer} /></p>
+                {answer.draft && <Button type="button" className={styles.helpAction} disabled={busy} onClick={() => { try { onPrepare?.(answer.draft!); } catch { setError("Las opciones del borrador cambiaron. Consulta de nuevo."); } }}>Revisar borrador</Button>}
                 {isProductHelpId(answer.helpId) && <GuideStartButton guide={productHelp[answer.helpId].guide} variant="outline" className={styles.helpAction}>{productHelp[answer.helpId].label}</GuideStartButton>}
                 <div className="flex items-center justify-end gap-1">
                   <Button type="button" variant="ghost" size="icon" className={styles.responseAction} aria-label="Copiar respuesta" title="Copiar respuesta" onClick={() => void copyAnswer(answer.answer)}><Copy aria-hidden /></Button>
@@ -216,21 +225,24 @@ export function OperationalAssistant({ controlRef }: { controlRef?: Ref<Assistan
         <form ref={composer} onSubmit={submit} className={styles.composer}>
           <div data-guide="ai-suggestions" className={styles.suggestions} aria-label="Preguntas sugeridas">
             {suggestions.map(({ label, question: suggestedQuestion }) => (
-              <Button key={label} type="button" variant="outline" size="sm" className={styles.suggestion} disabled={!data || busy} onClick={() => void ask(suggestedQuestion)}>
+              <Button key={label} type="button" variant="outline" size="sm" className={styles.suggestion} title={suggestedQuestion} disabled={!data || busy || listening} onClick={() => void ask(suggestedQuestion, false)}>
                 {label}
               </Button>
             ))}
           </div>
           <label htmlFor="operational-question" className="sr-only">Tu pregunta</label>
           <textarea ref={input} id="operational-question" value={question} onChange={(e) => setQuestion(e.target.value)}
-            placeholder="¿Qué cambió en OT-1001?" required minLength={3} maxLength={MAX_QUESTION_LENGTH}
-            rows={2} disabled={busy} className={styles.messageInput} />
+            placeholder="Pregunta o dicta una nueva solicitud…" required minLength={3} maxLength={MAX_QUESTION_LENGTH}
+            rows={2} disabled={busy || listening} className={styles.messageInput} />
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className={styles.composerMeta}>{data ? `${data.orders.length} órdenes ficticias` : "Cargando órdenes…"} · {question.length}/{MAX_QUESTION_LENGTH}</p>
-            <Button type="submit" className={styles.sendButton} disabled={!data || busy || question.trim().length < 3}>
+            <div className="flex flex-wrap items-center justify-end gap-2">
+            <Button type="submit" className={styles.sendButton} disabled={!data || busy || listening || question.trim().length < 3}>
               {busy ? <LoaderCircle className="size-4 animate-spin motion-reduce:animate-none" aria-hidden /> : <Send className="size-4" aria-hidden />}
               {busy ? "Analizando…" : "Consultar"}
             </Button>
+            <VoiceInput value={question} onChange={setQuestion} disabled={!data || busy} onListeningChange={setListening} className={styles.sendButton} />
+            </div>
           </div>
         </form>
         </div>

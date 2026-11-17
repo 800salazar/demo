@@ -73,20 +73,34 @@ export function DemoGuideProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [run, setRun] = useState<Run | null>(null);
   const returnFocus = useRef<HTMLElement | null>(null);
+  const restoreFocus = useRef(false);
   const steps: GuideStep[] = run ? guides[run.guide] : [];
   const step = run ? steps[run.index] : undefined;
 
   function close() {
     window.dispatchEvent(new CustomEvent("salazar:guide-target", { detail: null }));
+    restoreFocus.current = true;
     setRun(null);
-    requestAnimationFrame(() => {
+  }
+
+  useEffect(() => {
+    if (run || !restoreFocus.current) return;
+    let frame = 0;
+    let attempts = 0;
+    function focusLauncher() {
+      // Wait for the launcher to reappear after its visibility transition.
       // Next can retain old route DOM inside a hidden Activity; connected is not enough.
       const opener = returnFocus.current;
-      const visible = opener?.isConnected && opener.getClientRects().length > 0 && !opener.closest("[hidden],[inert]") && !opener.matches(":disabled");
-      const target = visible ? opener : document.querySelector<HTMLElement>("[data-guide-launcher]");
-      target?.focus({ preventScroll: true });
-    });
-  }
+      const available = (element: HTMLElement | null) => element?.isConnected && element.getClientRects().length > 0 && !element.closest("[hidden],[inert]") && !element.matches(":disabled") && getComputedStyle(element).visibility === "visible";
+      const target = available(opener) ? opener : Array.from(document.querySelectorAll<HTMLElement>("[data-guide-launcher]")).find(available);
+      if (target) {
+        target.focus({ preventScroll: true });
+        restoreFocus.current = false;
+      } else if (++attempts < 120) frame = requestAnimationFrame(focusLauncher);
+    }
+    frame = requestAnimationFrame(focusLauncher);
+    return () => cancelAnimationFrame(frame);
+  }, [run]);
 
   function start(guide: GuideId = "full") {
     returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;

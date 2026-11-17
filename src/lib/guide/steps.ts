@@ -17,7 +17,7 @@ const full: GuideStep[] = [
   { id: "table", path: demoRoutes.workspace, view: "administrador", target: "orders-table", title: "Encuentra lo importante", description: "Busca o filtra órdenes. El folio abre la edición y el botón IA prepara una consulta." },
   { id: "director", path: demoRoutes.workspace, view: "administrador", target: "view-selector", title: "Mira la operación completa", description: "Selecciona Dirección para revisar indicadores y actividad.", action: "view-director" },
   { id: "activity", path: demoRoutes.workspace, view: "direccion", target: "activity-chart", title: "Entiende cada pico", description: "Toca un día para ver las órdenes que lo forman. «Analizar este día con IA» envía una consulta sobre ese día." },
-  { id: "report", path: demoRoutes.workspace, view: "direccion", target: "report-download", title: "Llévate el reporte", description: "Descarga el PDF con los indicadores y todas las órdenes actuales.", action: "report-ready" },
+  { id: "report", path: demoRoutes.workspace, view: "direccion", target: "report-download", title: "Llévate el reporte", description: "Pulsa Reporte PDF y elige 7 o 14 días. Dirección incluye indicadores y gráficos del periodo.", action: "report-ready" },
 ];
 
 export const guides = {
@@ -25,7 +25,7 @@ export const guides = {
   helpCatalog: [{ id: "catalog", path: demoRoutes.workspace, view: "administrador", target: "status-settings", title: "Edita tus estados", description: "Pulsa Editar en un estado, ajusta el nombre o color y guarda." }],
   helpChecklist: [full[2]],
   helpCost: [{ id: "cost", path: demoRoutes.workspace, view: "operador", target: "order-cost", title: "Actualiza el costo", description: "Escribe el costo real y pulsa Guardar cambios para aplicar tu edición." }],
-  helpReport: [{ id: "report-help", path: demoRoutes.workspace, view: "operador", target: "report-download", title: "Descarga tu reporte", description: "Este botón genera el PDF con los datos guardados de tu escenario." }],
+  helpReport: [{ id: "report-help", path: demoRoutes.workspace, view: "operador", target: "report-download", title: "Descarga tu reporte", description: "Pulsa el botón y elige 7 o 14 días. El PDF usa tu vista actual y las órdenes con movimientos en ese periodo." }],
   home: full,
   full,
   // Keep the public guide entry points compatible with the former routes.
