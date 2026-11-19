@@ -1,11 +1,13 @@
 import { demoRoutes } from "@/config/routes";
 
-export type GuideAction = "order-saved" | "answer-ready" | "catalog-saved" | "view-admin" | "view-operator" | "view-director" | "report-ready";
+export type GuideAction = "order-saved" | "answer-ready" | "catalog-saved" | "view-admin" | "view-operator" | "view-director" | "report-ready" | "department-selected" | "department-analysis";
 export type DemoView = "operador" | "administrador" | "direccion";
 export type GuideStep = {
   id: string; path: string; target: string; title: string; description: string;
-  action?: GuideAction; view?: DemoView;
+  action?: GuideAction; view?: DemoView; onAction?: "next" | "close";
 };
+
+export const maintenanceDepartmentId = "dept-mantenimiento";
 
 const full: GuideStep[] = [
   { id: "order", path: demoRoutes.workspace, view: "operador", target: "order-select", title: "Elige una orden", description: "Busca un folio o escribe parte de su nombre." },
@@ -23,9 +25,18 @@ const full: GuideStep[] = [
 export const guides = {
   helpStatus: [{ id: "status", path: demoRoutes.workspace, view: "operador", target: "order-status", title: "Cambia el estado", description: "Elige el nuevo estado y pulsa Guardar cambios. Para completar, verifica primero las actividades obligatorias." }],
   helpCatalog: [{ id: "catalog", path: demoRoutes.workspace, view: "administrador", target: "status-settings", title: "Edita tus estados", description: "Pulsa el lápiz de un estado, ajusta el nombre o color y guarda." }],
+  manageStatuses: [
+    { id: "add-status", path: demoRoutes.workspace, view: "administrador", target: "status-add", title: "Agrega un estado", description: "Pulsa Agregar. Define el nombre, el color y el comportamiento del nuevo estado. Pulsa Siguiente para ver dónde editar uno existente." },
+    { id: "edit-status", path: demoRoutes.workspace, view: "administrador", target: "status-edit", title: "Edita un estado", description: "Pulsa el lápiz. Puedes cambiar el nombre o el color y decidir si el nuevo nombre se usa también en las órdenes existentes." },
+  ],
+  analyzeDepartment: [
+    { id: "department", path: demoRoutes.workspace, view: "direccion", target: "cost-department", title: "Selecciona un departamento", description: "En el gráfico de costos, pulsa el departamento resaltado para ver las órdenes que componen su costo.", action: "department-selected", onAction: "next" },
+    { id: "analyze-department", path: demoRoutes.workspace, view: "direccion", target: "cost-analysis", title: "Analiza los costos con IA", description: "Pulsa Analizar con IA para consultar qué órdenes explican el costo del departamento.", action: "department-analysis", onAction: "close" },
+  ],
   helpChecklist: [full[2]],
   helpCost: [{ id: "cost", path: demoRoutes.workspace, view: "operador", target: "order-cost", title: "Actualiza el costo", description: "Escribe el costo real y pulsa Guardar cambios para aplicar tu edición." }],
   helpReport: [{ id: "report-help", path: demoRoutes.workspace, view: "operador", target: "report-download", title: "Descarga tu reporte", description: "Pulsa el botón y elige 7 o 14 días. El PDF usa tu vista actual y las órdenes con movimientos en ese periodo." }],
+  directorReport: [full[9]],
   home: full,
   full,
   // Keep the public guide entry points compatible with the former routes.

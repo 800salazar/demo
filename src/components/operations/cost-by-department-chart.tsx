@@ -9,10 +9,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatMXN } from "@/lib/format";
 import { summarizeByDepartment } from "@/lib/demo/selectors";
 import { useDemoData } from "@/lib/demo/use-demo-data";
+import { maintenanceDepartmentId, notifyGuideAction } from "@/lib/guide/steps";
 
 export function CostByDepartmentChart({ onAsk }: { onAsk?: (question: string) => void }) {
   const data = useDemoData();
   const [openId, setOpenId] = useState<string | null>(null);
+  const [pinned, setPinned] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => { if (closeTimer.current) clearTimeout(closeTimer.current); }, []);
 
@@ -26,6 +28,7 @@ export function CostByDepartmentChart({ onAsk }: { onAsk?: (question: string) =>
   }
 
   const departments = data ? summarizeByDepartment(data) : [];
+  const guideDepartment = departments.find(({ departmentId }) => departmentId === maintenanceDepartmentId) ?? departments[0];
   const total = departments.reduce((sum, item) => sum + item.actualCost, 0);
   const colors = ["#2563eb", "#7c3aed", "#0891b2", "#d97706", "#16a34a", "#db2777"];
   const segments = departments.map((item, index) => {
@@ -52,12 +55,21 @@ export function CostByDepartmentChart({ onAsk }: { onAsk?: (question: string) =>
             <p className="sr-only">Costo total: {formatMXN(total)}. Selecciona un departamento para ver el desglose.</p>
             <div className="space-y-1">{departments.map((department, index) => (
               <Popover.Root key={department.departmentId} open={openId === department.departmentId}
-                onOpenChange={(open) => { cancelClose(); setOpenId(open ? department.departmentId : null); }}>
+                onOpenChange={(open) => { cancelClose(); setPinned(open); setOpenId(open ? department.departmentId : null); }}>
                 <Popover.Trigger asChild>
-                  <button type="button" className="group w-full rounded-xl px-2 py-2 text-left hover:bg-accent/60 focus-visible:outline-2 focus-visible:outline-ring"
+                  <button type="button" className="group min-h-11 w-full rounded-xl px-2 py-2 text-left hover:bg-accent/60 focus-visible:outline-2 focus-visible:outline-ring"
+                    data-guide={department === guideDepartment ? "cost-department" : undefined}
                     aria-label={`${department.department}: ${formatMXN(department.actualCost)}, ${percent(segments[index].percentage)} del total. Ver desglose`}
-                    onPointerEnter={(event) => { if (event.pointerType === "mouse") { cancelClose(); setOpenId(department.departmentId); } }}
-                    onPointerLeave={(event) => { if (event.pointerType === "mouse") scheduleClose(); }}>
+                    onClick={(event) => {
+                      event.preventDefault();
+                      cancelClose();
+                      const open = !pinned || openId !== department.departmentId;
+                      setPinned(open);
+                      setOpenId(open ? department.departmentId : null);
+                      if (open) notifyGuideAction("department-selected");
+                    }}
+                    onPointerEnter={(event) => { if (!pinned && event.pointerType === "mouse") { cancelClose(); setOpenId(department.departmentId); } }}
+                    onPointerLeave={(event) => { if (!pinned && event.pointerType === "mouse") scheduleClose(); }}>
                     <span className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-sm">
                       <span className="flex items-center gap-2 font-medium"><span className="size-3 rounded-full" style={{ backgroundColor: colors[index % colors.length] }} aria-hidden />{department.department}</span>
                       <span className="font-semibold tabular-nums">{formatMXN(department.actualCost)} <span className="text-muted-foreground">· {percent(segments[index].percentage)}</span></span>
@@ -66,19 +78,22 @@ export function CostByDepartmentChart({ onAsk }: { onAsk?: (question: string) =>
                   </button>
                 </Popover.Trigger>
                 <Popover.Portal>
-                  <Popover.Content side="top" sideOffset={8} collisionPadding={12} aria-label={`Desglose de ${department.department}`}
+                  <Popover.Content side="top" sideOffset={8} collisionPadding={12} aria-label={`Desglose de ${department.department}`} aria-labelledby={undefined}
                     onOpenAutoFocus={(event) => event.preventDefault()} onCloseAutoFocus={(event) => event.preventDefault()}
+                    onInteractOutside={(event) => {
+                      if (event.target instanceof Element && event.target.closest("[data-demo-guide-panel]")) event.preventDefault();
+                    }}
                     onPointerEnter={(event) => { if (event.pointerType === "mouse") cancelClose(); }}
-                    onPointerLeave={(event) => { if (event.pointerType === "mouse") scheduleClose(); }}
-                    className="z-50 w-80 max-w-[calc(100vw-1.5rem)] rounded-xl border bg-popover p-4 text-popover-foreground shadow-xl outline-none">
-                    <div className="flex items-start justify-between gap-3">
+                    onPointerLeave={(event) => { if (!pinned && event.pointerType === "mouse") scheduleClose(); }}
+                    className="z-50 flex max-h-[var(--radix-popover-content-available-height)] w-80 max-w-[calc(100vw-1.5rem)] flex-col overflow-y-auto rounded-xl border bg-popover p-4 text-popover-foreground shadow-xl outline-none">
+                    <div className="flex shrink-0 items-start justify-between gap-3">
                       <div>
                         <Popover.Title className="font-semibold">{department.department}</Popover.Title>
                         <p className="mt-1 text-sm font-medium">Total: {formatMXN(department.actualCost)}</p>
                       </div>
                       <Popover.Close aria-label="Cerrar desglose" className="grid size-11 shrink-0 place-items-center rounded-lg hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring"><X className="size-4" aria-hidden /></Popover.Close>
                     </div>
-                    <div className="mt-3 max-h-[min(45dvh,20rem)] overflow-y-auto overscroll-contain">
+                    <div className="mt-3 min-h-10 max-h-[min(45dvh,20rem)] overflow-y-auto overscroll-contain">
                       {department.details.length ? <ul className="divide-y text-sm">
                         {department.details.map((order) => <li key={order.id} className="flex items-start justify-between gap-3 py-2.5">
                           <span className="min-w-0"><span className="font-medium">{order.folio}</span><span className="block break-words text-muted-foreground">{order.title}</span></span>
@@ -86,7 +101,13 @@ export function CostByDepartmentChart({ onAsk }: { onAsk?: (question: string) =>
                         </li>)}
                       </ul> : <p className="text-sm text-muted-foreground">Sin órdenes.</p>}
                     </div>
-                    {onAsk && <AiAction className="mt-3 w-full" onClick={() => { setOpenId(null); onAsk(`Analiza los costos de ${department.department}. ¿Qué órdenes explican su costo y cuáles requieren atención?`); }}>Analizar con IA</AiAction>}
+                    {onAsk && <AiAction data-guide="cost-analysis" data-guide-fixed className="mt-3 w-full" onClick={() => {
+                      cancelClose();
+                      setPinned(false);
+                      setOpenId(null);
+                      notifyGuideAction("department-analysis");
+                      onAsk(`Analiza los costos de ${department.department}. ¿Qué órdenes explican su costo y cuáles requieren atención?`);
+                    }}>Analizar con IA</AiAction>}
                   </Popover.Content>
                 </Popover.Portal>
               </Popover.Root>

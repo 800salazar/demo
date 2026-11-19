@@ -12,11 +12,13 @@ import { demoRoutes } from "@/config/routes";
 import { MAX_QUESTION_LENGTH } from "@/lib/ai/limits";
 import { getSnapshot } from "@/lib/demo/store";
 import { useDemoData } from "@/lib/demo/use-demo-data";
+import type { WorkOrder } from "@/lib/demo/types";
 import { notifyGuideAction } from "@/lib/guide/steps";
 import { answerParts, plainAnswer } from "@/lib/ai/answer-format";
 import { draftCatalogs, validateDraft, type OrderDraft } from "@/lib/ai/order-draft";
 import { initialSuggestions, fallbackSuggestions, readSuggestions, type Suggestion } from "@/lib/ai/suggestions";
 import { VoiceInput } from "./voice-input";
+import { UsageSuggestions } from "./usage-suggestions";
 import styles from "./operational-assistant.module.css";
 
 
@@ -67,7 +69,13 @@ function TypedAnswer({ text }: { text: string }) {
 
 export type AssistantControl = { askQuestion: (text: string) => void };
 
-export function OperationalAssistant({ controlRef, getDraft, onPrepare }: { controlRef?: Ref<AssistantControl>; getDraft?: () => OrderDraft | null; onPrepare?: (draft: OrderDraft) => boolean }) {
+export function OperationalAssistant({ controlRef, getDraft, onPrepare, onConsultOrder, onStatusHelp }: {
+  controlRef?: Ref<AssistantControl>;
+  getDraft?: () => OrderDraft | null;
+  onPrepare?: (draft: OrderDraft) => boolean;
+  onConsultOrder: (order: WorkOrder) => void;
+  onStatusHelp: () => void;
+}) {
   const input = useRef<HTMLTextAreaElement>(null);
   const data = useDemoData();
   const [listening, setListening] = useState(false);
@@ -249,6 +257,7 @@ export function OperationalAssistant({ controlRef, getDraft, onPrepare }: { cont
               {busy ? "Analizando…" : "Consultar"}
             </Button>
             <VoiceInput value={question} onChange={setQuestion} disabled={!data || busy} onListeningChange={setListening} className={styles.sendButton} />
+            <UsageSuggestions data={data} disabled={busy || listening} onConsultOrder={onConsultOrder} onStatusHelp={onStatusHelp} />
             </div>
           </div>
         </form>

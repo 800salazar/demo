@@ -61,9 +61,12 @@ export function DemoWorkspace() {
     notifyGuideAction(next === "direccion" ? "view-director" : next === "administrador" ? "view-admin" : "view-operator");
   }
   function ask(question: string) { setAiOpen(true); assistant.current?.askQuestion(question); }
-  function edit(id: string) {
-    changeView("operador"); editor.current?.selectOrder(id);
-    requestAnimationFrame(() => document.querySelector('[data-guide="order-edit"]')?.scrollIntoView({ block: "start", behavior: "instant" }));
+  function edit(id: string, onSelected?: () => void) {
+    changeView("operador");
+    editor.current?.selectOrder(id, () => {
+      requestAnimationFrame(() => document.querySelector('[data-guide="order-edit"]')?.scrollIntoView({ block: "start", behavior: "instant" }));
+      onSelected?.();
+    });
   }
   async function download(days: ReportDays) {
     const snapshot = getSnapshot();
@@ -108,10 +111,19 @@ export function DemoWorkspace() {
         <OrdersTable onEdit={edit} onAsk={ask} />
       </div>
       <aside ref={rail} data-guide-fixed id="workspace-assistant" className={styles.assistantRail} data-open={aiOpen} aria-label="Asistente de la operación" onKeyDown={event => {
-        if (event.key === "Escape" && window.matchMedia("(max-width: 1099px)").matches) { setAiOpen(false); launcher.current?.focus(); }
+        if (event.key === "Escape" && !event.defaultPrevented && window.matchMedia("(max-width: 1099px)").matches) { setAiOpen(false); launcher.current?.focus(); }
       }}>
         <div className={styles.mobileClose}><Button variant="ghost" onClick={() => { setAiOpen(false); launcher.current?.focus(); }}><X aria-hidden />Volver a la operación</Button></div>
-        <OperationalAssistant controlRef={assistant} getDraft={() => newOrder.current?.getDraft() ?? null} onPrepare={draft => {
+        <OperationalAssistant controlRef={assistant}
+          onConsultOrder={(order) => {
+            setAiOpen(false);
+            edit(order.id, () => ask(`Analiza ${order.folio}: estado, costos, observaciones y actividades pendientes. ¿Qué debo revisar?`));
+          }}
+          onStatusHelp={() => {
+            changeView("administrador");
+            ask("¿Cómo agrego o edito un estado en el catálogo?");
+          }}
+          getDraft={() => newOrder.current?.getDraft() ?? null} onPrepare={draft => {
           const applied = newOrder.current?.prepare(draft);
           if (applied) {
             changeView("operador"); setAiOpen(false);

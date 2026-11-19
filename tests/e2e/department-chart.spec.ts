@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test("el desglose aparece al pasar el cursor y refleja los importes", async ({ page }) => {
-  await page.goto("/demo/sistema?vista=administrador");
+  await page.goto("/demo/sistema?vista=direccion");
   const bar = page.getByRole("button", { name: /Ver desglose/ }).first();
   await expect(bar).toBeVisible();
   await expect(bar).toContainText(/\$[\d,]+\.\d{2}/);
@@ -13,11 +13,11 @@ test("el desglose aparece al pasar el cursor y refleja los importes", async ({ p
   await expect(detail.locator("li").first()).toContainText(/\$[\d,]+\.\d{2}/);
 });
 
-test("el desglose se puede abrir y cerrar en móvil", async ({ browser }) => {
-  const context = await browser.newContext({ viewport: { width: 320, height: 640 }, isMobile: true, hasTouch: true });
+test("el desglose se puede abrir y cerrar en móvil", async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ baseURL, viewport: { width: 320, height: 640 }, isMobile: true, hasTouch: true });
   try {
     const page = await context.newPage();
-    await page.goto("http://127.0.0.1:3100/demo/sistema?vista=administrador");
+    await page.goto("/demo/sistema?vista=direccion");
     await page.getByRole("button", { name: /Ver desglose/ }).first().tap();
     const detail = page.getByRole("dialog", { name: /Desglose de/ });
     await expect(detail).toBeVisible();

@@ -8,6 +8,10 @@ export const productHelp = {
     answer: "En **Administrador → Estados**, pulsa el **lápiz**. Cambia el nombre o el color, elige si actualizar las órdenes existentes o conservar sus nombres y guarda.",
     guide: "helpCatalog", label: "Mostrar configuración de estados",
   },
+  manageStatus: {
+    answer: "En **Administrador → Estados**, pulsa **Agregar** para definir nombre, color y comportamiento: Pendiente, En proceso o Completada. Para editar uno existente, pulsa el **lápiz**. Si cambias el nombre, puedes conservarlo en las órdenes anteriores o actualizarlo también ahí.",
+    guide: "manageStatuses", label: "Muéstrame cómo",
+  },
   checklist: {
     answer: "En **Operador**, elige la orden y revisa **Antes de cerrar**. Marca solo las actividades que verificaste. Las obligatorias pendientes bloquean el cierre. Una orden completada debe reabrirse antes de editar sus actividades.",
     guide: "helpChecklist", label: "Mostrar actividades de la orden",
@@ -53,6 +57,7 @@ export function findProductHelp(question: string): ProductHelpId | undefined {
   const edit = has("cambiar", "cambio", "cambia", "editar", "edito", "edita", "modificar", "modifico", "actualizar", "actualizo", "poner");
   const state = has("estado", "estados", "estatus");
   const catalog = has("renombrar", "renombro", "nombre", "nombres", "color", "colores", "configurar", "configuracion");
+  if (state && (has("agregar", "agrego", "agrega", "anadir", "anado") || (how && has("catalogo") && edit))) return "manageStatus";
   if (state && catalog && (how || edit || has("renombrar", "configurar"))) return "renameStatus";
   if (state && edit) return "changeStatus";
   if ((how || has("completar", "cerrar", "verificar")) && has("checklist", "actividades", "actividad", "completar", "cerrar")) return "checklist";

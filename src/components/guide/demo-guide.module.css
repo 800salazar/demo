@@ -9,7 +9,7 @@
 }
 @media print { .floatingGuide { display: none; } }
 .startControls { display: inline-flex; flex-direction: column; align-items: stretch; gap: .875rem; }
-.attention:global([data-slot="button"][data-guide-launcher]) { color: #01172f; background: #facc15; border-color: #fde047; }
+.attention:global([data-slot="button"]) { color: #01172f; background: #facc15; border-color: #fde047; }
 .attention { transform-origin: center; animation: guideHeartbeat 2.6s ease-in-out infinite; }
 .attention:hover, .attention:focus-visible, .attention:disabled { animation: none; }
 @keyframes guideHeartbeat {

@@ -4,11 +4,11 @@ export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: false,
   workers: 1,
-  use: { baseURL: process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:3100", trace: "retain-on-failure" },
+  use: { baseURL: process.env.PLAYWRIGHT_BASE_URL || "http://localhost:3100", trace: "retain-on-failure" },
   projects: [{ name: "chrome", use: { ...devices["Desktop Chrome"], channel: "chrome" } }],
   webServer: process.env.PLAYWRIGHT_BASE_URL ? undefined : {
-    command: "pnpm dev --hostname 127.0.0.1 --port 3100",
-    url: "http://127.0.0.1:3100/demo/ia",
+    command: "pnpm dev --hostname localhost --port 3100",
+    url: "http://localhost:3100/demo/ia",
     reuseExistingServer: false,
     timeout: 120_000,
     // Deterministic integration tests: no model charges or external credentials.

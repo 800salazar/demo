@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useRef, useState, type ComponentProps, type CSSProperties, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ComponentProps, type CSSProperties, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ArrowLeft, CircleHelp, Crosshair, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,10 +11,10 @@ import { cn } from "@/lib/utils";
 import styles from "./demo-guide.module.css";
 
 type Run = { guide: GuideId; index: number; completed: number[] };
-type GuideContextValue = { start: (guide?: GuideId) => void; active: boolean };
+type GuideContextValue = { start: (guide?: GuideId, opener?: HTMLElement) => void; active: boolean };
 const GuideContext = createContext<GuideContextValue | null>(null);
 
-function useGuide() {
+export function useGuide() {
   const context = useContext(GuideContext);
   if (!context) throw new Error("La guía requiere DemoGuideProvider.");
   return context;
@@ -77,11 +77,13 @@ export function DemoGuideProvider({ children }: { children: ReactNode }) {
   const steps: GuideStep[] = run ? guides[run.guide] : [];
   const step = run ? steps[run.index] : undefined;
 
-  function close() {
+  const clearGuide = useCallback((restore: boolean) => {
     window.dispatchEvent(new CustomEvent("salazar:guide-target", { detail: null }));
-    restoreFocus.current = true;
+    restoreFocus.current = restore;
     setRun(null);
-  }
+  }, []);
+
+  const close = useCallback(() => clearGuide(true), [clearGuide]);
 
   useEffect(() => {
     if (run || !restoreFocus.current) return;
@@ -102,8 +104,8 @@ export function DemoGuideProvider({ children }: { children: ReactNode }) {
     return () => cancelAnimationFrame(frame);
   }, [run]);
 
-  function start(guide: GuideId = "full") {
-    returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  function start(guide: GuideId = "full", opener?: HTMLElement) {
+    returnFocus.current = opener ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null);
     setRun({ guide, index: 0, completed: [] });
     const first = guides[guide][0];
     router.push(guideStepUrl(first), { scroll: false });
@@ -121,6 +123,14 @@ export function DemoGuideProvider({ children }: { children: ReactNode }) {
     const action = (event: Event) => {
       const detail = (event as CustomEvent<GuideAction>).detail;
       if (pathname !== step?.path || detail !== step.action) return;
+      if (step.onAction === "close") {
+        clearGuide(false);
+        return;
+      }
+      if (step.onAction === "next") {
+        setRun({ ...run, index: run.index + 1 });
+        return;
+      }
       setRun((current) => current && !current.completed.includes(current.index)
         ? { ...current, completed: [...current.completed, current.index] } : current);
     };
@@ -140,7 +150,7 @@ export function DemoGuideProvider({ children }: { children: ReactNode }) {
       window.removeEventListener("popstate", close);
       document.removeEventListener("click", navigate);
     };
-  }, [run, step, pathname]);
+  }, [run, step, pathname, close, clearGuide]);
 
   return (
     <GuideContext.Provider value={{ start, active: Boolean(run) }}>
@@ -290,11 +300,12 @@ function GuideOverlay({ step, onRoute, index, total, completed, onClose, onBack,
   const intersectsX = Boolean(view.rect && view.rect.right + 12 > panelLeft && view.rect.left - 12 < panelLeft + panelWidth);
   const defaultTop = view.top + Math.max(12, view.height - view.panelHeight - margin);
   // The assistant's composer cannot be moved with page scrolling. Put its guide above it.
-  const panelTop = view.fixed && intersectsX && view.rect
-    ? Math.max(view.top + 12, Math.min(defaultTop, view.rect.top - view.panelHeight - 18)) : defaultTop;
+  const aboveTarget = view.rect ? view.rect.top - view.panelHeight - 18 : 0;
+  const panelTop = view.fixed && intersectsX && view.rect && aboveTarget >= view.top + 12
+    ? Math.min(defaultTop, aboveTarget) : defaultTop;
   const panelAboveTarget = Boolean(view.fixed && view.rect && panelTop + view.panelHeight <= view.rect.top - 12);
   const hidePanel = Boolean(view.expanded && view.rect && view.rect.bottom + 12 > panelTop);
-  const ringTop = view.rect ? Math.max(view.top + 76, view.rect.top - 6) : 0;
+  const ringTop = view.rect ? Math.max(view.top + (view.fixed ? 6 : 76), view.rect.top - 6) : 0;
   const ringBottom = view.rect ? Math.min(hidePanel || !intersectsX || panelAboveTarget ? view.top + view.height - 6 : panelTop - 12, view.rect.bottom + 6) : 0;
   const ringLeft = view.rect ? Math.max(view.left + 6, view.rect.left - 6) : 0;
   const ringRight = view.rect ? Math.min(view.left + view.width - 6, view.rect.right + 6) : 0;
@@ -308,7 +319,7 @@ function GuideOverlay({ step, onRoute, index, total, completed, onClose, onBack,
           style={{ top: ringTop, left: ringLeft, width: ringRight - ringLeft, height: ringBottom - ringTop }}>
           {highlightCount > 0 && <span key={highlightCount} className={styles.spotlightPulse} />}
         </div>}
-        <div ref={panel} className={`${styles.panel} ${view.height < 480 ? styles.compact : ""}`} role="dialog" aria-modal="false" aria-hidden={hidePanel || undefined}
+        <div ref={panel} data-demo-guide-panel className={`${styles.panel} ${view.height < 480 ? styles.compact : ""}`} role="dialog" aria-modal="false" aria-hidden={hidePanel || undefined}
           aria-labelledby="guide-title" aria-describedby="guide-description" tabIndex={-1}
           style={{ visibility: hidePanel ? "hidden" : undefined, top: panelTop, left: panelLeft, width: panelWidth, maxHeight: view.height - 24 }}>
           <div className={styles.heading}>

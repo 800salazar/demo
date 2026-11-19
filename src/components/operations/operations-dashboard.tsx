@@ -155,19 +155,22 @@ function OrderSearch({ orders, order, onSelect }: { orders: WorkOrder[]; order: 
   );
 }
 
-export type OrderEditorControl = { selectOrder: (id: string) => void };
+export type OrderEditorControl = { selectOrder: (id: string, onSelected?: () => void) => void };
 
 export function OperationsDashboard({ controlRef, onAsk }: { controlRef?: Ref<OrderEditorControl>; onAsk?: (question: string) => void }) {
   const data = useDemoData();
   const [selectedId, setSelectedId] = useState("");
   const [editedOrder, setEditedOrder] = useState<string | null>(null);
-  const [pendingSelection, setPendingSelection] = useState<string | null>(null);
+  const [pendingSelection, setPendingSelection] = useState<{ id: string; onSelected?: () => void } | null>(null);
   const order = data?.orders.find((o) => o.id === selectedId) ?? data?.orders[0];
   const orderKey = order ? `${order.id}:${data?.seededAt}` : "";
-  function selectOrder(id: string) {
-    if (id === order?.id) return;
-    if (editedOrder === orderKey) setPendingSelection(id);
-    else setSelectedId(id);
+  function selectOrder(id: string, onSelected?: () => void) {
+    if (id !== order?.id && editedOrder === orderKey) {
+      setPendingSelection({ id, onSelected });
+      return;
+    }
+    setSelectedId(id);
+    onSelected?.();
   }
   useImperativeHandle(controlRef, () => ({ selectOrder }));
   if (!data) return <Skeleton className="h-72 w-full" aria-label="Cargando órdenes" />;
@@ -187,7 +190,13 @@ export function OperationsDashboard({ controlRef, onAsk }: { controlRef?: Ref<Or
           <AlertDialogHeader><AlertDialogTitle>¿Cambiar de orden?</AlertDialogTitle><AlertDialogDescription>Tienes cambios sin guardar en {order?.folio}.</AlertDialogDescription></AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Seguir editando</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={() => { if (pendingSelection) setSelectedId(pendingSelection); setEditedOrder(null); setPendingSelection(null); }}>Descartar cambios</AlertDialogAction>
+            <AlertDialogAction variant="destructive" onClick={() => {
+              if (!pendingSelection) return;
+              setSelectedId(pendingSelection.id);
+              setEditedOrder(null);
+              setPendingSelection(null);
+              pendingSelection.onSelected?.();
+            }}>Descartar cambios</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
