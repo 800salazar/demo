@@ -1,5 +1,6 @@
 import { localStorageAdapter, type PersistenceAdapter } from "./persistence";
 import { createSeedData } from "./seed";
+import { addRecentActivity } from "./recent-activity";
 import type { DemoData } from "./types";
 
 type Listener = () => void;
@@ -27,7 +28,9 @@ function load() {
     .then((stored) => {
       if (snapshot) return;
       if (stored) {
-        publish(stored);
+        const refreshed = addRecentActivity(stored, new Date());
+        publish(refreshed);
+        if (refreshed !== stored) persist(refreshed);
         return;
       }
       const seeded = createSeedData(new Date());
@@ -42,9 +45,29 @@ function load() {
 export function subscribe(listener: Listener): () => void {
   listeners.add(listener);
   load();
+  if (listeners.size === 1) {
+    window.addEventListener("focus", refreshRecentActivity);
+    document.addEventListener("visibilitychange", refreshRecentActivity);
+    refreshTimer = window.setInterval(refreshRecentActivity, 60000);
+  }
   return () => {
     listeners.delete(listener);
+    if (listeners.size === 0) {
+      window.removeEventListener("focus", refreshRecentActivity);
+      document.removeEventListener("visibilitychange", refreshRecentActivity);
+      window.clearInterval(refreshTimer);
+    }
   };
+}
+
+let refreshTimer: number | undefined;
+function refreshRecentActivity() {
+  if (!snapshot || document.hidden) return;
+  const next = addRecentActivity(snapshot, new Date());
+  if (next !== snapshot) {
+    publish(next);
+    persist(next);
+  }
 }
 
 /** `null` mientras los datos se cargan en el navegador. */

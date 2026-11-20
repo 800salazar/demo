@@ -83,6 +83,6 @@ export function VoiceInput({ value, onChange, disabled, onListeningChange, class
     <Button type="button" size="icon" className={className} disabled={disabled} aria-label={listening ? "Detener dictado" : "Dictar con micrófono"} title={listening ? "Detener dictado" : "Dictar con micrófono"} aria-pressed={listening} aria-describedby="voice-status" onClick={toggle}>
       {listening ? <Square aria-hidden /> : <Mic aria-hidden />}
     </Button>
-    <span id="voice-status" role="status" className="basis-full text-xs">{message}</span>
+    <span id="voice-status" role="status" className="col-span-full text-xs">{message}</span>
   </>;
 }

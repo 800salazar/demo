@@ -239,6 +239,7 @@ export function OperationalAssistant({ controlRef, getDraft, onPrepare, onConsul
             ))}
           </div>
           <label htmlFor="operational-question" className="sr-only">Tu pregunta</label>
+          <div className={styles.inputRow}>
           <textarea ref={input} id="operational-question" value={question} onChange={(e) => setQuestion(e.target.value)}
             placeholder="Pregunta o dicta una nueva solicitud…" required minLength={3} maxLength={MAX_QUESTION_LENGTH}
             rows={2} disabled={busy || listening} className={styles.messageInput}
@@ -249,18 +250,16 @@ export function OperationalAssistant({ controlRef, getDraft, onPrepare, onConsul
                 event.currentTarget.form?.requestSubmit();
               }
             }} />
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className={styles.composerMeta}>{data ? `${data.orders.length} órdenes ficticias` : "Cargando órdenes…"} · {question.length}/{MAX_QUESTION_LENGTH}</p>
-            <div className="flex flex-wrap items-center justify-end gap-2">
-            <Button type="submit" className={styles.sendButton} disabled={!data || busy || listening || question.trim().length < 3}>
+            <Button type="submit" size="icon" aria-label="Consultar" title="Consultar" className={styles.sendButton} disabled={!data || busy || listening || question.trim().length < 3}>
               {busy ? <LoaderCircle className="size-4 animate-spin motion-reduce:animate-none" aria-hidden /> : <Send className="size-4" aria-hidden />}
-              {busy ? "Analizando…" : "Consultar"}
             </Button>
             <VoiceInput value={question} onChange={setQuestion} disabled={!data || busy} onListeningChange={setListening} className={styles.sendButton} />
-            <UsageSuggestions data={data} disabled={busy || listening} onConsultOrder={onConsultOrder} onStatusHelp={onStatusHelp} />
-            </div>
           </div>
+          <p className={styles.composerMeta}>{data ? `${data.orders.length} órdenes ficticias` : "Cargando órdenes…"} · {question.length}/{MAX_QUESTION_LENGTH}</p>
         </form>
+        </div>
+        <div className={styles.usageFooter}>
+          <UsageSuggestions data={data} disabled={busy || listening} onConsultOrder={onConsultOrder} onStatusHelp={onStatusHelp} />
         </div>
       </CardContent>
     </Card>

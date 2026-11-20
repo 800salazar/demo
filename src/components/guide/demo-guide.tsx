@@ -113,6 +113,10 @@ export function DemoGuideProvider({ children }: { children: ReactNode }) {
 
   function move(index: number) {
     if (!run) return;
+    if (index >= steps.length) {
+      close();
+      return;
+    }
     setRun({ ...run, index });
     const next = steps[index];
     if (next) router.push(guideStepUrl(next), { scroll: false });
@@ -155,7 +159,7 @@ export function DemoGuideProvider({ children }: { children: ReactNode }) {
   return (
     <GuideContext.Provider value={{ start, active: Boolean(run) }}>
       {children}
-      {run && <GuideOverlay key={`${run.guide}:${run.index}`} step={step} onRoute={pathname === step?.path}
+      {run && step && <GuideOverlay key={`${run.guide}:${run.index}`} step={step} onRoute={pathname === step.path}
         index={run.index} total={steps.length} completed={run.completed.includes(run.index)}
         onClose={close} onBack={() => move(run.index - 1)} onNext={() => move(run.index + 1)} />}
     </GuideContext.Provider>
@@ -163,7 +167,7 @@ export function DemoGuideProvider({ children }: { children: ReactNode }) {
 }
 
 type OverlayProps = {
-  step?: GuideStep; onRoute: boolean; index: number; total: number; completed: boolean;
+  step: GuideStep; onRoute: boolean; index: number; total: number; completed: boolean;
   onClose: () => void; onBack: () => void; onNext: () => void;
 };
 type View = { top: number; left: number; width: number; height: number; panelHeight: number; rect: DOMRect | null; expanded: boolean; fixed: boolean };
@@ -177,9 +181,7 @@ function GuideOverlay({ step, onRoute, index, total, completed, onClose, onBack,
   const target = useRef<HTMLElement | null>(null);
   const [view, setView] = useState<View>({ top: 0, left: 0, width: 390, height: 800, panelHeight: 260, rect: null, expanded: false, fixed: false });
   const [missing, setMissing] = useState(false);
-  const [feedback, setFeedback] = useState<boolean | null>(null);
   const [highlightCount, setHighlightCount] = useState(1);
-  const finished = !step;
 
   function revealTarget(focus = false) {
     const element = target.current;
@@ -289,11 +291,6 @@ function GuideOverlay({ step, onRoute, index, total, completed, onClose, onBack,
     };
   }, [step, onRoute]);
 
-  function rate(useful: boolean) {
-    setFeedback(useful);
-    try { localStorage.setItem("salazar-demo:guide-feedback", JSON.stringify({ useful, at: new Date().toISOString() })); } catch { /* Help also works without storage. */ }
-  }
-
   const margin = bottomMargin(view.width, view.height);
   const panelWidth = Math.min(480, view.width - 24);
   const panelLeft = view.left + (view.width - panelWidth) / 2;
@@ -323,25 +320,16 @@ function GuideOverlay({ step, onRoute, index, total, completed, onClose, onBack,
           aria-labelledby="guide-title" aria-describedby="guide-description" tabIndex={-1}
           style={{ visibility: hidePanel ? "hidden" : undefined, top: panelTop, left: panelLeft, width: panelWidth, maxHeight: view.height - 24 }}>
           <div className={styles.heading}>
-            <p className={styles.counter}>{finished ? "Recorrido completado" : `Guía · ${index + 1} de ${total}`}</p>
+            <p className={styles.counter}>{`Guía · ${index + 1} de ${total}`}</p>
             <Button variant="ghost" size="icon" onClick={onClose} aria-label="Cerrar guía"><X aria-hidden /></Button>
           </div>
-          <h2 id="guide-title">{step?.title ?? "Ya puedes explorar"}</h2>
-          <p id="guide-description" className={styles.description}>{step?.description ?? "La ayuda sigue disponible en cada pantalla."}</p>
-          {!finished && <progress className={styles.progress} value={index + 1} max={total} aria-label="Avance de la guía" />}
-          {!finished && <p role="status" className={styles.status}>
+          <h2 id="guide-title">{step?.title}</h2>
+          <p id="guide-description" className={styles.description}>{step?.description}</p>
+          <progress className={styles.progress} value={index + 1} max={total} aria-label="Avance de la guía" />
+          <p role="status" className={styles.status}>
             {completed ? "Listo. Puedes continuar." : !ready ? missing ? "Control no disponible. Puedes omitir este paso." : "Buscando el control…" : step.action ? "Realiza la acción o elige Omitir." : ""}
-          </p>}
-          {finished ? <>
-            <p className={styles.description}>{feedback === null ? "¿Te fue útil?" : "Gracias por tu opinión."}</p>
-            <div className={styles.actions}>
-              <div>
-                <Button variant="outline" onClick={() => rate(true)} disabled={feedback !== null} aria-label="La guía fue útil">Sí</Button>
-                <Button variant="outline" onClick={() => rate(false)} disabled={feedback !== null} aria-label="La guía no fue útil">No</Button>
-              </div>
-              <Button onClick={onClose}>Finalizar</Button>
-            </div>
-          </> : <div className={styles.actions}>
+          </p>
+          <div className={styles.actions}>
             <div>
               <Button variant="outline" size="icon" onClick={onBack} disabled={index === 0} aria-label="Paso anterior"><ArrowLeft aria-hidden /></Button>
               <Button variant="outline" size="icon" onClick={() => { revealTarget(true); setHighlightCount((count) => count + 1); }} disabled={!ready} aria-label="Ir al control resaltado"><Crosshair aria-hidden /></Button>
@@ -350,7 +338,7 @@ function GuideOverlay({ step, onRoute, index, total, completed, onClose, onBack,
               {((step.action && !completed) || !ready) && <Button variant="ghost" onClick={onNext}>Omitir</Button>}
               <Button onClick={onNext} disabled={!ready || Boolean(step.action && !completed)}>{index + 1 === total ? "Terminar" : "Siguiente"}</Button>
             </div>
-          </div>}
+          </div>
         </div>
       </div>
     </>

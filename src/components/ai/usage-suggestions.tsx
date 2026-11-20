@@ -33,10 +33,11 @@ export function UsageSuggestions({ data, disabled, onConsultOrder, onStatusHelp 
 
   return <Popover.Root open={open} onOpenChange={setOpen}>
     <Popover.Trigger asChild>
-      <Button ref={trigger} type="button" size="icon" variant="outline"
+      <Button ref={trigger} type="button" variant="outline"
         className={`${guideStyles.attention} ${styles.usageTrigger}`}
         disabled={!data || disabled || active} aria-label="Sugerencias" title="Sugerencias">
         <Lightbulb aria-hidden />
+        <span className={styles.usageLabel}>Sugerencias</span>
       </Button>
     </Popover.Trigger>
     <Popover.Portal>
